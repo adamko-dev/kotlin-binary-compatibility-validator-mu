@@ -17,6 +17,7 @@ dependencies {
   testFixturesApi(platform("io.kotest:kotest-bom:5.5.5"))
   testFixturesApi("io.kotest:kotest-runner-junit5")
   testFixturesApi("io.kotest:kotest-assertions-core")
+  testFixturesApi("io.kotest:kotest-property")
 }
 
 @Suppress("UnstableApiUsage")

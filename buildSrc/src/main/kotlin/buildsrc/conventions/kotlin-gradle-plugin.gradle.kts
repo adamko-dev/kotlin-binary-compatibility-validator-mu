@@ -17,6 +17,7 @@ sourceSets {
     java.setSrcDirs(emptyList<File>())
   }
 }
+
 //
 ///** These dependencies will be provided by Gradle, and we should prevent version conflict */
 //fun Configuration.excludeGradleCommonDependencies() {

@@ -17,3 +17,7 @@ extensions.getByType<JavaPluginExtension>().apply {
   }
   withSourcesJar()
 }
+
+tasks.withType<Test>().configureEach {
+  useJUnitPlatform()
+}

@@ -4,7 +4,7 @@ package dev.adamko.kotlin.binary_compatibility_validator.internal
 /** Converts a glob-string to a [Regex] */
 internal fun globToRegex(glob: String, separatorChars: String): Regex {
 
-  val separatorsEscaped = separatorChars.escapeRegexChars()
+  val separatorsEscaped = separatorChars.toSortedSet().joinToString("").escapeRegexChars()
 
   return glob
     .escapeRegexChars()
