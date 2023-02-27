@@ -21,7 +21,6 @@ fun BuildResult.assertTaskFailure(task: String) {
 
 private fun BuildResult.assertTaskOutcome(taskOutcome: TaskOutcome, taskName: String) {
   task(taskName)?.outcome shouldBe taskOutcome
-//    assertEquals(taskOutcome, task(taskName)?.outcome)
 }
 
 /**
@@ -32,5 +31,4 @@ fun BuildResult.assertTaskNotRun(taskName: String) {
   withClue("task $taskName was not expected to be run") {
     task(taskName) shouldBe null
   }
-//    assertNull(task(taskName), "task $taskName was not expected to be run")
 }

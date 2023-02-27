@@ -34,7 +34,7 @@ class GradleProjectTest(
 
   companion object {
 
-    /** file-based Maven Repo that contains the Dokka dependencies */
+    /** file-based Maven Repo that contains the published plugin */
     val testMavenRepoDir: Path by systemProperty(Paths::get)
 
     private val projectTestTempDir: Path by systemProperty(Paths::get)
@@ -43,8 +43,6 @@ class GradleProjectTest(
     val funcTestTempDir: Path by lazy {
       projectTestTempDir.resolve("functional-tests")
     }
-
-    private val dokkaSourceDir: Path by systemProperty(Paths::get)
 
     private fun <T> systemProperty(
       convert: (String) -> T,
@@ -56,19 +54,6 @@ class GradleProjectTest(
     }
   }
 }
-
-
-///**
-// * Load a project from the [GradleProjectTest.dokkaSrcIntegrationTestProjectsDir]
-// */
-//fun gradleKtsProjectIntegrationTest(
-//  testProjectName: String,
-//  build: GradleProjectTest.() -> Unit,
-//): GradleProjectTest =
-//  GradleProjectTest(
-//    baseDir = GradleProjectTest.dokkaSrcIntegrationTestProjectsDir,
-//    testProjectName = testProjectName,
-//  ).apply(build)
 
 
 /**
@@ -263,13 +248,3 @@ fun ProjectDirectoryScope.createKotlinFile(filePath: String, @Language("kotlin")
 
 fun ProjectDirectoryScope.createKtsFile(filePath: String, @Language("kts") contents: String) =
   createFile(filePath, contents)
-
-
-fun GradleRunner.withEnvironment(vararg map: Pair<String, String>): GradleRunner =
-  withEnvironment(map.toMap())
-
-
-inline fun GradleRunner.build(block: BuildResult.() -> Unit) = build().block()
-inline fun GradleRunner.buildAndFail(block: BuildResult.() -> Unit) = buildAndFail().block()
-@Suppress("UnstableApiUsage")
-inline fun GradleRunner.run(block: BuildResult.() -> Unit) = run().block()

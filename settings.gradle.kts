@@ -22,7 +22,7 @@ dependencyResolutionManagement {
 
 include(
   ":modules:bcv-gradle-plugin",
-  ":modules:bcv-gradle-plugin-tests",
+  ":modules:bcv-gradle-plugin-functional-tests",
 )
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

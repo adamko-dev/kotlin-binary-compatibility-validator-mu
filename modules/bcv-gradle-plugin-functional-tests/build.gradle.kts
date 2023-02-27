@@ -5,6 +5,8 @@ plugins {
   `jvm-test-suite`
 }
 
+description = "Functional tests for bcv-gradle-plugin"
+
 dependencies {
   testMavenPublication(projects.modules.bcvGradlePlugin)
 
@@ -19,18 +21,14 @@ dependencies {
   testFixturesApi(platform("io.kotest:kotest-bom:5.5.5"))
   testFixturesApi("io.kotest:kotest-runner-junit5")
   testFixturesApi("io.kotest:kotest-assertions-core")
+
+  testFixturesApi(testFixtures(projects.modules.bcvGradlePlugin))
 }
 
 
 @Suppress("UnstableApiUsage")
 testing.suites {
   withType<JvmTestSuite>().configureEach {
-//    useJUnitJupiter()
-//
-//    dependencies {
-//      implementation(project.dependencies.testFixtures(project()))
-//    }
-
     targets.configureEach {
       testTask.configure {
         val projectTestTempDirPath = "$buildDir/test-temp-dir"

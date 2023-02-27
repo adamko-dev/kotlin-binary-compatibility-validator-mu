@@ -1,6 +1,7 @@
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
   buildsrc.conventions.`maven-publish-test`
+  `java-test-fixtures`
 //  buildsrc.conventions.`gradle-plugin-variants`
 }
 
@@ -11,6 +12,10 @@ dependencies {
   compileOnly("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.0")
 
   compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
+
+  testFixturesApi(platform("io.kotest:kotest-bom:5.5.5"))
+  testFixturesApi("io.kotest:kotest-runner-junit5")
+  testFixturesApi("io.kotest:kotest-assertions-core")
 }
 
 @Suppress("UnstableApiUsage")
