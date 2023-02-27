@@ -15,7 +15,7 @@ abstract class BCVSettingsPlugin : Plugin<Settings> {
 
     settings.gradle.beforeProject {
       if (
-        extension.ignoredProjects.get().any { globToRegex(it).matches(project.path) }
+        extension.ignoredProjects.get().none { globToRegex(it).matches(project.path) }
       ) {
         project.pluginManager.apply(BCVProjectPlugin::class)
       }
