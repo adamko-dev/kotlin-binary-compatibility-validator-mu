@@ -1,6 +1,8 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
+import dev.adamko.kotlin.binary_compatibility_validator.internal.globToRegex
 import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.provider.SetProperty
 import org.gradle.kotlin.dsl.apply
@@ -15,7 +17,9 @@ abstract class BCVSettingsPlugin : Plugin<Settings> {
 
     settings.gradle.beforeProject {
       if (
-        extension.ignoredProjects.get().none { globToRegex(it).matches(project.path) }
+        extension.ignoredProjects.get().none {
+          globToRegex(it, Project.PATH_SEPARATOR).matches(project.path)
+        }
       ) {
         project.pluginManager.apply(BCVProjectPlugin::class)
       }
@@ -34,22 +38,5 @@ abstract class BCVSettingsPlugin : Plugin<Settings> {
      * - `**` will match 0 to many characters, including `:`
      */
     val ignoredProjects: SetProperty<String>
-  }
-
-  companion object {
-
-    /** Converts a glob-string to a [Regex] */
-    private fun globToRegex(glob: String): Regex {
-      return glob
-        .replace(Regex("""\W"""), """\\$0""")
-        .replace(Regex("""(?<doubleStar>\\\*\\\*)|(?<singleStar>\\\*)|(?<singleChar>\\\?)""")) {
-          when {
-            it.groups["doubleStar"] != null -> ".*?"
-            it.groups["singleStar"] != null -> "[^:]*?"
-            it.groups["singleChar"] != null -> "[^:]?"
-            else                            -> error("could not convert '$glob' to regex")
-          }
-        }.toRegex(RegexOption.IGNORE_CASE)
-    }
   }
 }
