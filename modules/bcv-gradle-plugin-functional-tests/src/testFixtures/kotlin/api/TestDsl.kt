@@ -20,8 +20,7 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
       .invariantSeparatorsPath
 
   baseKotlinScope.settingsGradleKts {
-    addText(
-      """
+    addText(/*language=kts*/ """
         |@Suppress("UnstableApiUsage")
         |dependencyResolutionManagement {
         |  repositories {
@@ -198,21 +197,12 @@ class AppendableScope(val filePath: String) {
 
 class Runner {
   val arguments: MutableList<String> = mutableListOf(
-//    "--configuration-cache",
+    "--configuration-cache",
   )
 }
 
 fun readResourceFile(@Language("file-reference") path: String): String {
   val resource = BaseKotlinGradleTest::class.java.getResource(path)
-    ?: throw IllegalStateException("Could not find resource '$path'")
+    ?: error("Could not find resource '$path'")
   return File(resource.toURI()).readText().invariantNewlines()
 }
-
-//private fun GradleRunner.addPluginTestRuntimeClasspath() = apply {
-//  val cpResource = javaClass.classLoader.getResourceAsStream("plugin-classpath.txt")
-//    ?.let { InputStreamReader(it) }
-//    ?: throw IllegalStateException("Could not find classpath resource")
-//
-//  val pluginClasspath = pluginClasspath + cpResource.readLines().map { File(it) }
-//  withPluginClasspath(pluginClasspath)
-//}

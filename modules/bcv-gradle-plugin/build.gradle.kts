@@ -6,12 +6,13 @@ plugins {
 }
 
 dependencies {
-//  implementation("com.googlecode.java-diff-utils:diffutils:1.3.0")
   implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
   compileOnly("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.0")
 
   compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
+
+  testFixturesApi(gradleTestKit())
 
   testFixturesApi(platform("io.kotest:kotest-bom:5.5.5"))
   testFixturesApi("io.kotest:kotest-runner-junit5")

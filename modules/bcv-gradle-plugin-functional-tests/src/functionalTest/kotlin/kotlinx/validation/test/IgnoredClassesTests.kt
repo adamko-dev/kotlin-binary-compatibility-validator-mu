@@ -1,7 +1,10 @@
 package kotlinx.validation.test
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -26,8 +29,8 @@ internal class IgnoredClassesTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -50,8 +53,8 @@ internal class IgnoredClassesTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -74,8 +77,8 @@ internal class IgnoredClassesTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiDump")
+    runner.build {
+      task(":apiDump") shouldHaveOutcome SUCCESS
 
       assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
 

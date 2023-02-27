@@ -1,13 +1,13 @@
 package kotlinx.validation.test
 
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.buildAndFail
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
 import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
 internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
@@ -52,7 +52,7 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      assertTaskSuccess(":apiCheck")
+      task(":apiCheck") shouldHaveOutcome SUCCESS
 //      assertTaskSuccess(":jvmApiCheck")
 //      assertTaskSuccess(":anotherJvmApiCheck")
     }
@@ -95,9 +95,9 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 //      assertTaskNotRun(":apiCheck")
 //      assertTaskFailure(":jvmApiCheck")
 //      assertTaskFailure(":anotherJvmApiCheck")
-      assertTaskFailure(":apiCheck")
+      task(":apiCheck") shouldHaveOutcome FAILED
       output shouldContain "API check failed for project :testproject"
-      assertTaskNotRun(":check")
+      shouldNotHaveRunTask(":check")
     }
   }
 
@@ -119,8 +119,8 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
       }
 
     }
-    runner.build().apply {
-      assertTaskSuccess(":apiDump")
+    runner.build {
+      task(":apiDump") shouldHaveOutcome SUCCESS
 //      assertTaskSuccess(":jvmApiDump")
 //      assertTaskSuccess(":anotherJvmApiDump")
 

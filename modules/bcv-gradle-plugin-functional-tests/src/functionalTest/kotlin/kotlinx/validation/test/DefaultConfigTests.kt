@@ -1,11 +1,12 @@
 package kotlinx.validation.test
 
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.buildAndFail
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.file.shouldBeEmpty
 import io.kotest.matchers.string.shouldContain
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
 
     runner.buildAndFail {
       output shouldContain "Please ensure that task ':${rootProjectDir.name}:apiDump' was executed"
-      assertTaskFailure(":apiCheck")
+      task(":apiCheck") shouldHaveOutcome FAILED
     }
   }
 
@@ -42,8 +43,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      assertTaskFailure(":apiCheck")
-      assertTaskNotRun(":check") // apiCheck fails before we can run check
+      task(":apiCheck") shouldHaveOutcome FAILED
+      shouldNotHaveRunTask(":check") // apiCheck fails before we can run check
     }
   }
 
@@ -61,8 +62,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -84,8 +85,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -107,8 +108,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -131,16 +132,17 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      val dumpOutput =
-        "  @@ -1,1 +1,7 @@\n" +
-            "  +public final class com/company/BuildConfig {\n" +
-            "  +\tpublic fun <init> ()V\n" +
-            "  +\tpublic final fun function ()I\n" +
-            "  +\tpublic final fun getProperty ()I\n" +
-            "  +}"
+      task(":apiCheck") shouldHaveOutcome FAILED
 
-      assertTaskFailure(":apiCheck")
-      //Assertions.assertThat(output).contains(dumpOutput)
+      // note that tabs are used as function indents!
+      val dumpOutput = /*language=TEXT*/ """
+        |  @@ -1,1 +1,7 @@
+        |  +public final class com/company/BuildConfig {
+        |  +	public fun <init> ()V
+        |  +	public final fun function ()I
+        |  +	public final fun getProperty ()I
+        |  +}
+      """.trimMargin()
       output shouldContain dumpOutput
     }
   }
@@ -157,8 +159,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiDump")
+    runner.build {
+      task(":apiDump") shouldHaveOutcome SUCCESS
 
       assertTrue(
         rootProjectApiDump.exists(),
@@ -166,7 +168,6 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       )
 
       rootProjectApiDump.shouldBeEmpty()
-      //Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines("")
     }
   }
 
@@ -185,8 +186,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiDump")
+    runner.build {
+      task(":apiDump") shouldHaveOutcome SUCCESS
 
       val apiDumpFile = rootProjectDir.resolve("api/testproject.api")
       assertTrue(apiDumpFile.exists(), "api dump file ${apiDumpFile.path} should exist")
@@ -197,7 +198,6 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       )
 
       rootProjectApiDump.shouldBeEmpty()
-      //Assertions.assertThat(apiDumpFile.readText()).isEqualToIgnoringNewLines("")
     }
   }
 
@@ -216,8 +216,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiDump")
+    runner.build {
+      task(":apiDump") shouldHaveOutcome SUCCESS
 
       assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
 
@@ -241,9 +241,9 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":check")
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":check") shouldHaveOutcome SUCCESS
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 }

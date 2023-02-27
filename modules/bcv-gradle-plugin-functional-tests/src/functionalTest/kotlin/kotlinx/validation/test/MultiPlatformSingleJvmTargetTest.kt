@@ -1,10 +1,12 @@
 package kotlinx.validation.test
 
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.string.shouldContain
 import java.io.File
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
 internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
@@ -43,8 +45,8 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiCheck")
+    runner.build {
+      task(":apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -75,13 +77,10 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
     }
 
-    runner.buildAndFail().apply {
-      //assertTaskFailure(":jvmApiCheck")
-      //assertTaskNotRun(":apiCheck")
-      assertTaskFailure(":apiCheck")
+    runner.buildAndFail {
+      task(":apiCheck") shouldHaveOutcome FAILED
       output shouldContain "API check failed for project :testproject"
-      //assertThat(output).contains("API check failed for project testproject")
-      assertTaskNotRun(":check")
+      shouldNotHaveRunTask(":check")
     }
   }
 
@@ -105,8 +104,8 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":apiDump")
+    runner.build {
+      task(":apiDump") shouldHaveOutcome SUCCESS
 
       val mainExpectedApi = """
         |${readResourceFile("/examples/classes/Subsub1Class.dump").trim()}

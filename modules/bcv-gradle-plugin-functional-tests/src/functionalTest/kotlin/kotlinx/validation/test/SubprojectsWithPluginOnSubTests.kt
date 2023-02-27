@@ -1,9 +1,13 @@
 package kotlinx.validation.test
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldNotHaveRunTask
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.file.shouldBeEmpty
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
@@ -75,12 +79,12 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskNotRun(":apiCheck")
-      assertTaskSuccess(":sub1:apiCheck")
-      assertTaskSuccess(":sub1:subsub1:apiCheck")
-      assertTaskSuccess(":sub1:subsub2:apiCheck")
-      assertTaskNotRun(":sub2:apiCheck")
+    runner.build {
+      shouldNotHaveRunTask(":apiCheck")
+      task(":sub1:apiCheck") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub1:apiCheck") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub2:apiCheck") shouldHaveOutcome SUCCESS
+      shouldNotHaveRunTask(":sub2:apiCheck")
     }
   }
 
@@ -106,12 +110,12 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskNotRun(":apiCheck")
-      assertTaskSuccess(":sub1:apiCheck")
-      assertTaskSuccess(":sub1:subsub1:apiCheck")
-      assertTaskSuccess(":sub1:subsub2:apiCheck")
-      assertTaskNotRun(":sub2:apiCheck")
+    runner.build {
+      shouldNotHaveRunTask(":apiCheck")
+      task(":sub1:apiCheck") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub1:apiCheck") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub2:apiCheck") shouldHaveOutcome SUCCESS
+      shouldNotHaveRunTask(":sub2:apiCheck")
     }
   }
 
@@ -129,8 +133,8 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":sub1:apiCheck")
+    runner.build {
+      task(":sub1:apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -150,8 +154,8 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":sub1:subsub2:apiCheck")
+    runner.build {
+      task(":sub1:subsub2:apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -176,8 +180,8 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":sub1:subsub2:apiCheck")
+    runner.build {
+      task(":sub1:subsub2:apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -212,12 +216,12 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskNotRun(":apiCheck")
-      assertTaskSuccess(":sub1:apiCheck")
-      assertTaskSuccess(":sub1:subsub1:apiCheck")
-      assertTaskSuccess(":sub1:subsub2:apiCheck")
-      assertTaskNotRun(":sub2:apiCheck")
+    runner.build {
+      shouldNotHaveRunTask(":apiCheck")
+      task(":sub1:apiCheck") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub1:apiCheck") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub2:apiCheck") shouldHaveOutcome SUCCESS
+      shouldNotHaveRunTask(":sub2:apiCheck")
     }
   }
 
@@ -231,8 +235,8 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":sub1:apiDump")
+    runner.build {
+      task(":sub1:apiDump") shouldHaveOutcome SUCCESS
 
       val apiDumpFile = rootProjectDir.resolve("sub1/api/sub1.api")
       assertTrue(apiDumpFile.exists(), "api dump file ${apiDumpFile.path} should exist")
@@ -265,12 +269,12 @@ internal class SubprojectsWithPluginOnSubTests : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskNotRun(":apiDump")
-      assertTaskSuccess(":sub1:apiDump")
-      assertTaskSuccess(":sub1:subsub1:apiDump")
-      assertTaskSuccess(":sub1:subsub2:apiDump")
-      assertTaskNotRun(":sub2:apiDump")
+    runner.build {
+      shouldNotHaveRunTask(":apiDump")
+      task(":sub1:apiDump") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub1:apiDump") shouldHaveOutcome SUCCESS
+      task(":sub1:subsub2:apiDump") shouldHaveOutcome SUCCESS
+      shouldNotHaveRunTask(":sub2:apiDump")
 
       assertFalse(
         rootProjectApiDump.exists(),

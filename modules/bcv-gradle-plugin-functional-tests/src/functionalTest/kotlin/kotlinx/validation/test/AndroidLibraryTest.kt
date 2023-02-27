@@ -4,6 +4,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import java.io.File
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
@@ -23,8 +24,8 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":kotlin-library:apiDump")
+    runner.build {
+      task(":kotlin-library:apiDump") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -37,7 +38,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
         arguments.add(":kotlin-library:apiCheck")
       }
     }.build().apply {
-      assertTaskSuccess(":kotlin-library:apiCheck")
+      task(":kotlin-library:apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -56,8 +57,8 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       }
     }
 
-    runner.build().apply {
-      assertTaskSuccess(":java-library:apiDump")
+    runner.build {
+      task(":java-library:apiDump") shouldHaveOutcome SUCCESS
     }
   }
 
@@ -70,7 +71,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
         arguments.add(":java-library:apiCheck")
       }
     }.build().apply {
-      assertTaskSuccess(":java-library:apiCheck")
+      task(":java-library:apiCheck") shouldHaveOutcome SUCCESS
     }
   }
 
