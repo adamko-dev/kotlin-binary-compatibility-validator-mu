@@ -14,6 +14,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.SourceSet
+import org.gradle.internal.component.external.model.TestFixturesSupport.TEST_FIXTURE_SOURCESET_NAME
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
@@ -88,6 +89,7 @@ abstract class BCVProjectPlugin @Inject constructor(
     createKotlinJvmTargets(project, extension)
     createKotlinAndroidTargets(project, extension)
     createKotlinMultiplatformTargets(project, extension)
+    createJavaTestFixtureTargets(project, extension)
   }
 
   private fun createExtension(project: Project): BCVProjectExtension {
@@ -166,6 +168,24 @@ abstract class BCVProjectPlugin @Inject constructor(
             inputClasses.from(output.classesDirs)
           }
         }
+      }
+    }
+  }
+
+  private fun createJavaTestFixtureTargets(
+    project: Project,
+    extension: BCVProjectExtension,
+  ) {
+    project.pluginManager.withPlugin("java-test-fixtures") {
+      extension.targets.create(TEST_FIXTURE_SOURCESET_NAME) {
+        // don't enable by default - requiring an API spec for test-fixtures is pretty unusual
+        enabled.set(false)
+        project
+          .sourceSets
+          .matching { it.name == TEST_FIXTURE_SOURCESET_NAME }
+          .all {
+            inputClasses.from(output.classesDirs)
+          }
       }
     }
   }

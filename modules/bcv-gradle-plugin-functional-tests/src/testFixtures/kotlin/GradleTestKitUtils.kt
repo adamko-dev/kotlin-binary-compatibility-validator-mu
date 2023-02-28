@@ -2,6 +2,7 @@
 
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils
 
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoDir
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -26,10 +27,6 @@ class GradleProjectTest(
   ) : this(projectDir = baseDir.resolve(testProjectName))
 
   val runner: GradleRunner = GradleRunner.create().withProjectDir(projectDir.toFile())
-
-  val testMavenRepoRelativePath: String =
-    projectDir.relativize(testMavenRepoDir).toFile().invariantSeparatorsPath
-
 
   companion object {
 
@@ -63,7 +60,7 @@ class GradleProjectTest(
  * Builder for testing a Gradle project that uses Kotlin script DSL and creates default
  * `settings.gradle.kts` and `gradle.properties` files.
  *
- * @param[testProjectName] the path of the project directory, relative to [baseDir
+ * @param[testProjectName] the path of the project directory
  */
 fun gradleKtsProjectTest(
   testProjectName: String,
@@ -79,7 +76,7 @@ fun gradleKtsProjectTest(
       |dependencyResolutionManagement {
       |    repositories {
       |        mavenCentral()
-      |        maven(file("$testMavenRepoRelativePath"))
+      |        maven(file("$testMavenRepoDir"))
       |    }
       |}
       |
@@ -87,7 +84,7 @@ fun gradleKtsProjectTest(
       |    repositories {
       |        gradlePluginPortal()
       |        mavenCentral()
-      |        maven(file("$testMavenRepoRelativePath"))
+      |        maven(file("$testMavenRepoDir"))
       |    }
       |}
       |
@@ -123,7 +120,7 @@ fun gradleGroovyProjectTest(
             |dependencyResolutionManagement {
             |    repositories {
             |        mavenCentral()
-            |        maven { url = file("$testMavenRepoRelativePath") }
+            |        maven { url = file("$testMavenRepoDir") }
             |    }
             |}
             |
@@ -131,7 +128,7 @@ fun gradleGroovyProjectTest(
             |    repositories {
             |        gradlePluginPortal()
             |        mavenCentral()
-            |        maven { url = file("$testMavenRepoRelativePath") }
+            |        maven { url = file("$testMavenRepoDir") }
             |    }
             |}
             |
