@@ -103,7 +103,11 @@ abstract class BCVApiCheckTask @Inject constructor(
       )
     }
 
-    val diff = compareFiles(projectApiDeclaration, buildApiDeclaration)
+    val diff = compareFiles(
+      // use RelativePath.getFile() to fetch the files, because it's case-insensitive
+      checkFile = expectedApiDeclaration.getFile(projectApiDeclaration.parentFile),
+      builtFile = expectedApiDeclaration.getFile(buildApiDeclaration.parentFile),
+    )
     val diffSet = mutableSetOf<String>()
     if (diff != null) diffSet.add(diff)
     if (diffSet.isNotEmpty()) {
