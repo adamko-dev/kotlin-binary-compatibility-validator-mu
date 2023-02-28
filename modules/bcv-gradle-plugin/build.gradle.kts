@@ -8,18 +8,20 @@ plugins {
 }
 
 dependencies {
-  implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+  implementation(libs.javaDiffUtils)
 
-  compileOnly("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.0")
-
-  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
+  compileOnly(libs.kotlinx.bcv)
+  compileOnly(libs.kotlin.gradlePlugin)
 
   testFixturesApi(gradleTestKit())
 
-  testFixturesApi(platform("io.kotest:kotest-bom:5.5.5"))
-  testFixturesApi("io.kotest:kotest-runner-junit5")
-  testFixturesApi("io.kotest:kotest-assertions-core")
-  testFixturesApi("io.kotest:kotest-property")
+  testFixturesApi(platform(libs.junit.bom))
+  testFixturesApi(libs.junit.jupiter)
+
+  testFixturesApi(platform(libs.kotest.bom))
+  testFixturesApi(libs.kotest.runnerJUnit5)
+  testFixturesApi(libs.kotest.assertionsCore)
+  testFixturesApi(libs.kotest.property)
 }
 
 @Suppress("UnstableApiUsage")

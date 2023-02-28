@@ -10,17 +10,15 @@ description = "Functional tests for bcv-gradle-plugin"
 dependencies {
   testMavenPublication(projects.modules.bcvGradlePlugin)
 
-//  runtimeOnly("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.0")
-//  runtimeOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
-
   testFixturesApi(gradleTestKit())
 
-  testFixturesApi(platform("org.junit:junit-bom:5.9.2"))
-  testFixturesApi("org.junit.jupiter:junit-jupiter")
+  testFixturesApi(platform(libs.junit.bom))
+  testFixturesApi(libs.junit.jupiter)
 
-  testFixturesApi(platform("io.kotest:kotest-bom:5.5.5"))
-  testFixturesApi("io.kotest:kotest-runner-junit5")
-  testFixturesApi("io.kotest:kotest-assertions-core")
+  testFixturesApi(platform(libs.kotest.bom))
+  testFixturesApi(libs.kotest.runnerJUnit5)
+  testFixturesApi(libs.kotest.assertionsCore)
+  testFixturesApi(libs.kotest.property)
 
   testFixturesApi(testFixtures(projects.modules.bcvGradlePlugin))
 }
