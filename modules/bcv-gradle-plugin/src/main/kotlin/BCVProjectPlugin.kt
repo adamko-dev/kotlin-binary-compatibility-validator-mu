@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 abstract class BCVProjectPlugin @Inject constructor(
   private val providers: ProviderFactory,
   private val layout: ProjectLayout,
-  private val objects: ObjectFactory,
 ) : Plugin<Project> {
 
   override fun apply(project: Project) {
@@ -63,6 +62,7 @@ abstract class BCVProjectPlugin @Inject constructor(
     project.tasks.withType<BCVApiCheckTask>().configureEach {
       outputs.dir(temporaryDir) // dummy output, so up-to-date checks work
       expectedProjectName.convention(extension.projectName)
+      expectedApiDirPath.convention(extension.outputApiDir.map { it.asFile.canonicalFile.absolutePath })
     }
 
     project.tasks.withType<BCVApiDumpTask>().configureEach {
@@ -71,59 +71,21 @@ abstract class BCVProjectPlugin @Inject constructor(
 
     val apiGenerateTask = project.tasks.register("apiGenerate", BCVApiGenerateTask::class)
 
-    val apiDumpTask = project.tasks.register("apiDump", BCVApiDumpTask::class) {
+    project.tasks.register("apiDump", BCVApiDumpTask::class) {
       apiDumpFiles.from(apiGenerateTask.map { it.outputApiBuildDir })
     }
 
     val apiCheckTask = project.tasks.register("apiCheck", BCVApiCheckTask::class) {
       apiBuildDir.convention(apiGenerateTask.flatMap { it.outputApiBuildDir })
-//      projectApiDir.convention { extension.outputApiDir.asFile.get() }
-//      projectApiDir.convention(extension.outputApiDir)
-      expectedApiDirPath.convention(extension.outputApiDir.map { it.asFile.canonicalFile.absolutePath })
     }
 
     project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure {
       dependsOn(apiCheckTask)
     }
 
-    project.pluginManager.withPlugin("kotlin") {
-      extension.targets.create("kotlin") {
-        project
-          .sourceSets
-          .matching { it.name == SourceSet.MAIN_SOURCE_SET_NAME }
-          .all {
-            inputClasses.from(output.classesDirs)
-          }
-      }
-    }
-
-    project.pluginManager.withPlugin("kotlin-android") {
-      val androidExtension = project.extensions.getByType<KotlinAndroidProjectExtension>()
-
-      extension.targets.create(androidExtension.target.name) {
-        androidExtension.target.compilations.all {
-          inputClasses.from(this)
-        }
-      }
-    }
-
-    project.pluginManager.withPlugin("kotlin-multiplatform") {
-      val kotlinExtension = project.extensions.getByType<KotlinMultiplatformExtension>()
-      val kotlinJvmTargets = kotlinExtension.targets.matching {
-        it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
-      }
-
-      kotlinJvmTargets.all {
-        extension.targets.create(name) {
-//        val bcvPlatformType = objects.newInstance<BCVPlatformType>(name)
-          enabled.convention(true)
-//          platformType.convention(objects.newInstance<BCVPlatformType>(name))
-          compilations.all {
-            inputClasses.from(output.classesDirs)
-          }
-        }
-      }
-    }
+    createKotlinJvmTargets(project, extension)
+    createKotlinAndroidTargets(project, extension)
+    createKotlinMultiplatformTargets(project, extension)
   }
 
   private fun createExtension(project: Project): BCVExtension {
@@ -132,7 +94,7 @@ abstract class BCVProjectPlugin @Inject constructor(
       ignoredPackages.convention(emptySet())
       ignoredMarkers.convention(emptySet())
       ignoredClasses.convention(emptySet())
-      outputApiDir.convention(layout.projectDirectory.dir("api"))
+      outputApiDir.convention(layout.projectDirectory.dir(API_DIR))
       projectName.convention(providers.provider { project.name })
       kotlinxBinaryCompatibilityValidatorVersion.convention("0.13.0")
     }
@@ -147,7 +109,63 @@ abstract class BCVProjectPlugin @Inject constructor(
       ignoredPackages.convention(extension.ignoredPackages)
     }
 
+    extension.targets.all {
+      extension.extensions.add(platformType, this)
+    }
+
     return extension
+  }
+
+  private fun createKotlinJvmTargets(
+    project: Project,
+    extension: BCVExtension,
+  ) {
+    project.pluginManager.withPlugin("kotlin") {
+      extension.targets.create("kotlinJvm") {
+        project
+          .sourceSets
+          .matching { it.name == SourceSet.MAIN_SOURCE_SET_NAME }
+          .all {
+            inputClasses.from(output.classesDirs)
+          }
+      }
+    }
+  }
+
+  private fun createKotlinAndroidTargets(
+    project: Project,
+    extension: BCVExtension,
+  ) {
+    project.pluginManager.withPlugin("kotlin-android") {
+      val androidExtension = project.extensions.getByType<KotlinAndroidProjectExtension>()
+
+      extension.targets.create(androidExtension.target.name) {
+        androidExtension.target.compilations.all {
+          inputClasses.from(this)
+        }
+      }
+    }
+  }
+
+  private fun createKotlinMultiplatformTargets(
+    project: Project,
+    extension: BCVExtension,
+  ) {
+    project.pluginManager.withPlugin("kotlin-multiplatform") {
+      val kotlinExtension = project.extensions.getByType<KotlinMultiplatformExtension>()
+      val kotlinJvmTargets = kotlinExtension.targets.matching {
+        it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
+      }
+
+      kotlinJvmTargets.all {
+        extension.targets.create(targetName) {
+          enabled.convention(true)
+          compilations.all {
+            inputClasses.from(output.classesDirs)
+          }
+        }
+      }
+    }
   }
 
 //  private fun configureMultiplatformPlugin(
@@ -254,11 +272,11 @@ abstract class BCVProjectPlugin @Inject constructor(
 //  }
 
   companion object {
-    //        const val API_DIR = "api"
-    const val EXTENSION_NAME = "bcv"
-    const val RUNTIME_CLASSPATH_CONFIGURATION_NAME = "bcvRuntime"
+    const val API_DIR = "api"
+    const val EXTENSION_NAME = "bcvMu"
+    const val TASK_GROUP = "bcv mu"
+    const val RUNTIME_CLASSPATH_CONFIGURATION_NAME = "bcvMuRuntime"
   }
-
 }
 
 

@@ -5,10 +5,11 @@ import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTargetSpec
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ReplacedBy
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 
-interface BCVExtension : BCVTargetSpec {
+interface BCVExtension : BCVTargetSpec, ExtensionAware {
 
   override val enabled: Property<Boolean>
 

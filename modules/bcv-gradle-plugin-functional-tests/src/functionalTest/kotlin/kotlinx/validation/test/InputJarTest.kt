@@ -4,10 +4,8 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled("need to update the DSL")
 class InputJarTest : BaseKotlinGradleTest() {
 
   @Test
