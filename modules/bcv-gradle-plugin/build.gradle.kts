@@ -47,15 +47,18 @@ gradlePlugin {
     }
   }
 
-  registerBcvPlugin("binary-compatibility-validator", "BCVPlugin")
+  registerBcvPlugin("binary-compatibility-validator", "BCVPlugin") {
+    displayName = "Binary Compatibility Validator MU"
+  }
   registerBcvPlugin("binary-compatibility-validator.project", "BCVProjectPlugin") {
+    displayName = "Binary Compatibility Validator MU (Project Plugin)"
     description += """
       |
       |This is a Gradle Project plugin and can be applied directly in a `build.gradle` or `build.gradle.kts` file.
     """.trimMargin()
   }
   registerBcvPlugin("binary-compatibility-validator.settings", "BCVSettingsPlugin") {
-
+    displayName = "Binary Compatibility Validator MU (Settings Plugin)"
     description += """
       |
       |This is a Gradle Settings plugin and can be applied directly in a `settings.gradle` or `settings.gradle.kts` file.
