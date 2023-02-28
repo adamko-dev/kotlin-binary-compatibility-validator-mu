@@ -1,3 +1,5 @@
+import buildsrc.utils.skipTestFixturesPublications
+
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
   buildsrc.conventions.`maven-publish-test`
@@ -27,7 +29,7 @@ gradlePlugin {
   isAutomatedPublishing = true
 
   plugins.configureEach {
-    tags += listOf("kotlin", "kotlin/jvm", "api-management", "binary-compatibility")
+    tags.addAll("kotlin", "kotlin/jvm", "api-management", "binary-compatibility")
   }
 
   fun registerBcvPlugin(name: String, cls: String, config: PluginDeclaration.() -> Unit = {}) {
@@ -56,3 +58,5 @@ gradlePlugin {
     """.trimMargin()
   }
 }
+
+skipTestFixturesPublications()

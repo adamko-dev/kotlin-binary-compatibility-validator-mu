@@ -1,7 +1,5 @@
 rootProject.name = "kotlin-binary-compatibility-validator-mu"
 
-//"kotlin-binary-api-tracker"
-
 pluginManagement {
   repositories {
     gradlePluginPortal()
