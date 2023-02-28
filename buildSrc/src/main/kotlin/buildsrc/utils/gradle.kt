@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.api.file.RelativePath
+import org.gradle.api.tasks.SourceSet
 import org.gradle.kotlin.dsl.get
 
 /**
@@ -63,3 +64,20 @@ fun Project.skipTestFixturesPublications() {
   javaComponent.withVariantsFromConfiguration(configurations["testFixturesApiElements"]) { skip() }
   javaComponent.withVariantsFromConfiguration(configurations["testFixturesRuntimeElements"]) { skip() }
 }
+
+/** Get all [Configuration] names for a [SourceSet] */
+fun SourceSet.configurationNames() =
+  listOf(
+    compileOnlyConfigurationName,
+    compileOnlyApiConfigurationName,
+    compileClasspathConfigurationName,
+    annotationProcessorConfigurationName,
+    apiConfigurationName,
+    implementationConfigurationName,
+    apiElementsConfigurationName,
+    runtimeOnlyConfigurationName,
+    runtimeClasspathConfigurationName,
+    runtimeElementsConfigurationName,
+    javadocElementsConfigurationName,
+    sourcesElementsConfigurationName,
+  )

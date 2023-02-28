@@ -1,27 +1,12 @@
 package buildsrc.conventions
 
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
+import buildsrc.utils.configurationNames
 
 plugins {
   id("buildsrc.conventions.base")
   `java-gradle-plugin`
 }
-
-fun SourceSet.configurationNames() =
-  listOf(
-    compileOnlyConfigurationName,
-    compileOnlyApiConfigurationName,
-    compileClasspathConfigurationName,
-    annotationProcessorConfigurationName,
-    apiConfigurationName,
-    implementationConfigurationName,
-    apiElementsConfigurationName,
-    runtimeOnlyConfigurationName,
-    runtimeClasspathConfigurationName,
-    runtimeElementsConfigurationName,
-    javadocElementsConfigurationName,
-    sourcesElementsConfigurationName,
-  )
 
 configurations
   .matching { it.isCanBeConsumed && it.name in sourceSets.main.get().configurationNames() }

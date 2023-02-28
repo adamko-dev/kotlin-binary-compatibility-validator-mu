@@ -63,4 +63,16 @@ gradlePlugin {
   }
 }
 
+// Only consume Gradle dependencies that match the Gradle version we support
+configurations
+  .matching { it.isCanBeConsumed && it.name in sourceSets.main.get().configurationNames() }
+  .configureEach {
+    attributes {
+      attribute(
+        GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+        objects.named(libs.versions.testGradleVersion.get())
+      )
+    }
+  }
+
 skipTestFixturesPublications()
