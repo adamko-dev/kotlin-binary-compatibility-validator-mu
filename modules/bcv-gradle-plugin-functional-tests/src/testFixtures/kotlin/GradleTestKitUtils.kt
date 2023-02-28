@@ -9,7 +9,6 @@ import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
-import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
 
@@ -43,6 +42,10 @@ class GradleProjectTest(
     val funcTestTempDir: Path by lazy {
       projectTestTempDir.resolve("functional-tests")
     }
+
+    val minimumGradleTestVersion: String by systemProperty()
+
+    private fun systemProperty() = systemProperty { it }
 
     private fun <T> systemProperty(
       convert: (String) -> T,
@@ -92,10 +95,10 @@ fun gradleKtsProjectTest(
 
     buildGradleKts = """"""
 
-//    gradleProperties = """
-//            |kotlin.mpp.stability.nowarn=true
-//            |
-//       """.trimMargin()
+    gradleProperties = """
+            |kotlin.mpp.stability.nowarn=true
+            |
+       """.trimMargin()
 
     build()
   }

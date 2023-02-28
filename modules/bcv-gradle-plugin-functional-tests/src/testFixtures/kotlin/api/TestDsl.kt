@@ -1,6 +1,7 @@
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils.api
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.minimumGradleTestVersion
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
@@ -59,14 +60,10 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
     }
   }
 
-  return GradleRunner.create() //
+  return GradleRunner.create()
     .withProjectDir(rootProjectDir)
-    .withGradleVersion("7.6.1")
-//    .withPluginClasspath()
+    .withGradleVersion(minimumGradleTestVersion)
     .withArguments(baseKotlinScope.runner.arguments)
-  //.addPluginTestRuntimeClasspath()
-  // disabled because of: https://github.com/gradle/gradle/issues/6862
-  // .withDebug(baseKotlinScope.runner.debug)
 }
 
 /**
