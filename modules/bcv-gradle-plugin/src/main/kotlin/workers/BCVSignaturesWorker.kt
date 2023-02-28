@@ -52,7 +52,7 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
       signatures.count()
     }
 
-    logger.lifecycle("BCVSignaturesWorker generated $signaturesCount signatures for $projectName in $duration")
+    logger.info("BCVSignaturesWorker generated $signaturesCount signatures for $projectName in $duration")
   }
 
 
@@ -69,14 +69,14 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
         JarFile(inputJar.asFile).use { it.loadApiFromJvmClasses() }
 
       !inputClasses.isEmpty -> {
-        logger.lifecycle("inputClasses: ${inputClasses.files}")
+        logger.info("inputClasses: ${inputClasses.files}")
 
         val filteredInputClasses = inputClasses.asFileTree.matching {
           exclude("META-INF/**")
           include("**/*.class")
         }
 
-        logger.lifecycle("filteredInputClasses: ${filteredInputClasses.files}")
+        logger.info("filteredInputClasses: ${filteredInputClasses.files}")
 
         filteredInputClasses.asSequence()
           .map(File::inputStream)

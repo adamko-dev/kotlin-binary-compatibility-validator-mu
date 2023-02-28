@@ -2,6 +2,7 @@ package dev.adamko.kotlin.binary_compatibility_validator.tasks
 
 import com.github.difflib.DiffUtils
 import com.github.difflib.UnifiedDiffUtils
+import dev.adamko.kotlin.binary_compatibility_validator.internal.GradlePath
 import dev.adamko.kotlin.binary_compatibility_validator.internal.fullPath
 import java.io.*
 import java.util.TreeSet
@@ -17,7 +18,6 @@ import org.gradle.api.tasks.*
 @CacheableTask
 abstract class BCVApiCheckTask @Inject constructor(
   private val objects: ObjectFactory,
-  private val layout: ProjectLayout,
   private val providers: ProviderFactory,
 ) : BCVDefaultTask() {
 
@@ -36,24 +36,18 @@ abstract class BCVApiCheckTask @Inject constructor(
   @get:PathSensitive(PathSensitivity.RELATIVE)
   abstract val apiBuildDir: DirectoryProperty
 
-//    @get:OutputFile
-//    @get:Optional
-//    @get:Suppress("unused")
-//    abstract val dummyOutputFile: RegularFileProperty
-
   @get:Input
   internal abstract val expectedProjectName: Property<String>
 
+  // Project and tasks paths are used for creating better error messages
   private val projectFullPath = project.fullPath
-  private val apiDumpTaskPath = org.gradle.util.Path.path(project.path).child("apiDump")
+  private val apiDumpTaskPath = GradlePath(project.path).child("apiDump")
 
   private val rootDir = project.rootProject.rootDir
 
   @TaskAction
   fun verify() {
-//    val projectApiDir = projectApiDir.orNull?.asFile
-
-    val projectApiDir = projectApiDir.orNull //File(expectedApiDirPath.get()).takeIf(File::exists)
+    val projectApiDir = projectApiDir.orNull
       ?: error(
         """
           Expected folder with API declarations '${expectedApiDirPath.get()}' does not exist.
@@ -61,23 +55,20 @@ abstract class BCVApiCheckTask @Inject constructor(
         """.trimIndent()
       )
 
-
     val expectedApiDeclarations = setOfRelativePaths()
     objects.fileTree().from(projectApiDir)
-//      .matching { include("**/*.api") }
       .visit {
         if (!isDirectory) expectedApiDeclarations += relativePath
       }
-    logger.lifecycle("expectedApiDeclarations: $expectedApiDeclarations")
+    logger.info("expectedApiDeclarations: $expectedApiDeclarations")
 
     expectedApiDeclarations.forEach { expectedApiDeclaration ->
-//      apiBuildDir.get().dir(projectApiTargetDir.pathString)
-      logger.lifecycle("---------------------------")
+      logger.info("---------------------------")
       checkTarget(
         projectApiDir.resolve(expectedApiDeclaration.pathString),
         apiBuildDir.get().asFile.resolve(expectedApiDeclaration.pathString),
       )
-      logger.lifecycle("---------------------------")
+      logger.info("---------------------------")
     }
   }
 
@@ -85,8 +76,8 @@ abstract class BCVApiCheckTask @Inject constructor(
     projectApiDeclaration: File,
     buildApiDeclaration: File,
   ) {
-    logger.lifecycle("projectApiDeclaration: $projectApiDeclaration")
-    logger.lifecycle("buildApiDeclaration: $buildApiDeclaration")
+    logger.info("projectApiDeclaration: $projectApiDeclaration")
+    logger.info("buildApiDeclaration: $buildApiDeclaration")
 
     val apiBuildDirFiles = setOfRelativePaths()
     objects.fileTree().from(buildApiDeclaration.parent)
@@ -99,8 +90,8 @@ abstract class BCVApiCheckTask @Inject constructor(
         if (!isDirectory) expectedApiFiles += relativePath
       }
 
-    logger.lifecycle("apiBuildDirFiles: $apiBuildDirFiles")
-    logger.lifecycle("expectedApiFiles: $expectedApiFiles")
+    logger.info("apiBuildDirFiles: $apiBuildDirFiles")
+    logger.info("expectedApiFiles: $expectedApiFiles")
 
     val expectedApiDeclaration = apiBuildDirFiles.singleOrNull()
       ?: error("Expected a single file ${expectedProjectName.get()}.api, but found ${apiBuildDirFiles.size}: $apiBuildDirFiles")

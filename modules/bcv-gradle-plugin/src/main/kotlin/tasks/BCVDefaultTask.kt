@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator.tasks
 
+import dev.adamko.kotlin.binary_compatibility_validator.BCVProjectPlugin
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
@@ -12,6 +13,6 @@ abstract class BCVDefaultTask : DefaultTask() {
   abstract val bcvEnabled: Property<Boolean>
 
   init {
-    group = "binary-compatibility-validator"
+    group = BCVProjectPlugin.TASK_GROUP
   }
 }
