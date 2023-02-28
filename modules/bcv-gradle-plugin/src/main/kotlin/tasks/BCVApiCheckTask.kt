@@ -44,7 +44,8 @@ abstract class BCVApiCheckTask @Inject constructor(
   @get:Input
   internal abstract val expectedProjectName: Property<String>
 
-  private val projectPath = project.fullPath
+  private val projectFullPath = project.fullPath
+  private val apiDumpTaskPath = org.gradle.util.Path.path(project.path).child("apiDump")
 
   private val rootDir = project.rootProject.rootDir
 
@@ -56,7 +57,7 @@ abstract class BCVApiCheckTask @Inject constructor(
       ?: error(
         """
           Expected folder with API declarations '${expectedApiDirPath.get()}' does not exist.
-          Please ensure that task '${projectPath}:apiDump' was executed in order to get API dump to compare the build against
+          Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against
         """.trimIndent()
       )
 
@@ -107,26 +108,21 @@ abstract class BCVApiCheckTask @Inject constructor(
     if (expectedApiDeclaration !in expectedApiFiles) {
       val relativeDirPath = projectApiDir.get().toRelativeString(rootDir) + File.separator
       error(
-        "File ${expectedApiDeclaration.lastName} is missing from ${relativeDirPath}, please run $projectPath:apiDump task to generate one"
+        "File ${expectedApiDeclaration.lastName} is missing from ${relativeDirPath}, please run '$apiDumpTaskPath' task to generate one"
       )
     }
 
-    // Normalize case-sensitivity
-//    expectedApiDeclaration = expectedApiFiles.getValue(expectedApiDeclaration)
-//    val actualApiDeclaration = apiBuildDirFiles.single()//.getValue(expectedApiDeclaration)
-    val expectedFile = projectApiDeclaration //expectedApiDeclaration.getFile(projectApiDir.get())
-    val actualFile = buildApiDeclaration //actualApiDeclaration.getFile(apiBuildDir.asFile.get())
-    val diff = compareFiles(expectedFile, actualFile)
+    val diff = compareFiles(projectApiDeclaration, buildApiDeclaration)
     val diffSet = mutableSetOf<String>()
     if (diff != null) diffSet.add(diff)
     if (diffSet.isNotEmpty()) {
       val diffText = diffSet.joinToString("\n\n")
       error(
         """
-          |API check failed for project $projectPath.
+          |API check failed for project $projectFullPath.
           |$diffText
           |
-          |You can run ${projectPath}:apiDump task to overwrite API declarations
+          |You can run '$apiDumpTaskPath' task to overwrite API declarations
         """.trimMargin()
       )
     }
@@ -152,16 +148,6 @@ abstract class BCVApiCheckTask @Inject constructor(
     )
     return diff.joinToString("\n")
   }
-
-//    internal fun compareApiDumps(apiReferenceDir: File, apiBuildDir: File) {
-//        if (apiReferenceDir.exists()) {
-//            projectApiDir = apiReferenceDir
-//        } else {
-//            projectApiDir = null
-//            nonExistingProjectApiDir = apiReferenceDir.toString()
-//        }
-//        this.apiBuildDir = apiBuildDir
-//    }
 
   companion object {
     /*

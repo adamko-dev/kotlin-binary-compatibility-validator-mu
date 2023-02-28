@@ -25,7 +25,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      output shouldContain "Please ensure that task ':${rootProjectDir.name}:apiDump' was executed"
+      output shouldContain "Please ensure that task ':apiDump' was executed"
       task(":apiCheck") shouldHaveOutcome FAILED
     }
   }
