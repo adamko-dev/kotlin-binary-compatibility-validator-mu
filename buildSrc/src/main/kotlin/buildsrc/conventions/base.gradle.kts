@@ -5,7 +5,6 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
   base
-//  id("org.jetbrains.kotlin.plugin.assignment")
 }
 
 // common config for all projects
@@ -22,7 +21,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 }
 
 tasks.withType<AbstractTestTask>().configureEach {
-  timeout = Duration.ofMinutes(60)
+  timeout.set(Duration.ofMinutes(60))
 
   testLogging {
     showCauses = true

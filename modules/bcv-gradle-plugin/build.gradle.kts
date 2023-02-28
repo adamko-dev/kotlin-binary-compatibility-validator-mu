@@ -1,4 +1,6 @@
+import buildsrc.utils.configurationNames
 import buildsrc.utils.skipTestFixturesPublications
+import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
 
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
@@ -26,8 +28,8 @@ dependencies {
 
 @Suppress("UnstableApiUsage")
 gradlePlugin {
-  website = "https://github.com/Kotlin/binary-compatibility-validator-alternative"
-  vcsUrl = "https://github.com/adamko-dev/binary-compatibility-validator-alternative"
+  website.set("https://github.com/Kotlin/binary-compatibility-validator-alternative")
+  vcsUrl.set("https://github.com/adamko-dev/binary-compatibility-validator-alternative")
   isAutomatedPublishing = true
 
   plugins.configureEach {
