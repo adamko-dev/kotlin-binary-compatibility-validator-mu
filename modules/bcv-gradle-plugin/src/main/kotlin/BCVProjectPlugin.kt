@@ -169,5 +169,4 @@ abstract class BCVProjectPlugin @Inject constructor(
       }
     }
   }
-
 }

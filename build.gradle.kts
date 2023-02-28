@@ -31,6 +31,9 @@ val readmeCheck by tasks.registering {
       require("BCV version `${kotlinBcvVersion.get()}`" in readme) {
         "Incorrect BCV version in README"
       }
+      require("kotlinxBinaryCompatibilityValidatorVersion.set(\"${kotlinBcvVersion.get()}\")" in readme) {
+        "Incorrect BCV version in README"
+      }
       require("The minimal supported Gradle version is ${minimumGradleTestVersion.get()}" in readme) {
         "Incorrect Gradle version in README"
       }
