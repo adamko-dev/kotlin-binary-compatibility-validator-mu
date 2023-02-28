@@ -88,7 +88,7 @@ abstract class BCVApiCheckTask @Inject constructor(
     val builtFilePath = allBuiltFilePaths.singleOrNull()
       ?: error("Expected a single file ${expectedProjectName.get()}.api, but found ${allBuiltFilePaths.size}: $allBuiltFilePaths")
 
-    if (builtFilePath !in allCheckFilePaths) {
+    if (builtApiDeclaration == null || builtFilePath !in allCheckFilePaths) {
       val relativeDirPath = projectApiDir.get().toRelativeString(rootDir) + File.separator
       error(
         "File ${builtFilePath.lastName} is missing from ${relativeDirPath}, please run '$apiDumpTaskPath' task to generate one"
@@ -97,7 +97,7 @@ abstract class BCVApiCheckTask @Inject constructor(
 
     val diff = compareFiles(
       checkFile = checkApiDeclaration,
-      builtFile = builtFilePath.getFile(builtApiDeclaration!!.parentFile!!),
+      builtFile = builtApiDeclaration,
     )
     val diffSet = mutableSetOf<String>()
     if (diff != null) diffSet.add(diff)
