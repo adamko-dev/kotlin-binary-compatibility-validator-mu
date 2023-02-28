@@ -19,3 +19,25 @@ idea {
     )
   }
 }
+
+val readmeCheck by tasks.registering {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  val readme = providers.fileContents(layout.projectDirectory.file("README.md")).asText
+  val minimumGradleTestVersion = libs.versions.testGradleVersion
+  val kotlinBcvVersion = libs.versions.kotlinx.bcv
+
+  doLast {
+    readme.get().let { readme ->
+      require("BCV version `${kotlinBcvVersion.get()}`" in readme) {
+        "Incorrect BCV version in README"
+      }
+      require("The minimal supported Gradle version is ${minimumGradleTestVersion.get()}" in readme) {
+        "Incorrect Gradle version in README"
+      }
+    }
+  }
+}
+
+tasks.check {
+  dependsOn(readmeCheck)
+}
