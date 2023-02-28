@@ -1,7 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
 import dev.adamko.kotlin.binary_compatibility_validator.internal.sourceSets
-import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVPlatformType
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiCheckTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiGenerateTask
@@ -59,13 +58,6 @@ abstract class BCVProjectPlugin @Inject constructor(
       onlyIf("Must have at least one target") { targets.isNotEmpty() }
       outputApiBuildDir.convention(layout.buildDirectory.dir("bcv-api"))
       projectName.convention(extension.projectName)
-
-      ignoredClasses.convention(extension.ignoredClasses)
-      ignoredMarkers.convention(extension.ignoredMarkers.apply {
-        @Suppress("DEPRECATION")
-        addAll(extension.nonPublicMarkers)
-      })
-      ignoredPackages.convention(extension.ignoredPackages)
     }
 
     project.tasks.withType<BCVApiCheckTask>().configureEach {
@@ -125,7 +117,7 @@ abstract class BCVProjectPlugin @Inject constructor(
         extension.targets.create(name) {
 //        val bcvPlatformType = objects.newInstance<BCVPlatformType>(name)
           enabled.convention(true)
-          platformType.convention(objects.newInstance<BCVPlatformType>(name))
+//          platformType.convention(objects.newInstance<BCVPlatformType>(name))
           compilations.all {
             inputClasses.from(output.classesDirs)
           }
@@ -135,7 +127,7 @@ abstract class BCVProjectPlugin @Inject constructor(
   }
 
   private fun createExtension(project: Project): BCVExtension {
-    return project.extensions.create(EXTENSION_NAME, BCVExtension::class).apply {
+    val extension = project.extensions.create(EXTENSION_NAME, BCVExtension::class).apply {
       enabled.convention(true)
       ignoredPackages.convention(emptySet())
       ignoredMarkers.convention(emptySet())
@@ -143,10 +135,19 @@ abstract class BCVProjectPlugin @Inject constructor(
       outputApiDir.convention(layout.projectDirectory.dir("api"))
       projectName.convention(providers.provider { project.name })
       kotlinxBinaryCompatibilityValidatorVersion.convention("0.13.0")
-      targets.configureEach {
-        enabled.convention(true)
-      }
     }
+
+    extension.targets.configureEach {
+      enabled.convention(true)
+      ignoredClasses.convention(extension.ignoredClasses)
+      ignoredMarkers.convention(extension.ignoredMarkers.apply {
+        @Suppress("DEPRECATION")
+        addAll(extension.nonPublicMarkers)
+      })
+      ignoredPackages.convention(extension.ignoredPackages)
+    }
+
+    return extension
   }
 
 //  private fun configureMultiplatformPlugin(
