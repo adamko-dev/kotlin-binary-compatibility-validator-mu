@@ -38,18 +38,17 @@ abstract class BCVApiGenerateTask @Inject constructor(
 
   @TaskAction
   fun generate() {
-//    val groupedTargets = targets.groupBy { it.platformType.orNull }
-
     val workQueue = prepareWorkQueue()
 
     val outputApiBuildDir = outputApiBuildDir.get()
     fs.delete { delete(outputApiBuildDir) }
     outputApiBuildDir.asFile.mkdirs()
 
+    val enabledTargets = targets.asMap.values.filter { it.enabled.getOrElse(true) }
 
-    targets.asMap.values.forEach { target ->
+    enabledTargets.forEach { target ->
 
-      val outputDir = if (targets.size == 1) {
+      val outputDir = if (enabledTargets.size == 1) {
         outputApiBuildDir
       } else {
         outputApiBuildDir.dir(target.platformType)
