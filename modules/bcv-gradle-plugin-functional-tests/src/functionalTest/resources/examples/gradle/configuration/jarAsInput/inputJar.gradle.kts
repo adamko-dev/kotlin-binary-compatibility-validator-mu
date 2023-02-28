@@ -13,7 +13,7 @@ tasks.jar {
   exclude("**/HiddenProperty.class")
 }
 
-bcvMu {
+binaryCompatibilityValidator {
   kotlinJvm {
     inputJar.set(tasks.jar.flatMap { it.archiveFile })
   }

@@ -1,3 +1,3 @@
-configure<dev.adamko.kotlin.binary_compatibility_validator.BCVExtension> {
+configure<dev.adamko.kotlin.binary_compatibility_validator.BCVProjectExtension> {
     ignoredPackages.add("com.company")
 }

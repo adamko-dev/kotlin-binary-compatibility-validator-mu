@@ -11,8 +11,18 @@ interface BCVTargetSpec : Serializable {
   /** Enables or disables API generation and validation for this target */
   val enabled: Property<Boolean>
 
+  /**
+   * The classes to generate signatures for.
+   *
+   * Note that if [inputJar] has a value, the contents of [inputClasses] will be ignored
+   */
   val inputClasses: ConfigurableFileCollection
 
+  /**
+   * A JAR that contains the classes to generate signatures for.
+   *
+   * Note that if [inputJar] has a value, the contents of [inputClasses] will be ignored
+   */
   val inputJar: RegularFileProperty
 
   /**

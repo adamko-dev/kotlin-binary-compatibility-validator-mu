@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
  */
 
-configure<dev.adamko.kotlin.binary_compatibility_validator.BCVExtension> {
+configure<dev.adamko.kotlin.binary_compatibility_validator.BCVProjectExtension> {
     nonPublicMarkers.add("foo.HiddenField")
     nonPublicMarkers.add("foo.HiddenProperty")
 }

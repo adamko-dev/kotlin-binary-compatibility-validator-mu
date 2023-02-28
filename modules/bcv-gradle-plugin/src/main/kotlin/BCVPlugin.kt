@@ -15,4 +15,11 @@ abstract class BCVPlugin : Plugin<PluginAware> {
       else        -> error("cannot apply BCVPlugin to ${target::class}")
     }
   }
+
+  companion object {
+    const val API_DIR = "api"
+    const val EXTENSION_NAME = "binaryCompatibilityValidator"
+    const val TASK_GROUP = "bcv mu"
+    const val RUNTIME_CLASSPATH_CONFIGURATION_NAME = "bcvMuRuntime"
+  }
 }
