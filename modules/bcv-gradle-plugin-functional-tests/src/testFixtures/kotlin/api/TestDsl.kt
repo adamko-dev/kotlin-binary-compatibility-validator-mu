@@ -1,7 +1,7 @@
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils.api
 
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.minimumGradleTestVersion
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoPathString
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
@@ -12,21 +12,13 @@ const val API_DIR = "api"
 fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
   val baseKotlinScope = BaseKotlinScope()
 
-  val testMavenRepoRelativePath =
-    GradleProjectTest
-      .testMavenRepoDir
-      .toFile()
-      .canonicalFile
-      .absoluteFile
-      .invariantSeparatorsPath
-
   baseKotlinScope.settingsGradleKts {
     addText(/*language=kts*/ """
         |@Suppress("UnstableApiUsage")
         |dependencyResolutionManagement {
         |  repositories {
         |    mavenCentral()
-        |    maven(file("$testMavenRepoRelativePath"))
+        |    maven(file("$testMavenRepoPathString"))
         |  }
         |}
         |
@@ -34,7 +26,7 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
         |  repositories {
         |    gradlePluginPortal()
         |    mavenCentral()
-        |    maven(file("$testMavenRepoRelativePath"))
+        |    maven(file("$testMavenRepoPathString"))
         |  }
         |}
         |
@@ -47,7 +39,7 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
   baseKotlinScope.files.forEach { scope ->
     val fileWriteTo = rootProjectDir.resolve(scope.filePath)
       .apply {
-        parentFile.mkdirs()
+        parentFile?.mkdirs()
         createNewFile()
       }
 
@@ -195,6 +187,8 @@ class AppendableScope(val filePath: String) {
 class Runner {
   val arguments: MutableList<String> = mutableListOf(
     "--configuration-cache",
+    "--info",
+    "--stacktrace",
   )
 }
 

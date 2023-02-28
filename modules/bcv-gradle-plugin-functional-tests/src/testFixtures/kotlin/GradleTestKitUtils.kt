@@ -2,7 +2,7 @@
 
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils
 
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoDir
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoPathString
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -31,7 +31,13 @@ class GradleProjectTest(
   companion object {
 
     /** file-based Maven Repo that contains the published plugin */
-    val testMavenRepoDir: Path by systemProperty(Paths::get)
+    private val testMavenRepoDir: Path by systemProperty(Paths::get)
+    val testMavenRepoPathString
+      get() = testMavenRepoDir
+        .toFile()
+        .canonicalFile
+        .absoluteFile
+        .invariantSeparatorsPath
 
     private val projectTestTempDir: Path by systemProperty(Paths::get)
 
@@ -76,7 +82,7 @@ fun gradleKtsProjectTest(
       |dependencyResolutionManagement {
       |    repositories {
       |        mavenCentral()
-      |        maven(file("$testMavenRepoDir"))
+      |        maven(file("$testMavenRepoPathString"))
       |    }
       |}
       |
@@ -84,7 +90,7 @@ fun gradleKtsProjectTest(
       |    repositories {
       |        gradlePluginPortal()
       |        mavenCentral()
-      |        maven(file("$testMavenRepoDir"))
+      |        maven(file("$testMavenRepoPathString"))
       |    }
       |}
       |
@@ -120,7 +126,7 @@ fun gradleGroovyProjectTest(
             |dependencyResolutionManagement {
             |    repositories {
             |        mavenCentral()
-            |        maven { url = file("$testMavenRepoDir") }
+            |        maven { url = file("$testMavenRepoPathString") }
             |    }
             |}
             |
@@ -128,7 +134,7 @@ fun gradleGroovyProjectTest(
             |    repositories {
             |        gradlePluginPortal()
             |        mavenCentral()
-            |        maven { url = file("$testMavenRepoDir") }
+            |        maven { url = file("$testMavenRepoPathString") }
             |    }
             |}
             |
