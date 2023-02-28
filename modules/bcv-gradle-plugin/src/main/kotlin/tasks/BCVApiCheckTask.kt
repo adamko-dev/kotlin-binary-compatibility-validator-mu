@@ -5,7 +5,7 @@ import com.github.difflib.UnifiedDiffUtils
 import dev.adamko.kotlin.binary_compatibility_validator.internal.GradlePath
 import dev.adamko.kotlin.binary_compatibility_validator.internal.fullPath
 import java.io.*
-import java.util.TreeSet
+import java.util.TreeMap
 import javax.inject.Inject
 import org.gradle.api.*
 import org.gradle.api.file.*
@@ -55,14 +55,18 @@ abstract class BCVApiCheckTask @Inject constructor(
         """.trimIndent()
       )
 
+    val apiBuildDir = apiBuildDir.get().asFile
+
     val checkApiDeclarationPaths = projectApiDir.relativePathsOfContent { !isDirectory }
+    val builtApiDeclarationPaths = apiBuildDir.relativePathsOfContent { !isDirectory }
     logger.info("checkApiDeclarationPaths: $checkApiDeclarationPaths")
 
     checkApiDeclarationPaths.forEach { checkApiDeclarationPath ->
       logger.info("---------------------------")
       checkTarget(
         checkApiDeclaration = checkApiDeclarationPath.getFile(projectApiDir),
-        builtApiDeclaration = checkApiDeclarationPath.getFile(apiBuildDir.get().asFile)
+        // fetch the builtFile, using the case-insensitive map
+        builtApiDeclaration = builtApiDeclarationPaths[checkApiDeclarationPath]?.getFile(apiBuildDir)
       )
       logger.info("---------------------------")
     }
@@ -70,12 +74,12 @@ abstract class BCVApiCheckTask @Inject constructor(
 
   private fun checkTarget(
     checkApiDeclaration: File,
-    builtApiDeclaration: File,
+    builtApiDeclaration: File?,
   ) {
     logger.info("checkApiDeclaration: $checkApiDeclaration")
     logger.info("builtApiDeclaration: $builtApiDeclaration")
 
-    val allBuiltFilePaths = builtApiDeclaration.parentFile.relativePathsOfContent()
+    val allBuiltFilePaths = builtApiDeclaration?.parentFile.relativePathsOfContent()
     val allCheckFilePaths = checkApiDeclaration.parentFile.relativePathsOfContent()
 
     logger.info("allBuiltPaths: $allBuiltFilePaths")
@@ -93,7 +97,7 @@ abstract class BCVApiCheckTask @Inject constructor(
 
     val diff = compareFiles(
       checkFile = checkApiDeclaration,
-      builtFile = builtApiDeclaration,
+      builtFile = builtFilePath.getFile(builtApiDeclaration!!.parentFile!!),
     )
     val diffSet = mutableSetOf<String>()
     if (diff != null) diffSet.add(diff)
@@ -113,8 +117,8 @@ abstract class BCVApiCheckTask @Inject constructor(
   /** Get the relative paths of all files and folders inside a directory */
   private fun File?.relativePathsOfContent(
     filter: FileVisitDetails.() -> Boolean = { true },
-  ): TreeSet<RelativePath> {
-    val contents = setOfRelativePaths()
+  ): RelativePaths {
+    val contents = RelativePaths()
     if (this != null) {
       objects.fileTree().from(this).visit {
         if (filter()) contents += relativePath
@@ -145,16 +149,34 @@ abstract class BCVApiCheckTask @Inject constructor(
   }
 
   companion object {
-    /*
-     * We use case-insensitive comparison to workaround issues with case-insensitive OSes
-     * and Gradle behaving slightly different on different platforms.
-     * We neither know original sensitivity of existing .api files, not
-     * build ones, because projectName that is part of the path can have any sensitivity.
-     * To work around that, we replace paths we are looking for the same paths that
-     * actually exist on FS.
-     */
-    private fun setOfRelativePaths() = TreeSet<RelativePath> { rp1, rp2 ->
-      rp1.toString().compareTo(rp2.toString(), true)
-    }
+//    private fun setOfRelativePaths() = TreeSet<RelativePath> { rp1, rp2 ->
+//      rp1.toString().compareTo(rp2.toString(), true)
+//    }
+  }
+}
+
+/*
+ * We use case-insensitive comparison to workaround issues with case-insensitive OSes
+ * and Gradle behaving slightly different on different platforms.
+ * We neither know original sensitivity of existing .api files, not
+ * build ones, because projectName that is part of the path can have any sensitivity.
+ * To work around that, we replace paths we are looking for the same paths that
+ * actually exist on FS.
+ */
+private class RelativePaths(
+  private val map: TreeMap<RelativePath, RelativePath> = caseInsensitiveMap()
+) : Set<RelativePath> by map.keys {
+
+  operator fun plusAssign(path: RelativePath) {
+    map[path] = path
+  }
+
+  operator fun get(path: RelativePath): RelativePath? = map[path]
+
+  companion object {
+    private fun caseInsensitiveMap() =
+      TreeMap<RelativePath, RelativePath> { path1, path2 ->
+        path1.toString().compareTo(path2.toString(), true)
+      }
   }
 }

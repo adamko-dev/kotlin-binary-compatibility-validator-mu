@@ -53,8 +53,6 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 
     runner.build {
       task(":apiCheck") shouldHaveOutcome SUCCESS
-//      assertTaskSuccess(":jvmApiCheck")
-//      assertTaskSuccess(":anotherJvmApiCheck")
     }
   }
 
@@ -92,9 +90,6 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-//      assertTaskNotRun(":apiCheck")
-//      assertTaskFailure(":jvmApiCheck")
-//      assertTaskFailure(":anotherJvmApiCheck")
       task(":apiCheck") shouldHaveOutcome FAILED
       output shouldContain "API check failed for project :testproject"
       shouldNotHaveRunTask(":check")
@@ -121,19 +116,15 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
     runner.build {
       task(":apiDump") shouldHaveOutcome SUCCESS
-//      assertTaskSuccess(":jvmApiDump")
-//      assertTaskSuccess(":anotherJvmApiDump")
 
       System.err.println(output)
 
       val anotherExpectedApi = readResourceFile("/examples/classes/Subsub1Class.dump")
-      //assertThat(anotherApiDump.readText()).isEqualToIgnoringNewLines(anotherExpectedApi)
       anotherApiDump.shouldBeAFile()
       anotherApiDump.readText().invariantNewlines().shouldBe(anotherExpectedApi)
 
       val mainExpectedApi =
         anotherExpectedApi + readResourceFile("/examples/classes/Subsub2Class.dump")
-      //assertThat(jvmApiDump.readText()).isEqualToIgnoringNewLines(mainExpectedApi)
       jvmApiDump.shouldBeAFile()
       jvmApiDump.readText().invariantNewlines().shouldBe(mainExpectedApi)
     }
