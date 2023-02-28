@@ -7,3 +7,6 @@
 # These are Windows script files and should use crlf
 *.bat           text eol=crlf
 
+
+# Exclude tests from GitHub language stats https://github.com/github/linguist/blob/v7.24.1/docs/overrides.md
+**/src/*[tT]est*/resources/**          linguist-vendored
