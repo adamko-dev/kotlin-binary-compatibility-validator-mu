@@ -55,58 +55,45 @@ abstract class BCVApiCheckTask @Inject constructor(
         """.trimIndent()
       )
 
-    val expectedApiDeclarations = setOfRelativePaths()
-    objects.fileTree().from(projectApiDir)
-      .visit {
-        if (!isDirectory) expectedApiDeclarations += relativePath
-      }
-    logger.info("expectedApiDeclarations: $expectedApiDeclarations")
+    val checkApiDeclarationPaths = projectApiDir.relativePathsOfContent { !isDirectory }
+    logger.info("checkApiDeclarationPaths: $checkApiDeclarationPaths")
 
-    expectedApiDeclarations.forEach { expectedApiDeclaration ->
+    checkApiDeclarationPaths.forEach { checkApiDeclarationPath ->
       logger.info("---------------------------")
       checkTarget(
-        projectApiDir.resolve(expectedApiDeclaration.pathString),
-        apiBuildDir.get().asFile.resolve(expectedApiDeclaration.pathString),
+        checkApiDeclaration = checkApiDeclarationPath.getFile(projectApiDir),
+        builtApiDeclaration = checkApiDeclarationPath.getFile(apiBuildDir.get().asFile)
       )
       logger.info("---------------------------")
     }
   }
 
   private fun checkTarget(
-    projectApiDeclaration: File,
-    buildApiDeclaration: File,
+    checkApiDeclaration: File,
+    builtApiDeclaration: File,
   ) {
-    logger.info("projectApiDeclaration: $projectApiDeclaration")
-    logger.info("buildApiDeclaration: $buildApiDeclaration")
+    logger.info("checkApiDeclaration: $checkApiDeclaration")
+    logger.info("builtApiDeclaration: $builtApiDeclaration")
 
-    val apiBuildDirFiles = setOfRelativePaths()
-    objects.fileTree().from(buildApiDeclaration.parent)
-      .visit {
-        if (!isDirectory) apiBuildDirFiles += relativePath
-      }
-    val expectedApiFiles = setOfRelativePaths()
-    objects.fileTree().from(projectApiDeclaration.parent)
-      .visit {
-        if (!isDirectory) expectedApiFiles += relativePath
-      }
+    val allBuiltFilePaths = builtApiDeclaration.parentFile.relativePathsOfContent()
+    val allCheckFilePaths = checkApiDeclaration.parentFile.relativePathsOfContent()
 
-    logger.info("apiBuildDirFiles: $apiBuildDirFiles")
-    logger.info("expectedApiFiles: $expectedApiFiles")
+    logger.info("allBuiltPaths: $allBuiltFilePaths")
+    logger.info("allCheckFiles: $allCheckFilePaths")
 
-    val expectedApiDeclaration = apiBuildDirFiles.singleOrNull()
-      ?: error("Expected a single file ${expectedProjectName.get()}.api, but found ${apiBuildDirFiles.size}: $apiBuildDirFiles")
+    val builtFilePath = allBuiltFilePaths.singleOrNull()
+      ?: error("Expected a single file ${expectedProjectName.get()}.api, but found ${allBuiltFilePaths.size}: $allBuiltFilePaths")
 
-    if (expectedApiDeclaration !in expectedApiFiles) {
+    if (builtFilePath !in allCheckFilePaths) {
       val relativeDirPath = projectApiDir.get().toRelativeString(rootDir) + File.separator
       error(
-        "File ${expectedApiDeclaration.lastName} is missing from ${relativeDirPath}, please run '$apiDumpTaskPath' task to generate one"
+        "File ${builtFilePath.lastName} is missing from ${relativeDirPath}, please run '$apiDumpTaskPath' task to generate one"
       )
     }
 
     val diff = compareFiles(
-      // use RelativePath.getFile() to fetch the files, because it's case-insensitive
-      checkFile = expectedApiDeclaration.getFile(projectApiDeclaration.parentFile),
-      builtFile = expectedApiDeclaration.getFile(buildApiDeclaration.parentFile),
+      checkFile = checkApiDeclaration,
+      builtFile = builtApiDeclaration,
     )
     val diffSet = mutableSetOf<String>()
     if (diff != null) diffSet.add(diff)
@@ -121,6 +108,19 @@ abstract class BCVApiCheckTask @Inject constructor(
         """.trimMargin()
       )
     }
+  }
+
+  /** Get the relative paths of all files and folders inside a directory */
+  private fun File?.relativePathsOfContent(
+    filter: FileVisitDetails.() -> Boolean = { true },
+  ): TreeSet<RelativePath> {
+    val contents = setOfRelativePaths()
+    if (this != null) {
+      objects.fileTree().from(this).visit {
+        if (filter()) contents += relativePath
+      }
+    }
+    return contents
   }
 
   private fun compareFiles(checkFile: File, builtFile: File): String? {

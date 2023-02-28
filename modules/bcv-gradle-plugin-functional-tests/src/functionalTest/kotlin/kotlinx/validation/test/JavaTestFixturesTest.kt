@@ -28,11 +28,17 @@ class JavaTestFixturesTest : FunSpec({
       }
 
       test("expect :apiCheck task passes") {
-        project.runner.withArguments("apiCheck").build {
-          withClue(output) {
-            task(":apiCheck") shouldHaveOutcome SUCCESS
+        project.runner
+          .withArguments(
+            "apiCheck",
+            "--info",
+            "--stacktrace",
+          )
+          .build {
+            withClue(output) {
+              task(":apiCheck") shouldHaveOutcome SUCCESS
+            }
           }
-        }
       }
 
       test("expect correct kotlinJvm api declaration is generated") {
@@ -74,11 +80,17 @@ class JavaTestFixturesTest : FunSpec({
       }
 
       test("expect :apiCheck task passes") {
-        project.runner.withArguments("apiCheck").build {
-          withClue(output) {
-            task(":apiCheck") shouldHaveOutcome SUCCESS
+        project.runner
+          .withArguments(
+            "apiCheck",
+            "--info",
+            "--stacktrace",
+          )
+          .build {
+            withClue(output) {
+              task(":apiCheck") shouldHaveOutcome SUCCESS
+            }
           }
-        }
       }
 
       test("expect correct kotlinJvm api declaration is generated") {
