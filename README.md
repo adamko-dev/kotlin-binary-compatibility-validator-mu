@@ -1,3 +1,6 @@
+[![GitHub license](https://img.shields.io/github/license/adamko-dev/kotlin-binary-compatibility-validator-mu?style=for-the-badge)](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu/blob/main/LICENSE)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/dev.adamko.kotlin.binary-compatibility-validator?style=for-the-badge)](https://plugins.gradle.org/plugin/dev.adamko.kotlin.binary-compatibility-validator)
+
 # Kotlin Binary Compatibility Validator (Mirror Universe)
 
 BCV-MU is a re-imagined [Gradle](https://gradle.org/) Plugin for
