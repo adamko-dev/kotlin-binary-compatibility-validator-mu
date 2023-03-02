@@ -3,7 +3,7 @@
 
 # Kotlin Binary Compatibility Validator (Mirror Universe)
 
-BCV-MU is a re-imagined [Gradle](https://gradle.org/) Plugin for
+[BCV-MU](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu) is a re-imagined [Gradle](https://gradle.org/) Plugin for
 [Kotlin/binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator).
 
 This plugin validates the public JVM binary API of libraries to make sure that breaking changes are
