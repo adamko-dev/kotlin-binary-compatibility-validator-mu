@@ -6,6 +6,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProject
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.name
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -27,6 +28,8 @@ class GradleProjectTest(
   ) : this(projectDir = baseDir.resolve(testProjectName))
 
   val runner: GradleRunner = GradleRunner.create().withProjectDir(projectDir.toFile())
+
+  val projectName by projectDir::name
 
   companion object {
 
@@ -76,7 +79,7 @@ fun gradleKtsProjectTest(
   return GradleProjectTest(baseDir = baseDir, testProjectName = testProjectName).apply {
 
     settingsGradleKts = """
-      |rootProject.name = "$testProjectName"
+      |rootProject.name = "$projectName"
       |
       |@Suppress("UnstableApiUsage")
       |dependencyResolutionManagement {
@@ -225,27 +228,27 @@ fun ProjectDirectoryScope.findFiles(matcher: (File) -> Boolean): Sequence<File> 
   projectDir.toFile().walk().filter(matcher)
 
 
-/** Set the content of `settings.gradle.kts` */
+/** Get or set the content of `settings.gradle.kts` */
 @delegate:Language("kts")
 var ProjectDirectoryScope.settingsGradleKts: String by TestProjectFileDelegate("settings.gradle.kts")
 
 
-/** Set the content of `build.gradle.kts` */
+/** Get or set the content of `build.gradle.kts` */
 @delegate:Language("kts")
 var ProjectDirectoryScope.buildGradleKts: String by TestProjectFileDelegate("build.gradle.kts")
 
 
-/** Set the content of `settings.gradle` */
+/** Get or set the content of `settings.gradle` */
 @delegate:Language("groovy")
 var ProjectDirectoryScope.settingsGradle: String by TestProjectFileDelegate("settings.gradle")
 
 
-/** Set the content of `build.gradle` */
+/** Get or set the content of `build.gradle` */
 @delegate:Language("groovy")
 var ProjectDirectoryScope.buildGradle: String by TestProjectFileDelegate("build.gradle")
 
 
-/** Set the content of `gradle.properties` */
+/** Get or set the content of `gradle.properties` */
 @delegate:Language("properties")
 var ProjectDirectoryScope.gradleProperties: String by TestProjectFileDelegate("gradle.properties")
 
