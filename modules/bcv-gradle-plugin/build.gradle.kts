@@ -73,7 +73,7 @@ configurations
     attributes {
       attribute(
         GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
-        objects.named(libs.versions.testGradleVersion.get())
+        objects.named(libs.versions.supportedGradleVersion.get())
       )
     }
   }

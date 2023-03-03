@@ -33,7 +33,7 @@ testing.suites {
         inputs.property("projectTestTempDir", projectTestTempDirPath)
         systemProperty("projectTestTempDir", projectTestTempDirPath)
         systemProperty("integrationTestProjectsDir", "$projectDir/projects")
-        systemProperty("minimumGradleTestVersion", libs.versions.testGradleVersion.get())
+        systemProperty("minimumGradleTestVersion", libs.versions.supportedGradleVersion.get())
       }
     }
   }

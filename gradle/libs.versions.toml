@@ -9,7 +9,7 @@ kotlinx-bcv = "0.13.0"
 
 gradlePluginPublishPlugin = "1.1.0"
 
-testGradleVersion = "7.6" # the minimal supported Gradle plugin version, used in functional tests
+supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, used in functional tests
 
 [libraries]
 
