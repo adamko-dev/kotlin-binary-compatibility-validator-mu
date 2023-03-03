@@ -9,7 +9,7 @@ import io.kotest.matchers.paths.shouldExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.io.path.readText
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.intellij.lang.annotations.Language
 
 internal class SettingsPluginDslTest : FunSpec({
@@ -71,8 +71,8 @@ internal class SettingsPluginDslTest : FunSpec({
                 shouldNotHaveRunTask(":apiDump")
               }
 
-              task(":sub1:apiDump") shouldHaveOutcome TaskOutcome.SUCCESS
-              task(":sub2:apiDump") shouldHaveOutcome TaskOutcome.SUCCESS
+              shouldHaveRunTask(":sub1:apiDump", SUCCESS)
+              shouldHaveRunTask(":sub2:apiDump", SUCCESS)
             }
 
           testCase.project.projectDir.resolve("sub1/api/sub1.api").asClue { apiDump ->

@@ -8,7 +8,7 @@ import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled("Leftovers after revert of #94")
+@Disabled("Leftovers after revert of https://github.com/Kotlin/binary-compatibility-validator/issues/94")
 internal class AndroidLibraryTest : BaseKotlinGradleTest() {
 
   // region Kotlin Android Library
@@ -25,7 +25,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":kotlin-library:apiDump") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":kotlin-library:apiDump", SUCCESS)
     }
   }
 
@@ -38,7 +38,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
         arguments.add(":kotlin-library:apiCheck")
       }
     }.build {
-      task(":kotlin-library:apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":kotlin-library:apiCheck", SUCCESS)
     }
   }
 
@@ -58,7 +58,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":java-library:apiDump") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":java-library:apiDump", SUCCESS)
     }
   }
 
@@ -71,7 +71,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
         arguments.add(":java-library:apiCheck")
       }
     }.build {
-      task(":java-library:apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":java-library:apiCheck", SUCCESS)
     }
   }
 

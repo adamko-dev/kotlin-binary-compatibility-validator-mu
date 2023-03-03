@@ -53,7 +53,7 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiCheck", FAILED)
     }
   }
 
@@ -92,7 +92,7 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 
     runner.buildAndFail {
       withClue(output) {
-        shouldHaveRunTask(":apiCheck") shouldHaveOutcome FAILED
+        shouldHaveRunTask(":apiCheck", FAILED)
         output shouldContain "API check failed for project :testproject"
         shouldNotHaveRunTask(":check")
       }
@@ -118,22 +118,21 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 
     }
     runner.build {
-      task(":apiDump") shouldHaveOutcome SUCCESS
+      withClue(output) {
+        shouldHaveRunTask(":apiDump", SUCCESS)
 
-      System.err.println(output)
+        val anotherExpectedApi = readResourceFile("/examples/classes/Subsub1Class.dump")
+        anotherApiDump.shouldBeAFile()
+        anotherApiDump.readText().invariantNewlines() shouldBe anotherExpectedApi
 
-      val anotherExpectedApi = readResourceFile("/examples/classes/Subsub1Class.dump")
-      anotherApiDump.shouldBeAFile()
-      anotherApiDump.readText().invariantNewlines().shouldBe(anotherExpectedApi)
-
-      val mainExpectedApi =
-        anotherExpectedApi + readResourceFile("/examples/classes/Subsub2Class.dump")
-      jvmApiDump.shouldBeAFile()
-      jvmApiDump.readText().invariantNewlines().shouldBe(mainExpectedApi)
+        val mainExpectedApi =
+          anotherExpectedApi + readResourceFile("/examples/classes/Subsub2Class.dump")
+        jvmApiDump.shouldBeAFile()
+        jvmApiDump.readText().invariantNewlines() shouldBe mainExpectedApi
+      }
     }
   }
 
   private val jvmApiDump: File get() = rootProjectDir.resolve("api/jvm/testproject.api")
   private val anotherApiDump: File get() = rootProjectDir.resolve("api/anotherJvm/testproject.api")
-
 }

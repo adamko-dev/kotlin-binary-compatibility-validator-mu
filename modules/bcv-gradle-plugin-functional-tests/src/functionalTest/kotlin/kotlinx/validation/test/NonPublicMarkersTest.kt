@@ -3,6 +3,7 @@ package kotlinx.validation.test
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveTaskWithOutcome
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
@@ -30,7 +31,7 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveTaskWithOutcome(":apiCheck", SUCCESS)
     }
   }
 }

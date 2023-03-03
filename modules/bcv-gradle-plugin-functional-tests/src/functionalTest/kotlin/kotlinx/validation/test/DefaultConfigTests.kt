@@ -26,7 +26,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
 
     runner.buildAndFail {
       output shouldContain "Please ensure that task ':apiDump' was executed"
-      task(":apiCheck") shouldHaveOutcome FAILED
+      shouldHaveRunTask(":apiCheck", FAILED)
     }
   }
 
@@ -43,7 +43,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      task(":apiCheck") shouldHaveOutcome FAILED
+      shouldHaveRunTask(":apiCheck", FAILED)
       shouldNotHaveRunTask(":check") // apiCheck fails before we can run check
     }
   }
@@ -63,7 +63,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 
@@ -86,7 +86,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 
@@ -109,7 +109,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 
@@ -132,7 +132,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      task(":apiCheck") shouldHaveOutcome FAILED
+      shouldHaveRunTask(":apiCheck", FAILED)
 
       // note that tabs are used as function indents!
       val dumpOutput = /*language=TEXT*/ """
@@ -160,7 +160,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiDump") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiDump", SUCCESS)
 
       assertTrue(
         rootProjectApiDump.exists(),
@@ -187,7 +187,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiDump") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiDump", SUCCESS)
 
       val apiDumpFile = rootProjectDir.resolve("api/testproject.api")
       assertTrue(apiDumpFile.exists(), "api dump file ${apiDumpFile.path} should exist")
@@ -217,7 +217,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiDump") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiDump", SUCCESS)
 
       assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
 
@@ -242,8 +242,8 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":check") shouldHaveOutcome SUCCESS
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":check", SUCCESS)
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 }
