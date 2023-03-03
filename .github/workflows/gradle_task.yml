@@ -60,7 +60,7 @@ jobs:
           GRADLE_TESTKIT_DIR: ${{ runner.temp }}/.gradle-test-kit/caches
         with:
           gradle-home-cache-cleanup: true
-          arguments: ${{ inputs.gradle-task }}
+          arguments: ${{ inputs.gradle-task }} --scan
 
       - name: Upload build reports
         if: failure()
