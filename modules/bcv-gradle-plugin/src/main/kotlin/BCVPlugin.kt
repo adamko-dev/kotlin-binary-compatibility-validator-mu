@@ -4,7 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.plugins.PluginAware
-import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.*
 
 
 abstract class BCVPlugin : Plugin<PluginAware> {

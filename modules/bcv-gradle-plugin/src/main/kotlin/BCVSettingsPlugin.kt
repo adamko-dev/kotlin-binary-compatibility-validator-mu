@@ -8,10 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.SetProperty
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.newInstance
+import org.gradle.kotlin.dsl.*
 
 abstract class BCVSettingsPlugin @Inject constructor(
   private val objects: ObjectFactory
