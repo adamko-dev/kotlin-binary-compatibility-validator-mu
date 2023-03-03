@@ -59,7 +59,7 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
     .withArguments(baseKotlinScope.runner.arguments)
     .apply {
       GradleProjectTest.gradleTestKitDir?.let {
-        println("Using Gradle TestKit dir ${GradleProjectTest.gradleTestKitDir}")
+        println("Using Gradle TestKit dir $it")
         withTestKitDir(it.toFile())
       }
     }

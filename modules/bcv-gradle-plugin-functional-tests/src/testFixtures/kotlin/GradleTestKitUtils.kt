@@ -31,7 +31,7 @@ class GradleProjectTest(
     .withProjectDir(projectDir.toFile())
     .apply {
       gradleTestKitDir?.let {
-        println("Using Gradle TestKit dir $gradleTestKitDir")
+        println("Using Gradle TestKit dir $it")
         withTestKitDir(it.toFile())
       }
     }
