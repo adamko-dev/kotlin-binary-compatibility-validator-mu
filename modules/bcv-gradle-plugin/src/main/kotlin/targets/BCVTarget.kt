@@ -9,7 +9,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 
-abstract class BCVTarget @Inject constructor(
+abstract class BCVTarget
+@Inject
+constructor(
   /**
    * The JVM platform being targeted.
    *

@@ -1,6 +1,7 @@
 import buildsrc.utils.configurationNames
 import buildsrc.utils.skipTestFixturesPublications
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
@@ -8,6 +9,7 @@ plugins {
   `java-test-fixtures`
   //com.github.johnrengelman.shadow
   //buildsrc.conventions.`gradle-plugin-variants`
+  dev.adamko.kotlin.`binary-compatibility-validator`
 }
 
 dependencies {
@@ -88,3 +90,15 @@ skipTestFixturesPublications()
 //  isEnableRelocation = false
 //  archiveClassifier.set("")
 //}
+
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions {
+    freeCompilerArgs += listOf(
+      "-opt-in=dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi"
+    )
+  }
+}
+
+binaryCompatibilityValidator {
+  ignoredMarkers.add("dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi")
+}

@@ -2,6 +2,7 @@ package dev.adamko.kotlin.binary_compatibility_validator.tasks
 
 import com.github.difflib.DiffUtils
 import com.github.difflib.UnifiedDiffUtils
+import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.GradlePath
 import dev.adamko.kotlin.binary_compatibility_validator.internal.fullPath
 import java.io.*
@@ -16,7 +17,10 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 
 @CacheableTask
-abstract class BCVApiCheckTask @Inject constructor(
+abstract class BCVApiCheckTask
+@BCVInternalApi
+@Inject
+constructor(
   private val objects: ObjectFactory,
   private val providers: ProviderFactory,
 ) : BCVDefaultTask() {
@@ -146,12 +150,6 @@ abstract class BCVApiCheckTask @Inject constructor(
       3,
     )
     return diff.joinToString("\n")
-  }
-
-  companion object {
-//    private fun setOfRelativePaths() = TreeSet<RelativePath> { rp1, rp2 ->
-//      rp1.toString().compareTo(rp2.toString(), true)
-//    }
   }
 }
 
