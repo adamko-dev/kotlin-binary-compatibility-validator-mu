@@ -16,6 +16,7 @@ supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, us
 javaDiffUtils = { module = "io.github.java-diff-utils:java-diff-utils", version.ref = "javaDiffUtils" }
 kotlinx-bcv = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "kotlinx-bcv" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradle" }
+kotlin-gradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlinGradle" }
 
 ## region Test Libraries
 kotest-bom = { module = "io.kotest:kotest-bom", version.ref = "kotest" }

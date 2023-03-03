@@ -17,9 +17,9 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.component.external.model.TestFixturesSupport.TEST_FIXTURE_SOURCESET_NAME
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
+import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
 
 
 abstract class BCVProjectPlugin @Inject constructor(
@@ -95,9 +95,6 @@ abstract class BCVProjectPlugin @Inject constructor(
   private fun createExtension(project: Project): BCVProjectExtension {
     val extension = project.extensions.create(EXTENSION_NAME, BCVProjectExtension::class).apply {
       enabled.convention(true)
-      ignoredPackages.convention(emptySet())
-      ignoredMarkers.convention(emptySet())
-      ignoredClasses.convention(emptySet())
       outputApiDir.convention(layout.projectDirectory.dir(API_DIR))
       projectName.convention(providers.provider { project.name })
       kotlinxBinaryCompatibilityValidatorVersion.convention("0.13.0")
@@ -106,10 +103,10 @@ abstract class BCVProjectPlugin @Inject constructor(
     extension.targets.configureEach {
       enabled.convention(true)
       ignoredClasses.convention(extension.ignoredClasses)
-      ignoredMarkers.convention(extension.ignoredMarkers.apply {
+      ignoredMarkers.convention(
         @Suppress("DEPRECATION")
-        addAll(extension.nonPublicMarkers)
-      })
+        extension.ignoredMarkers.orElse(extension.nonPublicMarkers)
+      )
       ignoredPackages.convention(extension.ignoredPackages)
     }
 
@@ -141,11 +138,10 @@ abstract class BCVProjectPlugin @Inject constructor(
     extension: BCVProjectExtension,
   ) {
     project.pluginManager.withPlugin("kotlin-android") {
-      val androidExtension = project.extensions.getByType<KotlinAndroidProjectExtension>()
-
-      extension.targets.create(androidExtension.target.name) {
-        androidExtension.target.compilations.all {
-          inputClasses.from(this)
+      val kotlinSourceSetsContainer = project.extensions.getByType<KotlinSourceSetContainer>()
+      kotlinSourceSetsContainer.sourceSets.all {
+        extension.targets.create(name) {
+          inputClasses.from(kotlin.classesDirectory)
         }
       }
     }
@@ -156,19 +152,28 @@ abstract class BCVProjectPlugin @Inject constructor(
     extension: BCVProjectExtension,
   ) {
     project.pluginManager.withPlugin("kotlin-multiplatform") {
-      val kotlinExtension = project.extensions.getByType<KotlinMultiplatformExtension>()
-      val kotlinJvmTargets = kotlinExtension.targets.matching {
-        it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
-      }
+      val kotlinTargetsContainer = project.extensions.getByType<KotlinTargetsContainer>()
 
-      kotlinJvmTargets.all {
-        extension.targets.create(targetName) {
-          enabled.convention(true)
-          compilations.all {
-            inputClasses.from(output.classesDirs)
+      kotlinTargetsContainer.targets
+        .matching {
+          it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
+        }.all {
+          val targetPlatformType = platformType
+
+          extension.targets.register(targetName) {
+            enabled.convention(true)
+            compilations
+              .matching {
+                when (targetPlatformType) {
+                  KotlinPlatformType.jvm -> it.name == "main"
+                  KotlinPlatformType.androidJvm -> it.name == "release"
+                  else -> false
+                }
+              }.all {
+                inputClasses.from(output.classesDirs)
+              }
           }
         }
-      }
     }
   }
 

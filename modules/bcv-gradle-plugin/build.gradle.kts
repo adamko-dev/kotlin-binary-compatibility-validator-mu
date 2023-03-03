@@ -13,7 +13,8 @@ dependencies {
   implementation(libs.javaDiffUtils)
 
   compileOnly(libs.kotlinx.bcv)
-  compileOnly(libs.kotlin.gradlePlugin)
+//  compileOnly(libs.kotlin.gradlePlugin)
+  compileOnly(libs.kotlin.gradlePluginApi)
 
   testFixturesApi(gradleTestKit())
 
