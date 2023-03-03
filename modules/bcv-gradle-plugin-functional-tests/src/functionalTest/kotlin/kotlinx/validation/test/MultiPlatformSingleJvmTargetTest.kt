@@ -1,7 +1,23 @@
 package kotlinx.validation.test
 
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.BaseKotlinGradleTest
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.BaseKotlinScope
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.addText
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.buildGradleKts
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.dir
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.kotlin
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.readResourceFile
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.resolve
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.runner
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.settingsGradleKts
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.test
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.buildAndFail
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveRunTask
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldNotHaveRunTask
+import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.string.shouldContain
 import java.io.File
@@ -42,7 +58,6 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       kotlin("Subsub2Class.kt", "jvmMain") {
         resolve("/examples/classes/Subsub2Class.kt")
       }
-
     }
 
     runner.build {
@@ -74,13 +89,28 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       kotlin("Subsub2Class.kt", "jvmMain") {
         resolve("/examples/classes/Subsub2Class.kt")
       }
-
+      dir("src/jvmTest/kotlin") {}
+      kotlin("Subsub2ClassTest.kt", "jvmTest") {
+        addText(/*language=kotlin*/ """
+            |package com.company.test
+            |
+            |class SubSub2Test {
+            |  fun blah() {
+            |    println("test")
+            |  }
+            |}
+            |
+          """.trimMargin()
+        )
+      }
     }
 
     runner.buildAndFail {
-      task(":apiCheck") shouldHaveOutcome FAILED
-      output shouldContain "API check failed for project :testproject"
-      shouldNotHaveRunTask(":check")
+      withClue(output) {
+        shouldHaveRunTask(":apiCheck", FAILED)
+        output shouldContain "API check failed for project :testproject"
+        shouldNotHaveRunTask(":check")
+      }
     }
   }
 
@@ -101,7 +131,6 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       kotlin("Subsub2Class.kt", "jvmMain") {
         resolve("/examples/classes/Subsub2Class.kt")
       }
-
     }
 
     runner.build {

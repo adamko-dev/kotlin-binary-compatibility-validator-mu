@@ -37,7 +37,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       runner {
         arguments.add(":kotlin-library:apiCheck")
       }
-    }.build().apply {
+    }.build {
       task(":kotlin-library:apiCheck") shouldHaveOutcome SUCCESS
     }
   }
@@ -70,7 +70,7 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       runner {
         arguments.add(":java-library:apiCheck")
       }
-    }.build().apply {
+    }.build {
       task(":java-library:apiCheck") shouldHaveOutcome SUCCESS
     }
   }

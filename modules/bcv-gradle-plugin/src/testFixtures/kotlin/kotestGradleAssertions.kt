@@ -1,6 +1,10 @@
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils
 
-import io.kotest.matchers.*
+import io.kotest.matchers.Matcher
+import io.kotest.matchers.MatcherResult
+import io.kotest.matchers.neverNullMatcher
+import io.kotest.matchers.should
+import io.kotest.matchers.shouldNot
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.BuildTask
@@ -32,6 +36,17 @@ private fun <T> containDomainObject(name: String): Matcher<NamedDomainObjectColl
 infix fun BuildResult?.shouldHaveRunTask(taskPath: String): BuildTask {
   this should haveTask(taskPath)
   return this?.task(taskPath)!!
+}
+
+/** Assert that a task ran, with an [expected outcome][expectedOutcome]. */
+fun BuildResult?.shouldHaveRunTask(
+  taskPath: String,
+  expectedOutcome: TaskOutcome
+): BuildTask {
+  this should haveTask(taskPath)
+  val task = this?.task(taskPath)!!
+  task should haveOutcome(expectedOutcome)
+  return task
 }
 
 /**

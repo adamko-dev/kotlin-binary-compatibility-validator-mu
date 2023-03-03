@@ -1,7 +1,22 @@
 package kotlinx.validation.test
 
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.BaseKotlinGradleTest
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.BaseKotlinScope
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.buildGradleKts
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.dir
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.kotlin
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.readResourceFile
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.resolve
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.runner
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.settingsGradleKts
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.test
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.buildAndFail
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveRunTask
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldNotHaveRunTask
+import io.kotest.assertions.withClue
 import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -90,9 +105,11 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      task(":apiCheck") shouldHaveOutcome FAILED
-      output shouldContain "API check failed for project :testproject"
-      shouldNotHaveRunTask(":check")
+      withClue(output) {
+        shouldHaveRunTask(":apiCheck") shouldHaveOutcome FAILED
+        output shouldContain "API check failed for project :testproject"
+        shouldNotHaveRunTask(":check")
+      }
     }
   }
 
