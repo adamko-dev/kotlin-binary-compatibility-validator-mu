@@ -8,7 +8,9 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 
 @CacheableTask
-abstract class BCVDefaultTask @BCVInternalApi constructor() : DefaultTask() {
+abstract class BCVDefaultTask
+@BCVInternalApi
+constructor() : DefaultTask() {
 
   @get:Input
   abstract val bcvEnabled: Property<Boolean>

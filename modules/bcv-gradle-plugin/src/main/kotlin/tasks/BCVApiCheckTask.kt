@@ -17,7 +17,10 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 
 @CacheableTask
-abstract class BCVApiCheckTask @Inject @BCVInternalApi constructor(
+abstract class BCVApiCheckTask
+@BCVInternalApi
+@Inject
+constructor(
   private val objects: ObjectFactory,
   private val providers: ProviderFactory,
 ) : BCVDefaultTask() {

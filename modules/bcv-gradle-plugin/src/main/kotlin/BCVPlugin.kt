@@ -8,7 +8,9 @@ import org.gradle.api.plugins.PluginAware
 import org.gradle.kotlin.dsl.*
 
 
-abstract class BCVPlugin @BCVInternalApi constructor() : Plugin<PluginAware> {
+abstract class BCVPlugin
+@BCVInternalApi
+constructor() : Plugin<PluginAware> {
   override fun apply(target: PluginAware) {
     when (target) {
       is Project  -> target.pluginManager.apply(BCVProjectPlugin::class)

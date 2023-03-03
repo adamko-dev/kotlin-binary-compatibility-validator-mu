@@ -23,7 +23,10 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
 
 
-abstract class BCVProjectPlugin @Inject @BCVInternalApi constructor(
+abstract class BCVProjectPlugin
+@BCVInternalApi
+@Inject
+constructor(
   private val providers: ProviderFactory,
   private val layout: ProjectLayout,
 ) : Plugin<Project> {

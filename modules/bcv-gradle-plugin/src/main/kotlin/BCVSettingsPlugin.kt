@@ -11,7 +11,10 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.SetProperty
 import org.gradle.kotlin.dsl.*
 
-abstract class BCVSettingsPlugin @Inject @BCVInternalApi constructor(
+abstract class BCVSettingsPlugin
+@BCVInternalApi
+@Inject
+constructor(
   private val objects: ObjectFactory
 ) : Plugin<Settings> {
 

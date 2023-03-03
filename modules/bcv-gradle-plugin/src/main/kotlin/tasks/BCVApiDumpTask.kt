@@ -8,7 +8,10 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.*
 
 @CacheableTask
-abstract class BCVApiDumpTask @Inject @BCVInternalApi constructor(
+abstract class BCVApiDumpTask
+@BCVInternalApi
+@Inject
+constructor(
   private val fs: FileSystemOperations
 ) : BCVDefaultTask() {
 
