@@ -6,7 +6,7 @@
 plugins {
     kotlin("jvm")
     //id("org.jetbrains.kotlinx.binary-compatibility-validator")
-    id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.3"
+    id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.4-SNAPSHOT"
 }
 
 //repositories {
