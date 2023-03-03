@@ -27,11 +27,20 @@ class GradleProjectTest(
     baseDir: Path = funcTestTempDir,
   ) : this(projectDir = baseDir.resolve(testProjectName))
 
-  val runner: GradleRunner = GradleRunner.create().withProjectDir(projectDir.toFile())
+  val runner: GradleRunner = GradleRunner.create()
+    .withProjectDir(projectDir.toFile())
+    .apply {
+      gradleTestKitDir?.let {
+        println("Using Gradle TestKit dir $it")
+        withTestKitDir(it.toFile())
+      }
+    }
 
   val projectName by projectDir::name
 
   companion object {
+
+    val gradleTestKitDir: Path? by optionalSystemProperty(Paths::get)
 
     /** file-based Maven Repo that contains the published plugin */
     private val testMavenRepoDir: Path by systemProperty(Paths::get)
@@ -53,14 +62,25 @@ class GradleProjectTest(
 
     private fun systemProperty() = systemProperty { it }
 
-    private fun <T> systemProperty(
-      convert: (String) -> T,
-    ) = ReadOnlyProperty<Any, T> { _, property ->
-      val value = requireNotNull(System.getProperty(property.name)) {
-        "system property ${property.name} is unavailable"
+    private fun <T> optionalSystemProperty(
+      convert: (String) -> T?
+    ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, T?>> =
+      PropertyDelegateProvider { _: Any?, property ->
+        val systemProp = System.getProperty(property.name)
+        val value = if (systemProp != null) convert(systemProp) else null
+        ReadOnlyProperty { _, _ -> value }
       }
-      convert(value)
-    }
+
+    private fun <T> systemProperty(
+      convert: (String) -> T & Any
+    ): PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?, T>> =
+      PropertyDelegateProvider { _: Any?, property ->
+        val systemProp = requireNotNull(System.getProperty(property.name)) {
+          "system property ${property.name} is unavailable"
+        }
+        val converted = convert(systemProp)
+        ReadOnlyProperty { _, _ -> converted }
+      }
   }
 }
 

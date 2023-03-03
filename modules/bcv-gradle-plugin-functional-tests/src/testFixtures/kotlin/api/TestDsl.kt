@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils.api
 
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.minimumGradleTestVersion
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoPathString
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
@@ -56,6 +57,12 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
     .withProjectDir(rootProjectDir)
     .withGradleVersion(minimumGradleTestVersion)
     .withArguments(baseKotlinScope.runner.arguments)
+    .apply {
+      GradleProjectTest.gradleTestKitDir?.let {
+        println("Using Gradle TestKit dir $it")
+        withTestKitDir(it.toFile())
+      }
+    }
 }
 
 /**

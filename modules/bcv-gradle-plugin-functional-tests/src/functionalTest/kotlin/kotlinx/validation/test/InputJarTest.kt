@@ -2,7 +2,7 @@ package kotlinx.validation.test
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveOutcome
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveRunTask
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
@@ -30,8 +30,8 @@ class InputJarTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":jar") shouldHaveOutcome SUCCESS
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":jar", SUCCESS)
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 }

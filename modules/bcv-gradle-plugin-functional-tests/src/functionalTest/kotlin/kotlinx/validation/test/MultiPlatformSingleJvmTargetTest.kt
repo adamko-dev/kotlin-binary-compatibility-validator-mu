@@ -3,7 +3,8 @@ package kotlinx.validation.test
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import io.kotest.assertions.withClue
-import io.kotest.matchers.comparables.shouldBeEqualComparingTo
+import io.kotest.matchers.file.shouldBeAFile
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
 import org.gradle.testkit.runner.TaskOutcome.FAILED
@@ -46,7 +47,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiCheck") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 
@@ -119,7 +120,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      task(":apiDump") shouldHaveOutcome SUCCESS
+      shouldHaveRunTask(":apiDump", SUCCESS)
 
       val mainExpectedApi = """
         |${readResourceFile("/examples/classes/Subsub1Class.dump").trim()}
@@ -129,9 +130,8 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
         |
       """.trimMargin()
 
-      val actual = jvmApiDump.readText().invariantNewlines()
-
-      actual.shouldBeEqualComparingTo(mainExpectedApi)
+      jvmApiDump.shouldBeAFile()
+      jvmApiDump.readText().invariantNewlines() shouldBe mainExpectedApi
     }
   }
 

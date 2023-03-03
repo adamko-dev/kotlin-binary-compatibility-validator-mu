@@ -22,7 +22,7 @@ class JavaTestFixturesTest : FunSpec({
       test("expect :apiDump task passes") {
         project.runner.withArguments("apiDump").build {
           withClue(output) {
-            task(":apiDump") shouldHaveOutcome SUCCESS
+            shouldHaveRunTask(":apiDump", SUCCESS)
           }
         }
       }
@@ -36,7 +36,7 @@ class JavaTestFixturesTest : FunSpec({
           )
           .build {
             withClue(output) {
-              task(":apiCheck") shouldHaveOutcome SUCCESS
+              shouldHaveRunTask(":apiCheck", SUCCESS)
             }
           }
       }
@@ -74,7 +74,7 @@ class JavaTestFixturesTest : FunSpec({
       test("expect :apiDump task passes") {
         project.runner.withArguments("apiDump").build {
           withClue(output) {
-            task(":apiDump") shouldHaveOutcome SUCCESS
+            shouldHaveRunTask(":apiDump", SUCCESS)
           }
         }
       }
@@ -88,7 +88,7 @@ class JavaTestFixturesTest : FunSpec({
           )
           .build {
             withClue(output) {
-              task(":apiCheck") shouldHaveOutcome SUCCESS
+              shouldHaveRunTask(":apiCheck", SUCCESS)
             }
           }
       }
