@@ -52,13 +52,13 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ${{ env.RUNNER_TEMP }}/.gradle-test-kit/caches
+            $RUNNER_TEMP/.gradle-test-kit/caches
           key: gradle-testkit-${{ runner.os }}
 
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
-          arguments: ${{ inputs.gradle-task }} -Dorg.gradle.testkit.dir="${{ env.RUNNER_TEMP }}/.gradle-test-kit/"
+          arguments: ${{ inputs.gradle-task }} -Dorg.gradle.testkit.dir="$RUNNER_TEMP/.gradle-test-kit/"
 
       - name: Upload build reports
         if: failure()
