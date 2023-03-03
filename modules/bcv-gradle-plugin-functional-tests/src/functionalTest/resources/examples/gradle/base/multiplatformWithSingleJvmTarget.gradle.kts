@@ -6,7 +6,7 @@
 plugins {
     kotlin("multiplatform") version "1.7.20"
     //id("org.jetbrains.kotlinx.binary-compatibility-validator")
-    id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.3-SNAPSHOT"
+    id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.3"
 }
 
 //repositories {
