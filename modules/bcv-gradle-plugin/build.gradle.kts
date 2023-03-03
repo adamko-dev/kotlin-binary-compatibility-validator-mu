@@ -8,6 +8,7 @@ plugins {
   `java-test-fixtures`
   //com.github.johnrengelman.shadow
   //buildsrc.conventions.`gradle-plugin-variants`
+  dev.adamko.kotlin.`binary-compatibility-validator`
 }
 
 dependencies {
@@ -88,3 +89,7 @@ skipTestFixturesPublications()
 //  isEnableRelocation = false
 //  archiveClassifier.set("")
 //}
+
+binaryCompatibilityValidator {
+  ignoredMarkers.add("dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi")
+}
