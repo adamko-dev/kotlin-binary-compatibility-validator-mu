@@ -2,6 +2,7 @@ package kotlinx.validation.test
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import io.kotest.assertions.withClue
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.string.shouldContain
 import java.io.File
@@ -42,7 +43,6 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       kotlin("Subsub2Class.kt", "jvmMain") {
         resolve("/examples/classes/Subsub2Class.kt")
       }
-
     }
 
     runner.build {
@@ -74,13 +74,28 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       kotlin("Subsub2Class.kt", "jvmMain") {
         resolve("/examples/classes/Subsub2Class.kt")
       }
-
+      dir("src/jvmTest/kotlin") {}
+      kotlin("Subsub2ClassTest.kt", "jvmTest") {
+        addText(/*language=kotlin*/ """
+            |package com.company.test
+            |
+            |class SubSub2Test {
+            |  fun blah() {
+            |    println("test")
+            |  }
+            |}
+            |
+          """.trimMargin()
+        )
+      }
     }
 
     runner.buildAndFail {
-      task(":apiCheck") shouldHaveOutcome FAILED
-      output shouldContain "API check failed for project :testproject"
-      shouldNotHaveRunTask(":check")
+      withClue(output) {
+        shouldHaveRunTask(":apiCheck", FAILED)
+        output shouldContain "API check failed for project :testproject"
+        shouldNotHaveRunTask(":check")
+      }
     }
   }
 
@@ -101,7 +116,6 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       kotlin("Subsub2Class.kt", "jvmMain") {
         resolve("/examples/classes/Subsub2Class.kt")
       }
-
     }
 
     runner.build {

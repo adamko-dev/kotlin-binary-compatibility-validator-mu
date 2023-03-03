@@ -34,6 +34,17 @@ infix fun BuildResult?.shouldHaveRunTask(taskPath: String): BuildTask {
   return this?.task(taskPath)!!
 }
 
+/** Assert that a task ran, with an [expected outcome][expectedOutcome]. */
+fun BuildResult?.shouldHaveRunTask(
+  taskPath: String,
+  expectedOutcome: TaskOutcome
+): BuildTask {
+  this should haveTask(taskPath)
+  val task = this?.task(taskPath)!!
+  task should haveOutcome(expectedOutcome)
+  return task
+}
+
 /**
  * Assert that a task did not run.
  *

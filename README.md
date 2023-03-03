@@ -3,7 +3,8 @@
 
 # Kotlin Binary Compatibility Validator (Mirror Universe)
 
-[BCV-MU](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu) is a re-imagined [Gradle](https://gradle.org/) Plugin for
+[BCV-MU](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu) is a
+re-imagined [Gradle](https://gradle.org/) Plugin for
 [Kotlin/binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator).
 
 This plugin validates the public JVM binary API of libraries to make sure that breaking changes are
@@ -194,8 +195,8 @@ All subprojects are included by default, and can be excluded using BCV-MU config
 
 buildscript {
   dependencies {
-    // BCV-MU requires the Kotlin Gradle Plugin classes are present 
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
+    // BCV-MU requires the Kotlin Gradle Plugin classes are present
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.10")
   }
 }
 
@@ -203,19 +204,47 @@ plugins {
   id("dev.adamko.kotlin.binary-compatibility-validator") version "$bcvMuVersion"
 }
 
-extensions
-  .getByType<dev.adamko.kotlin.binary_compatibility_validator.BCVSettingsPlugin.Extension>()
-  .apply {
-    ignoredProjects.addAll(
+binaryCompatibilityValidator {
+  ignoredProjects.addAll(
 
-      // ignore subprojects explicitly
-      ":some-subproject",
+    ":",                // ignore root project
+    ":some-subproject", // ignore subprojects explicitly
 
-      // or ignore using a glob pattern
-      ":internal-dependencies:**",
-      ":*-tasks:**",
-    )
+    // or ignore using a glob pattern
+    ":internal-dependencies:*",
+    ":*-tasks:**",
+  )
+
+  // set the default values for all targets in all enabled-subprojects 
+  defaultTargetValues {
+    enabled.convention(true)
+    ignoredClasses.set(listOf("com.package.MyIgnoredClass"))
+    ignoredMarkers.set(listOf("com.package.MyInternalApiAnnotationMarker"))
+    ignoredPackages.set(listOf("com.package.my_ignored_package"))
   }
+}
+
+include(
+  // these projects will have BCV-MU automatically applied
+  ":common",
+  ":internal-dependencies:alpha:nested",
+  ":internal-dependencies:alpha:nested",
+  ":a-task",
+
+  // this subproject is explicitly excluded from BCV
+  ":some-subproject",
+
+  // these subprojects will be excluded by glob pattern
+  ":internal-dependencies",
+  ":internal-dependencies:alpha",
+  ":internal-dependencies:beta",
+  ":x-tasks",
+  ":x-tasks:sub1",
+  ":x-tasks:sub1:sub2",
+  ":z-tasks",
+  ":z-tasks:sub1",
+  ":z-tasks:sub1:sub2",
+)
 ```
 
 ## License

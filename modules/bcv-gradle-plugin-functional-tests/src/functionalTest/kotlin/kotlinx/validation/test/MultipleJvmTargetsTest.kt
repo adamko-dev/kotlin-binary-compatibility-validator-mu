@@ -2,6 +2,7 @@ package kotlinx.validation.test
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import io.kotest.assertions.withClue
 import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -90,9 +91,11 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      task(":apiCheck") shouldHaveOutcome FAILED
-      output shouldContain "API check failed for project :testproject"
-      shouldNotHaveRunTask(":check")
+      withClue(output) {
+        shouldHaveRunTask(":apiCheck") shouldHaveOutcome FAILED
+        output shouldContain "API check failed for project :testproject"
+        shouldNotHaveRunTask(":check")
+      }
     }
   }
 

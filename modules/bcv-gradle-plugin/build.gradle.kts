@@ -6,14 +6,16 @@ plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
   buildsrc.conventions.`maven-publish-test`
   `java-test-fixtures`
-//  buildsrc.conventions.`gradle-plugin-variants`
+  //com.github.johnrengelman.shadow
+  //buildsrc.conventions.`gradle-plugin-variants`
 }
 
 dependencies {
   implementation(libs.javaDiffUtils)
 
   compileOnly(libs.kotlinx.bcv)
-  compileOnly(libs.kotlin.gradlePlugin)
+//  compileOnly(libs.kotlin.gradlePlugin)
+  compileOnly(libs.kotlin.gradlePluginApi)
 
   testFixturesApi(gradleTestKit())
 
@@ -73,9 +75,16 @@ configurations
     attributes {
       attribute(
         GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
-        objects.named(libs.versions.testGradleVersion.get())
+        objects.named(libs.versions.supportedGradleVersion.get())
       )
     }
   }
 
 skipTestFixturesPublications()
+
+// Shadow plugin doesn't seem to help with https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu/issues/1
+//tasks.shadowJar {
+//  minimize()
+//  isEnableRelocation = false
+//  archiveClassifier.set("")
+//}
