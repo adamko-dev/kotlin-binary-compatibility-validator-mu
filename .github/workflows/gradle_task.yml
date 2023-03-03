@@ -47,10 +47,18 @@ jobs:
           distribution: temurin
           java-version: 11
 
+      - name: Cache Gradle TestKit
+        id: cache-gradle-testkit
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle-test-kit/caches
+          key: gradle-testkit-${{ runner.os }}
+
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
-          arguments: ${{ inputs.gradle-task }}
+          arguments: ${{ inputs.gradle-task }} -Dorg.gradle.testkit.dir="~/.gradle-test-kit"
 
       - name: Upload build reports
         if: failure()
