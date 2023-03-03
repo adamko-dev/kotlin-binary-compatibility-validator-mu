@@ -15,7 +15,7 @@ import org.gradle.workers.WorkQueue
 import org.gradle.workers.WorkerExecutor
 
 @CacheableTask
-abstract class BCVApiGenerateTask @Inject constructor(
+abstract class BCVApiGenerateTask @Inject @BCVInternalApi constructor(
   private val workers: WorkerExecutor,
   private val fs: FileSystemOperations,
 ) : BCVDefaultTask() {

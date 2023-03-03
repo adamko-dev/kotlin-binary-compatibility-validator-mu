@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
+import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.globToRegex
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTargetSpec
 import javax.inject.Inject
@@ -10,7 +11,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.SetProperty
 import org.gradle.kotlin.dsl.*
 
-abstract class BCVSettingsPlugin @Inject constructor(
+abstract class BCVSettingsPlugin @Inject @BCVInternalApi constructor(
   private val objects: ObjectFactory
 ) : Plugin<Settings> {
 

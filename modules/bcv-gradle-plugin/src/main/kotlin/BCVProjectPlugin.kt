@@ -3,6 +3,7 @@ package dev.adamko.kotlin.binary_compatibility_validator
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_DIR
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.EXTENSION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.sourceSets
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiCheckTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
@@ -22,7 +23,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
 
 
-abstract class BCVProjectPlugin @Inject constructor(
+abstract class BCVProjectPlugin @Inject @BCVInternalApi constructor(
   private val providers: ProviderFactory,
   private val layout: ProjectLayout,
 ) : Plugin<Project> {

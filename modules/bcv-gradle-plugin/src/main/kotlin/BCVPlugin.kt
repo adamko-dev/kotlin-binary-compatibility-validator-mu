@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
+import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
@@ -7,7 +8,7 @@ import org.gradle.api.plugins.PluginAware
 import org.gradle.kotlin.dsl.*
 
 
-abstract class BCVPlugin : Plugin<PluginAware> {
+abstract class BCVPlugin @BCVInternalApi constructor() : Plugin<PluginAware> {
   override fun apply(target: PluginAware) {
     when (target) {
       is Project  -> target.pluginManager.apply(BCVProjectPlugin::class)

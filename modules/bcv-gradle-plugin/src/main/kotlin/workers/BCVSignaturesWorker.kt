@@ -18,6 +18,7 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
 
   private val logger = Logging.getLogger(this::class.java)
 
+  @BCVInternalApi
   interface Parameters : WorkParameters {
     val outputApiDir: DirectoryProperty
 

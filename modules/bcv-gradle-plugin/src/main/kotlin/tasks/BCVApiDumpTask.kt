@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator.tasks
 
+import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import javax.inject.Inject
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -7,7 +8,7 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.tasks.*
 
 @CacheableTask
-abstract class BCVApiDumpTask @Inject constructor(
+abstract class BCVApiDumpTask @Inject @BCVInternalApi constructor(
   private val fs: FileSystemOperations
 ) : BCVDefaultTask() {
 
