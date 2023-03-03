@@ -54,6 +54,7 @@ testing.suites {
       testTask.configure {
         shouldRunAfter(test)
         dependsOn(project.configurations.testMavenPublication)
+        inputs.files(project.configurations.testMavenPublication)
 
         systemProperty("testMavenRepoDir", file(mavenPublishTest.testMavenRepo).canonicalPath)
       }
