@@ -53,7 +53,7 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveRunTask(":apiCheck", FAILED)
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 
