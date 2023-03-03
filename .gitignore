@@ -16,7 +16,9 @@ replay_pid*
 
 
 ### IntelliJ ###
-.idea
+.idea/**
+!.idea/codeStyles/
+!.idea/codeStyles/**
 
 
 ### Eclipse ###
