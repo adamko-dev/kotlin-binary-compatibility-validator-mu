@@ -8,6 +8,7 @@ kotest = "5.5.5"
 kotlinx-bcv = "0.13.0"
 
 gradlePluginPublishPlugin = "1.1.0"
+shadowPlugin = "8.1.0"
 
 supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, used in functional tests
 
@@ -30,4 +31,5 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 
 ## region Gradle Plugins
 gradlePlugin-pluginPublishing = { module = "com.gradle.publish:plugin-publish-plugin", version.ref = "gradlePluginPublishPlugin" }
+gradlePlugin-shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadowPlugin" }
 ## endregion

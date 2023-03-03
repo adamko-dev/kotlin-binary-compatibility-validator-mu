@@ -8,6 +8,7 @@ dependencies {
   implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
 
   implementation(libs.gradlePlugin.pluginPublishing)
+  implementation(libs.gradlePlugin.shadow)
 }
 
 java {
