@@ -34,3 +34,12 @@ testing.suites {
     }
   }
 }
+
+tasks.withType<Test>().configureEach {
+  // Help speed up TestKit tests by re-using dependencies cache
+  // https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:shared-readonly-cache
+  environment("GRADLE_RO_DEP_CACHE", gradle.gradleUserHomeDir.resolve("caches"))
+  providers.environmentVariable("GRADLE_TESTKIT_DIR").orNull?.let {
+    systemProperty("gradleTestKitDir", it)
+  }
+}
