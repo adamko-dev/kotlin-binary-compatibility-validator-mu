@@ -186,9 +186,9 @@ constructor(
     extension: BCVProjectExtension,
   ) {
     project.pluginManager.withPlugin("java-test-fixtures") {
-      extension.targets.create(TEST_FIXTURE_SOURCESET_NAME) {
+      extension.targets.register(TEST_FIXTURE_SOURCESET_NAME) {
         // don't enable by default - requiring an API spec for test-fixtures is pretty unusual
-        enabled.set(false)
+        enabled.convention(false)
         project
           .sourceSets
           .matching { it.name == TEST_FIXTURE_SOURCESET_NAME }
