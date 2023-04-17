@@ -119,9 +119,15 @@ binaryCompatibilityValidator {
     // Or overridden
     ignoredClasses.set(listOf())
   }
+
+  // BCV will automatically register a target for testFixtures, but it must be enabled manually
+  targets.named("testFixtures") {
+    enabled.set(true)
+  }
+
   // BCV Targets can also be manually defined
-  targets.register("testFixtures") {
-    inputJar.set(tasks.testFixturesJar)
+  targets.register("customTarget") {
+    inputJar.set(tasks.customTargetJar.flatMap { it.archiveFile })
   }
 }
 ```
