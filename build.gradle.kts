@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "dev.adamko.kotlin.binary_compatibility_validator"
-version = "0.0.4"
+version = "0.0.5-SNAPSHOT"
 
 idea {
   module {
