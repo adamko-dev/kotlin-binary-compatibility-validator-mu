@@ -26,6 +26,35 @@ interface BCVTargetSpec : Serializable {
   val inputJar: RegularFileProperty
 
   /**
+   * Fully qualified names of annotations that can be used to explicitly mark public declarations.
+   *
+   * If at least one of [publicMarkers], [publicPackages] or [publicClasses] is defined,
+   * all declarations not covered by any of them will be considered non-public.
+   * [ignoredPackages], [ignoredClasses] and [ignoredMarkers] can be used for additional filtering.
+   */
+  val publicMarkers: SetProperty<String>
+
+  /**
+   * Fully qualified package names that contain public declarations.
+   *
+   * If at least one of [publicMarkers], [publicPackages] or [publicClasses] is defined,
+   * all declarations not covered by any of them will be considered non-public.
+   *
+   * [ignoredPackages], [ignoredClasses] and [ignoredMarkers] can be used for additional filtering.
+   */
+  val publicPackages: SetProperty<String>
+
+  /**
+   * Fully qualified names of public classes.
+   *
+   * If at least one of [publicMarkers], [publicPackages] or [publicClasses] is defined,
+   * all declarations not covered by any of them will be considered non-public.
+   *
+   * [ignoredPackages], [ignoredClasses] and [ignoredMarkers] can be used for additional filtering.
+   */
+  val publicClasses: SetProperty<String>
+
+  /**
    * Fully qualified names of annotations that effectively exclude declarations from being public.
    * Example of such annotation could be `kotlinx.coroutines.InternalCoroutinesApi`.
    */

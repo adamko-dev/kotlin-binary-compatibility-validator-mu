@@ -23,7 +23,6 @@ dependencies {
   testFixturesApi(testFixtures(projects.modules.bcvGradlePlugin))
 }
 
-
 @Suppress("UnstableApiUsage")
 testing.suites {
   withType<JvmTestSuite>().configureEach {

@@ -6,22 +6,26 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveTas
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
-class NonPublicMarkersTest : BaseKotlinGradleTest() {
+class PublicMarkersTest : BaseKotlinGradleTest() {
 
   @Test
-  fun testIgnoredMarkersOnProperties() {
+  fun testPublicMarkers() {
     val runner = test {
       buildGradleKts {
         resolve("/examples/gradle/base/withPlugin.gradle.kts")
-        resolve("/examples/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
+        resolve("/examples/gradle/configuration/publicMarkers/markers.gradle.kts")
       }
 
-      kotlin("Properties.kt") {
-        resolve("/examples/classes/Properties.kt")
+      kotlin("ClassWithPublicMarkers.kt") {
+        resolve("/examples/classes/ClassWithPublicMarkers.kt")
+      }
+
+      kotlin("ClassInPublicPackage.kt") {
+        resolve("/examples/classes/ClassInPublicPackage.kt")
       }
 
       apiFile(projectName = rootProjectDir.name) {
-        resolve("/examples/classes/Properties.dump")
+        resolve("/examples/classes/ClassWithPublicMarkers.dump")
       }
 
       runner {

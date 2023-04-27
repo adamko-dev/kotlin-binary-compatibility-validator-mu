@@ -1,3 +1,4 @@
 configure<dev.adamko.kotlin.binary_compatibility_validator.BCVProjectExtension> {
-  ignoredPackages.add("com.company")
+  ignoredMarkers.add("mixed.PrivateApi")
+  publicMarkers.add("mixed.PublicApi")
 }

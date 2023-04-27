@@ -3,20 +3,22 @@
 
 # Kotlin Binary Compatibility Validator (Mirror Universe)
 
-[BCV-MU](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu) is a
-re-imagined [Gradle](https://gradle.org/) Plugin for
-[Kotlin/binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator).
+[BCV-MU](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu)
+is a [Gradle](https://gradle.org/) Plugin that validates the public JVM binary API of libraries, to
+make sure that breaking changes are tracked.
 
-This plugin validates the public JVM binary API of libraries to make sure that breaking changes are
-tracked.
+BCV-MU is based on
+[Kotlin/binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator),
+and contains improvements to better work with the Gradle API, especially in large projects.
 
-Read more in the BCV project:
+Read more about the validation of the public API in the BCV project:
 
 * [What constitutes the public API?](https://github.com/Kotlin/binary-compatibility-validator/#what-constitutes-the-public-api)
 * [What makes an incompatible change to the public binary API?](https://github.com/Kotlin/binary-compatibility-validator/#what-makes-an-incompatible-change-to-the-public-binary-api)
 
-(The [Mirror Universe](https://en.wikipedia.org/wiki/Mirror_Universe) tag was chosen because I hope
-to banish this plugin as soon the improvements here are merged upstream.)
+(The MU tag was chosen because I hope to banish this plugin to the
+[Mirror Universe](https://en.wikipedia.org/wiki/Mirror_Universe)
+as soon the improvements here are merged upstream.)
 
 ### Description
 
@@ -30,7 +32,7 @@ or (**experimentally**) [as a Settings plugin](#settings-plugin) in `settings.gr
 
 The minimal supported Gradle version is 7.6.
 
-By default, BCV-MU uses BCV version `0.13.0`, which can be overridden, but may introduce runtime
+By default, BCV-MU uses BCV version `0.13.1`, which can be overridden, but may introduce runtime
 errors.
 
 ### Build plugin
@@ -75,6 +77,14 @@ plugins {
 }
 
 binaryCompatibilityValidator {
+
+  // Explicitly include specific classes, markers, or packages.
+  // If any class, marker, or package is defined then all other declarations will be excluded.
+  // If no explicit public declarations are defined, then all declarations will be included by default.
+  publicClasses.add("com.company.api.FooPublicClass")
+  publicMarkers.add("com.company.api.ExplicitApiAnnotation")
+  publicPackages.add("com.company.api")
+
   // Packages that are excluded from public API dumps even if they contain public API.
   ignoredPackages.add("kotlinx.coroutines.internal")
   // Classes (fully qualified) that are excluded from public API dumps even if they contain public API.
@@ -88,14 +98,14 @@ binaryCompatibilityValidator {
   bcvEnabled.set(true)
 
   // Override the default BCV version
-  kotlinxBinaryCompatibilityValidatorVersion.set("0.13.0")
+  kotlinxBinaryCompatibilityValidatorVersion.set("0.13.1")
 }
 ```
 
 ##### Advanced configuration
 
-BCV automatically generates 'targets' for each Kotlin/JVM target that it finds.
-These targets can be specifically modified, or manually defined, for fine-grained control.
+BCV automatically generates 'targets' for each Kotlin/JVM source set that it finds.
+these `BCVTarget`s can be specifically modified, or manually defined, for fine-grained control.
 
 ```kotlin
 // build.gradle.kts

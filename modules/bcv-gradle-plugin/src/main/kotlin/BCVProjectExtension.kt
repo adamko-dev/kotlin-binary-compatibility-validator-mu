@@ -17,6 +17,15 @@ interface BCVProjectExtension : BCVTargetSpec, ExtensionAware {
   /** Sets the default [BCVTarget.ignoredPackages] value for all [targets]. */
   override val ignoredPackages: SetProperty<String>
 
+  /** Sets the default [BCVTarget.publicMarkers] for all [targets] */
+  override val publicMarkers: SetProperty<String>
+
+  /** Sets the default [BCVTarget.publicPackages] for all [targets] */
+  override val publicPackages: SetProperty<String>
+
+  /** Sets the default [BCVTarget.publicClasses] for all [targets] */
+  override val publicClasses: SetProperty<String>
+
   /** Sets the default [BCVTarget.ignoredMarkers] value for all [targets]. */
   override val ignoredMarkers: SetProperty<String>
 

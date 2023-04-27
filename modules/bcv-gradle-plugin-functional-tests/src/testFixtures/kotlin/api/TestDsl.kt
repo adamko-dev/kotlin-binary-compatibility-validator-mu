@@ -19,7 +19,14 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
         |dependencyResolutionManagement {
         |  repositories {
         |    mavenCentral()
-        |    maven(file("$testMavenRepoPathString"))
+        |    maven(file("$testMavenRepoPathString")) {
+        |      mavenContent {
+        |        includeGroup("dev.adamko.kotlin.binary_compatibility_validator")
+        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator")
+        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.project")
+        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.settings")
+        |      }
+        |    }
         |  }
         |}
         |
@@ -27,7 +34,14 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
         |  repositories {
         |    gradlePluginPortal()
         |    mavenCentral()
-        |    maven(file("$testMavenRepoPathString"))
+        |    maven(file("$testMavenRepoPathString")) {
+        |      mavenContent {
+        |        includeGroup("dev.adamko.kotlin.binary_compatibility_validator")
+        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator")
+        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.project")
+        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.settings")
+        |      }
+        |    }
         |  }
         |}
         |

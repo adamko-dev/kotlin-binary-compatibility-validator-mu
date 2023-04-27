@@ -49,8 +49,8 @@ class GlobMatchingTest : FunSpec({
 })
 
 
-private fun Regex.shouldMatchAll(strs: Collection<String>) =
-  shouldMatchAll(*strs.toTypedArray())
+private fun Regex.shouldMatchAll(strings: Collection<String>) =
+  shouldMatchAll(*strings.toTypedArray())
 
-private fun Regex.shouldNotMatchAny(strs: Collection<String>) =
-  shouldNotMatchAny(*strs.toTypedArray())
+private fun Regex.shouldNotMatchAny(strings: Collection<String>) =
+  shouldNotMatchAny(*strings.toTypedArray())

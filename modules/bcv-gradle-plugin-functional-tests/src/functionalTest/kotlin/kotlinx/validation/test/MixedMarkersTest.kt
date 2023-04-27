@@ -6,22 +6,22 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveTas
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
-class NonPublicMarkersTest : BaseKotlinGradleTest() {
+class MixedMarkersTest : BaseKotlinGradleTest() {
 
   @Test
-  fun testIgnoredMarkersOnProperties() {
+  fun testMixedMarkers() {
     val runner = test {
       buildGradleKts {
         resolve("/examples/gradle/base/withPlugin.gradle.kts")
-        resolve("/examples/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
+        resolve("/examples/gradle/configuration/publicMarkers/mixedMarkers.gradle.kts")
       }
 
-      kotlin("Properties.kt") {
-        resolve("/examples/classes/Properties.kt")
+      kotlin("MixedAnnotations.kt") {
+        resolve("/examples/classes/MixedAnnotations.kt")
       }
 
       apiFile(projectName = rootProjectDir.name) {
-        resolve("/examples/classes/Properties.dump")
+        resolve("/examples/classes/MixedAnnotations.dump")
       }
 
       runner {
