@@ -101,11 +101,16 @@ constructor(
       enabled.convention(true)
       outputApiDir.convention(layout.projectDirectory.dir(API_DIR))
       projectName.convention(providers.provider { project.name })
-      kotlinxBinaryCompatibilityValidatorVersion.convention("0.13.0")
+      kotlinxBinaryCompatibilityValidatorVersion.convention("0.13.1")
     }
 
     extension.targets.configureEach {
       enabled.convention(true)
+
+      publicMarkers.convention(extension.publicMarkers)
+      publicPackages.convention(extension.publicPackages)
+      publicClasses.convention(extension.publicClasses)
+
       ignoredClasses.convention(extension.ignoredClasses)
       ignoredMarkers.convention(
         @Suppress("DEPRECATION")

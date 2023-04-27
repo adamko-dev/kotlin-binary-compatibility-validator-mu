@@ -154,7 +154,7 @@ buildscript {
 
 
 plugins {
-  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.4-SNAPSHOT"
+  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.5-SNAPSHOT"
 }
 
 include(

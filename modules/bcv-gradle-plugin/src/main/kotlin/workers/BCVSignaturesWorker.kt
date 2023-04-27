@@ -25,6 +25,10 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
     val inputClasses: ConfigurableFileCollection
     val inputJar: RegularFileProperty
 
+    val publicMarkers: SetProperty<String>
+    val publicPackages: SetProperty<String>
+    val publicClasses: SetProperty<String>
+
     val ignoredPackages: SetProperty<String>
     val ignoredMarkers: SetProperty<String>
     val ignoredClasses: SetProperty<String>
@@ -39,6 +43,11 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
       val signatures = generateSignatures(
         inputJar = parameters.inputJar.orNull,
         inputClasses = parameters.inputClasses,
+
+        publicMarkers = parameters.publicMarkers.get(),
+        publicPackages = parameters.publicPackages.get(),
+        publicClasses = parameters.publicClasses.get(),
+
         ignoredPackages = parameters.ignoredPackages.get(),
         ignoredMarkers = parameters.ignoredMarkers.get(),
         ignoredClasses = parameters.ignoredClasses.get(),
@@ -56,10 +65,12 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
     logger.info("BCVSignaturesWorker generated $signaturesCount signatures for $projectName in $duration")
   }
 
-
   private fun generateSignatures(
     inputJar: RegularFile?,
     inputClasses: FileCollection,
+    publicMarkers: Set<String>,
+    publicPackages: Set<String>,
+    publicClasses: Set<String>,
     ignoredClasses: Set<String>,
     ignoredMarkers: Set<String>,
     ignoredPackages: Set<String>,
@@ -89,8 +100,9 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
     }
 
     return signatures
+      .retainExplicitlyIncludedIfDeclared(publicPackages, publicClasses, publicMarkers)
       .filterOutNonPublic(ignoredPackages, ignoredClasses)
-      .filterOutAnnotated(ignoredMarkers.map { it.replace(".", "/") }.toSet())
+      .filterOutAnnotated(ignoredMarkers.map(::replaceDots).toSet())
   }
 
   private fun writeSignatures(
@@ -123,5 +135,8 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
       val end = System.nanoTime()
       return value to (end - start).nanoseconds
     }
+
+    private fun replaceDots(dotSeparated: String): String =
+      dotSeparated.replace('.', '/')
   }
 }

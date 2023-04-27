@@ -84,13 +84,20 @@ constructor(
 
     @OptIn(BCVInternalApi::class)
     submit(BCVSignaturesWorker::class) worker@{
+      this@worker.projectName.set(task.projectName)
+
       this@worker.outputApiDir.set(outputDir)
       this@worker.inputClasses.from(target.inputClasses)
       this@worker.inputJar.set(target.inputJar)
+
+      this@worker.publicMarkers.set(target.publicMarkers)
+      this@worker.publicPackages.set(target.publicPackages)
+      this@worker.publicClasses.set(target.publicClasses)
+
       this@worker.ignoredPackages.set(target.ignoredPackages)
       this@worker.ignoredMarkers.set(target.ignoredMarkers)
       this@worker.ignoredClasses.set(target.ignoredClasses)
-      this@worker.projectName.set(task.projectName)
+
     }
   }
 }
