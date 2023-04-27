@@ -1,7 +1,7 @@
 import buildsrc.utils.configurationNames
 import buildsrc.utils.skipTestFixturesPublications
 import org.gradle.api.attributes.plugin.GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
@@ -32,8 +32,8 @@ dependencies {
 
 @Suppress("UnstableApiUsage")
 gradlePlugin {
-  website.set("https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu")
-  vcsUrl.set("https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu")
+  website = "https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu"
+  vcsUrl = "https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu"
   isAutomatedPublishing = true
 
   plugins.configureEach {
@@ -91,9 +91,9 @@ skipTestFixturesPublications()
 //  archiveClassifier.set("")
 //}
 
-tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    freeCompilerArgs += listOf(
+tasks.withType<KotlinCompilationTask<*>>().configureEach {
+  compilerOptions {
+    freeCompilerArgs.addAll(
       "-opt-in=dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi"
     )
   }

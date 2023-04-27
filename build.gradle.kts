@@ -10,8 +10,6 @@ version = "0.0.5-SNAPSHOT"
 
 idea {
   module {
-    isDownloadSources = true
-    isDownloadJavadoc = false
     excludeGeneratedGradleDsl(layout)
     excludeDirs = excludeDirs + layout.files(
       ".idea",

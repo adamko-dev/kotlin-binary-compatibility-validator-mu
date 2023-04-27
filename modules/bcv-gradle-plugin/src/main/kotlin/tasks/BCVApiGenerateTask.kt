@@ -97,7 +97,6 @@ constructor(
       this@worker.ignoredPackages.set(target.ignoredPackages)
       this@worker.ignoredMarkers.set(target.ignoredMarkers)
       this@worker.ignoredClasses.set(target.ignoredClasses)
-
     }
   }
 }
