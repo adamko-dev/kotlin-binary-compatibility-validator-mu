@@ -2,8 +2,8 @@ rootProject.name = "kotlin-binary-compatibility-validator-mu"
 
 pluginManagement {
   repositories {
-    gradlePluginPortal()
     mavenCentral()
+    gradlePluginPortal()
   }
 }
 
@@ -13,7 +13,6 @@ dependencyResolutionManagement {
 
   repositories {
     mavenCentral()
-    gradlePluginPortal()
   }
 }
 
