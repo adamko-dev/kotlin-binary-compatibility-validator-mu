@@ -2,15 +2,15 @@ rootProject.name = "buildSrc"
 
 pluginManagement {
   repositories {
-    gradlePluginPortal()
     mavenCentral()
+    gradlePluginPortal()
   }
 }
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
 
-  repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+  repositoriesMode = RepositoriesMode.PREFER_SETTINGS
 
   repositories {
     mavenCentral()
