@@ -1,7 +1,7 @@
 plugins {
   id("com.android.library")
   id("kotlin-android")
-  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.5-SNAPSHOT"
+  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.5"
 }
 
 android {

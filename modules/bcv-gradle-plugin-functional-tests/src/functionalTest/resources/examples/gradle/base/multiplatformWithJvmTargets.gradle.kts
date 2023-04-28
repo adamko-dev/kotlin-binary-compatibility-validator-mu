@@ -1,6 +1,6 @@
 plugins {
   kotlin("multiplatform") version "1.5.20"
-  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.5-SNAPSHOT"
+  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.5"
 }
 
 kotlin {
