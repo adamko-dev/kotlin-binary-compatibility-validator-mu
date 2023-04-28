@@ -125,7 +125,7 @@ private fun FunSpec.createTestFixturesProject(
     buildGradleKts = """
         |plugins {
         |  kotlin("jvm") version "1.7.10"
-        |  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.5"
+        |  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.6-SNAPSHOT"
         |  `java-test-fixtures`
         |}
         |
