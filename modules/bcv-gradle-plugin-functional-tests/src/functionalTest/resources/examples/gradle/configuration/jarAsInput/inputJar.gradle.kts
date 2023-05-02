@@ -4,7 +4,7 @@ tasks.jar {
 }
 
 binaryCompatibilityValidator {
-  kotlinJvm {
+  targets.kotlinJvm {
     inputJar.set(tasks.jar.flatMap { it.archiveFile })
   }
 }
