@@ -1,6 +1,8 @@
 package dev.adamko.kotlin.binary_compatibility_validator.tasks
 
 import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
+import dev.adamko.kotlin.binary_compatibility_validator.internal.adding
+import dev.adamko.kotlin.binary_compatibility_validator.internal.domainObjectContainer
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
 import dev.adamko.kotlin.binary_compatibility_validator.workers.BCVSignaturesWorker
 import java.io.*
@@ -8,6 +10,7 @@ import javax.inject.Inject
 import kotlinx.validation.api.*
 import org.gradle.api.*
 import org.gradle.api.file.*
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
@@ -21,10 +24,12 @@ abstract class BCVApiGenerateTask
 constructor(
   private val workers: WorkerExecutor,
   private val fs: FileSystemOperations,
+  private val objects: ObjectFactory,
 ) : BCVDefaultTask() {
 
   @get:Nested
-  abstract val targets: NamedDomainObjectContainer<BCVTarget>
+  val targets: NamedDomainObjectContainer<BCVTarget> =
+    extensions.adding("targets") { objects.domainObjectContainer() }
 
   @get:InputFiles
   @get:PathSensitive(PathSensitivity.RELATIVE)

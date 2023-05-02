@@ -130,7 +130,7 @@ private fun FunSpec.createTestFixturesProject(
         |}
         |
         |binaryCompatibilityValidator {
-        |  testFixtures {
+        |  targets.testFixtures {
         |    enabled.set($bcvTestFixturesTargetEnabled)
         |  }
         |}

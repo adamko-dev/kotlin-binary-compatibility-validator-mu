@@ -131,7 +131,7 @@ binaryCompatibilityValidator {
   }
 
   // BCV will automatically register a target for testFixtures, but it must be enabled manually
-  targets.named("testFixtures") {
+  targets.testFixtures {
     enabled.set(true)
   }
 

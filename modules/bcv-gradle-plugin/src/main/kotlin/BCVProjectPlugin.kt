@@ -119,10 +119,6 @@ constructor(
       ignoredPackages.convention(extension.ignoredPackages)
     }
 
-    extension.targets.all {
-      extension.extensions.add(platformType, this)
-    }
-
     return extension
   }
 
