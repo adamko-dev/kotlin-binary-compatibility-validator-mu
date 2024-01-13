@@ -103,3 +103,30 @@ tasks.withType<KotlinCompilationTask<*>>().configureEach {
 binaryCompatibilityValidator {
   ignoredMarkers.add("dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi")
 }
+
+
+publishing {
+  publications {
+    register<MavenPublication>("relocation") {
+      pom {
+        val relocationMessage =
+          "Relocated artifact. Replaced underscores with dashes in the Group ID, to match BCV-MU's Gradle Plugin ID."
+        name = "Binary Compatibility Validator MU [RELOCATION MARKER]"
+        description = relocationMessage
+
+        // Old artifact coordinates
+        groupId = "dev.adamko.kotlin.binary_compatibility_validator"
+        artifactId = "bcv-gradle-plugin"
+
+        distributionManagement {
+          relocation {
+            // New artifact coordinates
+            groupId = project.group.toString()
+            artifactId = project.name
+            message = relocationMessage
+          }
+        }
+      }
+    }
+  }
+}

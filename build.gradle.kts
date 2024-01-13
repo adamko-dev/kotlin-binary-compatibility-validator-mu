@@ -5,7 +5,7 @@ plugins {
   idea
 }
 
-group = "dev.adamko.kotlin.binary_compatibility_validator"
+group = "dev.adamko.kotlin.binary-compatibility-validator"
 project.version = object {
   private val gitVersion = project.gitVersion
   override fun toString(): String = gitVersion.get()
