@@ -15,6 +15,10 @@ dependencyResolutionManagement {
   repositories {
     mavenCentral()
     gradlePluginPortal()
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+      name = "MavenCentralSnapshots"
+      mavenContent { snapshotsOnly() }
+    }
   }
 
   versionCatalogs {
