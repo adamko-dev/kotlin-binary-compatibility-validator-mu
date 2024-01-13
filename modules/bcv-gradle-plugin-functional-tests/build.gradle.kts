@@ -28,7 +28,7 @@ testing.suites {
   withType<JvmTestSuite>().configureEach {
     targets.configureEach {
       testTask.configure {
-        val projectTestTempDirPath = "$buildDir/test-temp-dir"
+        val projectTestTempDirPath = layout.buildDirectory.dir("test-temp-dir").get().asFile
         inputs.property("projectTestTempDir", projectTestTempDirPath)
         systemProperty("projectTestTempDir", projectTestTempDirPath)
         systemProperty("integrationTestProjectsDir", "$projectDir/projects")
