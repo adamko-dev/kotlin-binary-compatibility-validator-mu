@@ -1,6 +1,6 @@
 [versions]
 
-kotlinGradle = "1.6.0"
+kotlinGradle = "1.9.21"
 
 javaDiffUtils = "4.12"
 junit = "5.9.3"
@@ -10,7 +10,7 @@ kotlinx-bcv = "0.13.2"
 gradlePluginPublishPlugin = "1.2.1"
 shadowPlugin = "8.1.1"
 devPublish = "0.2.0"
-bcvMu = "0.0.3"
+bcvMu = "0.1.0"
 #bcvMu = "0.2.0-SNAPSHOT"
 
 supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, used in functional tests
@@ -19,8 +19,8 @@ supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, us
 
 javaDiffUtils = { module = "io.github.java-diff-utils:java-diff-utils", version.ref = "javaDiffUtils" }
 kotlinx-bcv = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "kotlinx-bcv" }
-kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradle" }
-kotlin-gradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlinGradle" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin" }
+kotlin-gradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api" }
 
 ## region Test Libraries
 kotest-bom = { module = "io.kotest:kotest-bom", version.ref = "kotest" }

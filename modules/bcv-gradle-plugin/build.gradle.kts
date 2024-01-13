@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
+  buildsrc.conventions.`gradle-plugin-bcv-features`
   id("dev.adamko.dev-publish")
   `java-test-fixtures`
   //com.github.johnrengelman.shadow
@@ -15,9 +16,39 @@ plugins {
 dependencies {
   implementation(libs.javaDiffUtils)
 
+  runtimeOnly(projects.modules.bcvGradlePlugin) {
+    capabilities {
+      requireCapability("${project.group}:${project.name.replace("-plugin", "-build-plugin")}")
+    }
+  }
+  runtimeOnly(projects.modules.bcvGradlePlugin) {
+    capabilities {
+      requireCapability("${project.group}:${project.name.replace("-plugin", "-settings-plugin")}")
+    }
+  }
+
   compileOnly(libs.kotlinx.bcv)
-//  compileOnly(libs.kotlin.gradlePlugin)
   compileOnly(libs.kotlin.gradlePluginApi)
+
+  mainBuildPluginCompileOnly(gradleApi())
+  mainBuildPluginCompileOnly(libs.kotlin.gradlePluginApi) {
+    version {
+      prefer(embeddedKotlinVersion)
+//      prefer(libs.versions.kotlinGradle.get())
+    }
+  }
+  mainBuildPluginCompileOnly(gradleKotlinDsl())
+  mainBuildPluginImplementation(project)
+
+  mainSettingsPluginCompileOnly(gradleApi())
+  mainSettingsPluginCompileOnly(gradleKotlinDsl())
+  mainSettingsPluginImplementation(project)
+  mainSettingsPluginImplementation(libs.kotlin.gradlePluginApi) {
+    version {
+      prefer(embeddedKotlinVersion)
+//      prefer(libs.versions.kotlinGradle.get())
+    }
+  }
 
   testFixturesApi(gradleTestKit())
 
@@ -28,6 +59,27 @@ dependencies {
   testFixturesApi(libs.kotest.runnerJUnit5)
   testFixturesApi(libs.kotest.assertionsCore)
   testFixturesApi(libs.kotest.property)
+}
+
+//configurations.mainBuildPluginRuntimeClasspath {
+//  extendsFrom(configurations.runtimeClasspath.get())
+//}
+//
+//configurations.mainSettingsPluginRuntimeClasspath {
+//  extendsFrom(configurations.runtimeClasspath.get())
+//}
+
+kotlin {
+  target {
+    val mainCompilation = compilations.named("main")
+    compilations
+      .matching {
+        it.name == "mainBuildPlugin" || it.name == "mainSettingsPlugin"
+      }
+      .configureEach {
+        associateWith(mainCompilation.get())
+      }
+  }
 }
 
 @Suppress("UnstableApiUsage")

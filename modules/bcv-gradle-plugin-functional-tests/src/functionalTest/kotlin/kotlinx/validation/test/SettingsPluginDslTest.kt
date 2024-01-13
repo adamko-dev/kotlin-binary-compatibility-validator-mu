@@ -148,7 +148,7 @@ private fun kotlinMultiplatformProjectWithBcvSettingsPlugin() =
 private val settingsGradleKtsWithBcvPlugin = """
 buildscript {
   dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
+    //classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
   }
 }
 
@@ -176,7 +176,7 @@ binaryCompatibilityValidator {
 @Language("kts")
 private val buildGradleKtsWithKotlinJvmAndBcvConfig = """
 plugins {
-  kotlin("jvm") version "1.7.20"
+  kotlin("jvm") version "1.9.21"
 }
 
 // check that the DSL is available:
@@ -190,7 +190,7 @@ binaryCompatibilityValidator { }
 @Language("kts")
 private val buildGradleKtsWithKotlinMultiplatformJvmAndBcvConfig = """
 plugins {
-  kotlin("multiplatform") version "1.7.20"
+  kotlin("multiplatform") version "1.9.21"
 }
 
 kotlin {

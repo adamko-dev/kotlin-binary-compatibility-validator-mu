@@ -17,4 +17,4 @@ import kotlin.annotation.AnnotationTarget.*
   CONSTRUCTOR,
 )
 @MustBeDocumented
-internal annotation class BCVInternalApi
+annotation class BCVInternalApi
