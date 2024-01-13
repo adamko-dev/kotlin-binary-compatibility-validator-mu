@@ -16,6 +16,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiGenerateTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVDefaultTask
 import javax.inject.Inject
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -181,29 +182,88 @@ constructor(
     extension: BCVProjectExtension,
   ) {
     project.pluginManager.withPlugin("kotlin-multiplatform") {
-      val kotlinTargetsContainer = project.extensions.getByType<KotlinTargetsContainer>()
+      try {
+        val kotlinTargetsContainer = project.extensions.getByType<KotlinTargetsContainer>()
 
-      kotlinTargetsContainer.targets
-        .matching {
-          it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
-        }.all {
-          val targetPlatformType = platformType
+        kotlinTargetsContainer.targets
+          .matching {
+            it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
+          }.all {
+            val targetPlatformType = platformType
 
-          extension.targets.register(targetName) {
-            enabled.convention(true)
-            compilations
-              .matching {
-                when (targetPlatformType) {
-                  KotlinPlatformType.jvm -> it.name == "main"
-                  KotlinPlatformType.androidJvm -> it.name == "release"
-                  else -> false
+            extension.targets.register(targetName) {
+              enabled.convention(true)
+              compilations
+                .matching {
+                  when (targetPlatformType) {
+                    KotlinPlatformType.jvm        -> it.name == "main"
+                    KotlinPlatformType.androidJvm -> it.name == "release"
+                    else                          -> false
+                  }
+                }.all {
+                  inputClasses.from(output.classesDirs)
                 }
-              }.all {
-                inputClasses.from(output.classesDirs)
-              }
+            }
           }
+      } catch (e: Throwable) {
+        when (e) {
+          is NoClassDefFoundError,
+          is TypeNotPresentException -> {
+            logger.info("Failed to apply BCVProjectPlugin to project ${project.path} with plugin $id using KGP classes $e")
+            createKotlinMultiplatformTargetsHack(project, extension)
+          }
+
+          else                       -> throw e
         }
+      }
     }
+  }
+
+  private fun createKotlinMultiplatformTargetsHack(
+    project: Project,
+    extension: BCVProjectExtension,
+  ) {
+    logger.info("Falling back to Groovy metaprogramming to access to KGP classes ${project.path} https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu/issues/1")
+    val kotlinExtension = project.extensions.findByName("kotlin")
+      ?: return
+
+    val targets = kotlinExtension.withGroovyBuilder { "getTargets"() }
+        as NamedDomainObjectContainer<*>
+
+    targets
+      .matching { target ->
+        val platformType = target.withGroovyBuilder { "getPlatformType"() }
+          ?: return@matching false
+        val platformName = platformType.withGroovyBuilder { "getName"() }
+        platformName in listOf("jvm", "androidJvm")
+      }
+      .all action@{
+        val platformType = withGroovyBuilder { "getPlatformType"() } ?: return@action
+        val platformName = platformType.withGroovyBuilder { "getName"() }
+        val targetName = withGroovyBuilder { "getTargetName"() }
+        val compilations = withGroovyBuilder { "getCompilations"() }
+            as NamedDomainObjectContainer<*>
+
+        extension.targets.register(targetName.toString()) {
+          enabled.convention(true)
+
+          compilations
+            .matching { comp ->
+              val compName = comp.withGroovyBuilder { "getName"() }
+
+              when (platformName) {
+                "jvm"        -> compName == "main"
+                "androidJvm" -> compName == "release"
+                else         -> false
+              }
+            }
+            .all {
+              val output = withGroovyBuilder { "getOutput"() } ?: return@all
+              val classesDirs = output.withGroovyBuilder { "getClassesDirs"() }
+              inputClasses.from(classesDirs)
+            }
+        }
+      }
   }
 
   private fun createJavaTestFixtureTargets(
