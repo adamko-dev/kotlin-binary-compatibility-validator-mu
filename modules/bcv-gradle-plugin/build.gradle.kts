@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin`
+  buildsrc.conventions.`maven-publishing`
   id("dev.adamko.dev-publish")
   `java-test-fixtures`
   //com.github.johnrengelman.shadow
