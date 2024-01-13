@@ -2,7 +2,7 @@
 
 package dev.adamko.kotlin.binary_compatibility_validator.test.utils
 
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoPathString
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.devMavenRepoPathString
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -43,9 +43,9 @@ class GradleProjectTest(
     val gradleTestKitDir: Path? by optionalSystemProperty(Paths::get)
 
     /** file-based Maven Repo that contains the published plugin */
-    private val testMavenRepoDir: Path by systemProperty(Paths::get)
-    val testMavenRepoPathString
-      get() = testMavenRepoDir
+    private val devMavenRepoDir: Path by systemProperty(Paths::get)
+    val devMavenRepoPathString
+      get() = devMavenRepoDir
         .toFile()
         .canonicalFile
         .absoluteFile
@@ -101,20 +101,20 @@ fun gradleKtsProjectTest(
     settingsGradleKts = """
       |rootProject.name = "$projectName"
       |
-      |@Suppress("UnstableApiUsage")
-      |dependencyResolutionManagement {
-      |    repositories {
-      |        mavenCentral()
-      |        maven(file("$testMavenRepoPathString"))
-      |    }
+      |pluginManagement {
+      |  repositories {
+      |${devMavenRepoKotlinDsl().prependIndent("    ")}
+      |    mavenCentral()
+      |    gradlePluginPortal()
+      | }
       |}
       |
-      |pluginManagement {
-      |    repositories {
-      |        gradlePluginPortal()
-      |        mavenCentral()
-      |        maven(file("$testMavenRepoPathString"))
-      |    }
+      |@Suppress("UnstableApiUsage")
+      |dependencyResolutionManagement {
+      |  repositories {
+      |${devMavenRepoKotlinDsl().prependIndent("    ")}
+      |    mavenCentral()
+      |  }
       |}
       |
     """.trimMargin()
@@ -122,9 +122,9 @@ fun gradleKtsProjectTest(
     buildGradleKts = """"""
 
     gradleProperties = """
-            |kotlin.mpp.stability.nowarn=true
-            |
-       """.trimMargin()
+      |kotlin.mpp.stability.nowarn=true
+      |
+    """.trimMargin()
 
     build()
   }
@@ -144,32 +144,69 @@ fun gradleGroovyProjectTest(
   return GradleProjectTest(baseDir = baseDir, testProjectName = testProjectName).apply {
 
     settingsGradle = """
-            |rootProject.name = "test"
-            |
-            |dependencyResolutionManagement {
-            |    repositories {
-            |        mavenCentral()
-            |        maven { url = file("$testMavenRepoPathString") }
-            |    }
-            |}
-            |
-            |pluginManagement {
-            |    repositories {
-            |        gradlePluginPortal()
-            |        mavenCentral()
-            |        maven { url = file("$testMavenRepoPathString") }
-            |    }
-            |}
-            |
-        """.trimMargin()
+      |rootProject.name = "test"
+      |
+      |dependencyResolutionManagement {
+      |  repositories {
+      |    mavenCentral()
+      |${devMavenRepoGroovyDsl().prependIndent("    ")}
+      |  }
+      |}
+      |
+      |pluginManagement {
+      |  repositories {
+      |${devMavenRepoGroovyDsl().prependIndent("    ")}
+      |  }
+      |}
+      |
+    """.trimMargin()
 
     gradleProperties = """
-            |kotlin.mpp.stability.nowarn=true
-            |org.gradle.cache=true
-       """.trimMargin()
+      |kotlin.mpp.stability.nowarn=true
+      |org.gradle.cache=true
+    """.trimMargin()
 
     build()
   }
+}
+
+@Language("kts")
+internal fun devMavenRepoKotlinDsl(): String {
+  return """
+    |exclusiveContent {
+    |  forRepository {
+    |    maven(file("$devMavenRepoPathString")) {
+    |      name = "Dev Maven Repo"
+    |    }
+    |  }
+    |  filter {
+    |        includeGroup("dev.adamko.kotlin.binary_compatibility_validator")
+    |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator")
+    |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.project")
+    |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.settings")
+    |  }
+    |}
+  """.trimMargin()
+}
+
+@Language("groovy")
+private fun devMavenRepoGroovyDsl(): String {
+  return """
+    |exclusiveContent {
+    |  forRepository {
+    |    maven {
+    |      url = file("$devMavenRepoPathString") 
+    |      name = "Dev Maven Repo"
+    |    }
+    |  }
+    |  filter {
+    |        includeGroup("dev.adamko.kotlin.binary_compatibility_validator")
+    |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator")
+    |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.project")
+    |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.settings")
+    |  }
+    |}
+  """.trimMargin()
 }
 
 

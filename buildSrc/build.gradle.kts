@@ -10,6 +10,7 @@ dependencies {
   implementation(libs.gradlePlugin.bcvMu)
   implementation(libs.gradlePlugin.pluginPublishing)
   implementation(libs.gradlePlugin.shadow)
+  implementation(libs.gradlePlugin.devPublish)
 }
 
 java {

@@ -2,7 +2,7 @@ package dev.adamko.kotlin.binary_compatibility_validator.test.utils.api
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.minimumGradleTestVersion
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.GradleProjectTest.Companion.testMavenRepoPathString
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.devMavenRepoKotlinDsl
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
@@ -15,33 +15,19 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
 
   baseKotlinScope.settingsGradleKts {
     addText(/*language=kts*/ """
-        |@Suppress("UnstableApiUsage")
-        |dependencyResolutionManagement {
+        |pluginManagement {
         |  repositories {
+        |${devMavenRepoKotlinDsl().prependIndent("    ")}
+        |    gradlePluginPortal()
         |    mavenCentral()
-        |    maven(file("$testMavenRepoPathString")) {
-        |      mavenContent {
-        |        includeGroup("dev.adamko.kotlin.binary_compatibility_validator")
-        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator")
-        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.project")
-        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.settings")
-        |      }
-        |    }
         |  }
         |}
         |
-        |pluginManagement {
+        |@Suppress("UnstableApiUsage")
+        |dependencyResolutionManagement {
         |  repositories {
-        |    gradlePluginPortal()
+        |${devMavenRepoKotlinDsl().prependIndent("    ")}
         |    mavenCentral()
-        |    maven(file("$testMavenRepoPathString")) {
-        |      mavenContent {
-        |        includeGroup("dev.adamko.kotlin.binary_compatibility_validator")
-        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator")
-        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.project")
-        |        includeGroup("dev.adamko.kotlin.binary-compatibility-validator.settings")
-        |      }
-        |    }
         |  }
         |}
         |

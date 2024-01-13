@@ -1,11 +1,47 @@
 package buildsrc.utils
 
+import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.component.AdhocComponentWithVariants
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RelativePath
 import org.gradle.api.tasks.SourceSet
-import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.*
+import org.gradle.util.GradleVersion
+
+
+/** The current Gradle version */
+internal val CurrentGradleVersion: GradleVersion
+  get() = GradleVersion.current()
+
+
+/** @see GradleVersion.compareTo */
+internal operator fun GradleVersion.compareTo(version: String): Int =
+  compareTo(GradleVersion.version(version))
+
+
+/**
+ * Mark this [Configuration] as one that should be used to declare dependencies in
+ * [Project.dependencies] block.
+ *
+ * Declarable Configurations should be extended by [resolvable] and [consumable] Configurations.
+ *
+ * ```
+ * isCanBeResolved = false
+ * isCanBeConsumed = false
+ * isCanBeDeclared = true
+ * ```
+ */
+internal fun Configuration.declarable(
+  visible: Boolean = false,
+) {
+  isCanBeResolved = false
+  isCanBeConsumed = false
+  canBeDeclared(true)
+  isVisible = visible
+}
+
 
 /**
  * Mark this [Configuration] as one that will be consumed by other subprojects.
@@ -13,12 +49,18 @@ import org.gradle.kotlin.dsl.get
  * ```
  * isCanBeResolved = false
  * isCanBeConsumed = true
+ * isCanBeDeclared = false
  * ```
  */
-fun Configuration.asProvider() {
+internal fun Configuration.consumable(
+  visible: Boolean = true,
+) {
   isCanBeResolved = false
   isCanBeConsumed = true
+  canBeDeclared(false)
+  isVisible = visible
 }
+
 
 /**
  * Mark this [Configuration] as one that will consume artifacts from other subprojects (also known as 'resolving')
@@ -26,11 +68,30 @@ fun Configuration.asProvider() {
  * ```
  * isCanBeResolved = true
  * isCanBeConsumed = false
+ * isCanBeDeclared = false
  * ```
- * */
-fun Configuration.asConsumer() {
+ */
+internal fun Configuration.resolvable(
+  visible: Boolean = false,
+) {
   isCanBeResolved = true
   isCanBeConsumed = false
+  canBeDeclared(false)
+  isVisible = visible
+}
+
+
+/**
+ * Enable/disable [Configuration.isCanBeDeclared] only if it is supported by the
+ * [CurrentGradleVersion]
+ *
+ * This function should be removed when the minimal supported Gradle version is 8.2.
+ */
+@Suppress("UnstableApiUsage")
+private fun Configuration.canBeDeclared(value: Boolean) {
+  if (CurrentGradleVersion >= "8.2") {
+    isCanBeDeclared = value
+  }
 }
 
 
@@ -81,3 +142,19 @@ fun SourceSet.configurationNames() =
     javadocElementsConfigurationName,
     sourcesElementsConfigurationName,
   )
+
+/** exclude generated Gradle code, so it doesn't clog up search results */
+fun ProjectLayout.generatedKotlinDslAccessorDirs(): Set<File> {
+
+  val generatedSrcDirs = listOf(
+    "kotlin-dsl-accessors",
+    "kotlin-dsl-external-plugin-spec-builders",
+    "kotlin-dsl-plugins",
+  )
+
+  return projectDirectory.asFile.walk()
+    .filter { it.isDirectory && it.parentFile.name in generatedSrcDirs }
+    .flatMap { file ->
+      file.walk().maxDepth(1).filter { it.isDirectory }.toList()
+    }.toSet()
+}

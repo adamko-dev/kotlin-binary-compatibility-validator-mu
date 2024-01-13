@@ -1,6 +1,6 @@
 plugins {
   buildsrc.conventions.`kotlin-gradle-plugin-tests`
-  buildsrc.conventions.`maven-publish-test`
+  id("dev.adamko.dev-publish")
   `java-test-fixtures`
   `jvm-test-suite`
 }
@@ -8,7 +8,7 @@ plugins {
 description = "Functional tests for bcv-gradle-plugin"
 
 dependencies {
-  testMavenPublication(projects.modules.bcvGradlePlugin)
+  devPublication(projects.modules.bcvGradlePlugin)
 
   testFixturesApi(gradleTestKit())
 
@@ -52,10 +52,11 @@ testing.suites {
     targets.configureEach {
       testTask.configure {
         shouldRunAfter(test)
-        dependsOn(project.configurations.testMavenPublication)
-        inputs.files(project.configurations.testMavenPublication)
-
-        systemProperty("testMavenRepoDir", file(mavenPublishTest.testMavenRepo).canonicalPath)
+        dependsOn(tasks.updateDevRepo)
+        systemProperty(
+          "devMavenRepoDir",
+          devPublish.devMavenRepo.asFile.get().invariantSeparatorsPath,
+        )
       }
     }
   }

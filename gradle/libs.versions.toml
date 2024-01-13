@@ -9,7 +9,9 @@ kotlinx-bcv = "0.13.2"
 
 gradlePluginPublishPlugin = "1.2.0"
 shadowPlugin = "8.1.0"
+devPublish = "0.2.0"
 bcvMu = "0.0.3"
+#bcvMu = "0.2.0-SNAPSHOT"
 
 supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, used in functional tests
 
@@ -35,4 +37,5 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 gradlePlugin-bcvMu = { module = "dev.adamko.kotlin.binary_compatibility_validator:bcv-gradle-plugin", version.ref = "bcvMu" }
 gradlePlugin-pluginPublishing = { module = "com.gradle.publish:plugin-publish-plugin", version.ref = "gradlePluginPublishPlugin" }
 gradlePlugin-shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadowPlugin" }
+gradlePlugin-devPublish = { module = "dev.adamko.gradle:dev-publish-plugin", version.ref = "devPublish" }
 ## endregion
