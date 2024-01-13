@@ -8,7 +8,7 @@ kotest = "5.6.1"
 kotlinx-bcv = "0.13.2"
 
 gradlePluginPublishPlugin = "1.2.0"
-shadowPlugin = "8.1.0"
+shadowPlugin = "8.1.1"
 devPublish = "0.2.0"
 bcvMu = "0.0.3"
 #bcvMu = "0.2.0-SNAPSHOT"
