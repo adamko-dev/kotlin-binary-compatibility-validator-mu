@@ -5,7 +5,7 @@ kotlinGradle = "1.6.0"
 javaDiffUtils = "4.12"
 junit = "5.9.3"
 kotest = "5.6.1"
-kotlinx-bcv = "0.13.1"
+kotlinx-bcv = "0.13.2"
 
 gradlePluginPublishPlugin = "1.2.0"
 shadowPlugin = "8.1.0"
