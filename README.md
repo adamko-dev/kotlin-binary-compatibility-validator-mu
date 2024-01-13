@@ -1,5 +1,7 @@
 [![GitHub license](https://img.shields.io/github/license/adamko-dev/kotlin-binary-compatibility-validator-mu?style=for-the-badge)](https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu/blob/main/LICENSE)
 [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/dev.adamko.kotlin.binary-compatibility-validator?style=for-the-badge)](https://plugins.gradle.org/plugin/dev.adamko.kotlin.binary-compatibility-validator)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.adamko.kotlin.binary-compatibility-validator/bcv-gradle-plugin?style=for-the-badge&logo=apache-maven&color=6545e7&link=https%3A%2F%2Fsearch.maven.org%2Fsearch%3Fq%3Dg%3Adev.adamko.kotlin.binary-compatibility-validator)](https://search.maven.org/search?q=g:dev.adamko.kotlin.binary-compatibility-validator)
+[![Maven Central Snapshots](https://img.shields.io/maven-metadata/v?label=MAVEN%20SNAPSHOT&metadataUrl=https%3A%2F%2Fs01.oss.sonatype.org%2Fcontent%2Frepositories%2Fsnapshots%2Fdev%2Fadamko%2Fkotlin%2Fbinary-compatibility-validator%2Fbcv-gradle-plugin%2Fmaven-metadata.xml&style=for-the-badge&logo=apache-maven)](https://s01.oss.sonatype.org/content/repositories/snapshots/dev/adamko/kotlin/binary-compatibility-validator/bcv-gradle-plugin/)
 
 # Kotlin Binary Compatibility Validator (Mirror Universe)
 
