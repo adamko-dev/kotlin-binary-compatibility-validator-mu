@@ -13,8 +13,8 @@ abstract class BCVPlugin
 constructor() : Plugin<PluginAware> {
   override fun apply(target: PluginAware) {
     when (target) {
-      is Project  -> target.pluginManager.apply(BCVProjectPlugin::class)
-      is Settings -> target.pluginManager.apply(BCVSettingsPlugin::class)
+      is Project  -> target.pluginManager.apply(BCV_PROJECT_PLUGIN_ID)
+      is Settings -> target.pluginManager.apply(BCV_SETTINGS_PLUGIN_ID)
       else        -> error("cannot apply BCVPlugin to ${target::class}")
     }
   }
@@ -29,5 +29,8 @@ constructor() : Plugin<PluginAware> {
     const val API_CHECK_TASK_NAME = "apiCheck"
     const val API_DUMP_TASK_NAME = "apiDump"
     const val API_GENERATE_TASK_NAME = "apiGenerate"
+
+    const val BCV_PROJECT_PLUGIN_ID = "dev.adamko.kotlin.binary-compatibility-validator.project"
+    const val BCV_SETTINGS_PLUGIN_ID = "dev.adamko.kotlin.binary-compatibility-validator.settings"
   }
 }

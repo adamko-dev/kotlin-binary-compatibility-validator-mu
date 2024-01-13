@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
+import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.BCV_PROJECT_PLUGIN_ID
 import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.globToRegex
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTargetSpec
@@ -39,12 +40,14 @@ constructor(
           globToRegex(it, Project.PATH_SEPARATOR).matches(project.path)
         }
       ) {
-        project.pluginManager.apply(BCVProjectPlugin::class)
-        project.extensions.configure<BCVProjectExtension> {
-          enabled.convention(extension.defaultTargetValues.enabled)
-          ignoredClasses.convention(extension.defaultTargetValues.ignoredClasses)
-          ignoredMarkers.convention(extension.defaultTargetValues.ignoredMarkers)
-          ignoredPackages.convention(extension.defaultTargetValues.ignoredPackages)
+        project.pluginManager.apply(BCV_PROJECT_PLUGIN_ID)
+        project.pluginManager.withPlugin(BCV_PROJECT_PLUGIN_ID) {
+          project.extensions.configure<BCVProjectExtension> {
+            enabled.convention(extension.defaultTargetValues.enabled)
+            ignoredClasses.convention(extension.defaultTargetValues.ignoredClasses)
+            ignoredMarkers.convention(extension.defaultTargetValues.ignoredMarkers)
+            ignoredPackages.convention(extension.defaultTargetValues.ignoredPackages)
+          }
         }
       }
     }
