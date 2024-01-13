@@ -125,7 +125,7 @@ private fun FunSpec.createTestFixturesProject(
     buildGradleKts = """
         |plugins {
         |  kotlin("jvm") version "1.7.10"
-        |  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.0.6-SNAPSHOT"
+        |  id("dev.adamko.kotlin.binary-compatibility-validator") version "0.2.0-SNAPSHOT"
         |  `java-test-fixtures`
         |}
         |
@@ -141,20 +141,20 @@ private fun FunSpec.createTestFixturesProject(
       createKotlinFile(
         "Hello.kt",
         """
-            |class Hello(private val response: String) {
-            |  fun greeting() = response
-            |}
-            |
-          """.trimMargin()
+          |class Hello(private val response: String) {
+          |  fun greeting() = response
+          |}
+          |
+        """.trimMargin()
       )
     }
     dir("src/testFixtures/kotlin") {
       createKotlinFile(
         "HelloHelper.kt",
         """
-            |fun standardHello() = Hello("standard")
-            |
-          """.trimMargin()
+          |fun standardHello() = Hello("standard")
+          |
+        """.trimMargin()
       )
     }
   }
