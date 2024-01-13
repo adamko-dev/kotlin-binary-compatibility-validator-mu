@@ -1,8 +1,12 @@
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVPlugin : org/gradle/api/Plugin {
+	public static final field API_CHECK_TASK_NAME Ljava/lang/String;
 	public static final field API_DIR Ljava/lang/String;
+	public static final field API_DUMP_TASK_NAME Ljava/lang/String;
+	public static final field API_GENERATE_TASK_NAME Ljava/lang/String;
 	public static final field Companion Ldev/adamko/kotlin/binary_compatibility_validator/BCVPlugin$Companion;
 	public static final field EXTENSION_NAME Ljava/lang/String;
 	public static final field RUNTIME_CLASSPATH_CONFIGURATION_NAME Ljava/lang/String;
+	public static final field RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME Ljava/lang/String;
 	public static final field TASK_GROUP Ljava/lang/String;
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/plugins/PluginAware;)V
@@ -27,8 +31,12 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjec
 }
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjectPlugin : org/gradle/api/Plugin {
+	public static final field Companion Ldev/adamko/kotlin/binary_compatibility_validator/BCVProjectPlugin$Companion;
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class dev/adamko/kotlin/binary_compatibility_validator/BCVProjectPlugin$Companion {
 }
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVSettingsPlugin : org/gradle/api/Plugin {

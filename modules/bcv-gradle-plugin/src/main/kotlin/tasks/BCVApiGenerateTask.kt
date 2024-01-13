@@ -31,8 +31,9 @@ constructor(
   val targets: NamedDomainObjectContainer<BCVTarget> =
     extensions.adding("targets") { objects.domainObjectContainer() }
 
-  @get:InputFiles
-  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:Internal
+  @Deprecated("inputDependencies was unused and can be removed without impact")
+  @Suppress("unused")
   abstract val inputDependencies: ConfigurableFileCollection
 
   @get:Classpath

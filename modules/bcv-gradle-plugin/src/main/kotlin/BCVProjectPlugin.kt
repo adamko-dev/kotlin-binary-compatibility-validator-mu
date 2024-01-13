@@ -1,23 +1,31 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
+import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_CHECK_TASK_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_DIR
+import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_DUMP_TASK_NAME
+import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_GENERATE_TASK_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.EXTENSION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_CONFIGURATION_NAME
-import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
-import dev.adamko.kotlin.binary_compatibility_validator.internal.sourceSets
+import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME
+import dev.adamko.kotlin.binary_compatibility_validator.internal.*
+import dev.adamko.kotlin.binary_compatibility_validator.internal.Dynamic.Companion.Dynamic
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiCheckTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiGenerateTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVDefaultTask
 import javax.inject.Inject
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.logging.Logging
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.component.external.model.TestFixturesSupport.TEST_FIXTURE_SOURCESET_NAME
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.gradle.language.base.plugins.LifecycleBasePlugin.CHECK_TASK_NAME
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
@@ -37,21 +45,7 @@ constructor(
 
     val extension = createExtension(project)
 
-    val bcvGenerateClasspath =
-      project.configurations.register(RUNTIME_CLASSPATH_CONFIGURATION_NAME) {
-        isCanBeConsumed = false
-        isCanBeResolved = true
-        isVisible = false
-        defaultDependencies {
-          addLater(
-            extension.kotlinxBinaryCompatibilityValidatorVersion.map { version ->
-              project.dependencies.create(
-                "org.jetbrains.kotlinx:binary-compatibility-validator:$version"
-              )
-            }
-          )
-        }
-      }
+    val bcvGenerateClasspath = createBcvMuClasspath(project, extension)
 
     project.tasks.withType<BCVDefaultTask>().configureEach {
       bcvEnabled.convention(extension.enabled)
@@ -59,7 +53,7 @@ constructor(
     }
 
     project.tasks.withType<BCVApiGenerateTask>().configureEach {
-      runtimeClasspath.from(bcvGenerateClasspath.map { it.incoming.files })
+      runtimeClasspath.from(bcvGenerateClasspath)
       targets.addAllLater(providers.provider { extension.targets })
       onlyIf("Must have at least one target") { targets.isNotEmpty() }
       outputApiBuildDir.convention(layout.buildDirectory.dir("bcv-api"))
@@ -76,17 +70,17 @@ constructor(
       apiDirectory.convention(extension.outputApiDir)
     }
 
-    val apiGenerateTask = project.tasks.register("apiGenerate", BCVApiGenerateTask::class)
+    val apiGenerateTask = project.tasks.register(API_GENERATE_TASK_NAME, BCVApiGenerateTask::class)
 
-    project.tasks.register("apiDump", BCVApiDumpTask::class) {
+    project.tasks.register(API_DUMP_TASK_NAME, BCVApiDumpTask::class) {
       apiDumpFiles.from(apiGenerateTask.map { it.outputApiBuildDir })
     }
 
-    val apiCheckTask = project.tasks.register("apiCheck", BCVApiCheckTask::class) {
+    val apiCheckTask = project.tasks.register(API_CHECK_TASK_NAME, BCVApiCheckTask::class) {
       apiBuildDir.convention(apiGenerateTask.flatMap { it.outputApiBuildDir })
     }
 
-    project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure {
+    project.tasks.named(CHECK_TASK_NAME).configure {
       dependsOn(apiCheckTask)
     }
 
@@ -120,6 +114,34 @@ constructor(
     }
 
     return extension
+  }
+
+  private fun createBcvMuClasspath(
+    project: Project,
+    extension: BCVProjectExtension,
+  ): NamedDomainObjectProvider<Configuration> {
+
+    val bcvGenerateClasspath =
+      project.configurations.register(RUNTIME_CLASSPATH_CONFIGURATION_NAME) {
+        description = "Runtime classpath for running binary-compatibility-validator."
+        declarable()
+        defaultDependencies {
+          addLater(
+            extension.kotlinxBinaryCompatibilityValidatorVersion.map { version ->
+              project.dependencies.create(
+                "org.jetbrains.kotlinx:binary-compatibility-validator:$version"
+              )
+            }
+          )
+        }
+      }
+
+    return project.configurations.register(RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME) {
+      description = "Resolve the runtime classpath for running binary-compatibility-validator."
+      resolvable()
+      isVisible = false
+      extendsFrom(bcvGenerateClasspath.get())
+    }
   }
 
   private fun createKotlinJvmTargets(
@@ -179,7 +201,7 @@ constructor(
               }
           }
         }
-    }
+      }
   }
 
   private fun createJavaTestFixtureTargets(
@@ -198,5 +220,9 @@ constructor(
           }
       }
     }
+  }
+
+  companion object {
+    private val logger = Logging.getLogger(BCVProjectPlugin::class.java)
   }
 }

@@ -22,7 +22,12 @@ constructor() : Plugin<PluginAware> {
   companion object {
     const val API_DIR = "api"
     const val EXTENSION_NAME = "binaryCompatibilityValidator"
-    const val TASK_GROUP = "bcv mu"
     const val RUNTIME_CLASSPATH_CONFIGURATION_NAME = "bcvMuRuntime"
+    const val RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME = "bcvMuRuntimeResolver"
+
+    const val TASK_GROUP = "bcv mu"
+    const val API_CHECK_TASK_NAME = "apiCheck"
+    const val API_DUMP_TASK_NAME = "apiDump"
+    const val API_GENERATE_TASK_NAME = "apiGenerate"
   }
 }
