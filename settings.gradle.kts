@@ -89,6 +89,9 @@ val gitVersion: Provider<String> =
 
     if (!detached) {
       "$branch-SNAPSHOT"
+        // control chars and slashes aren't allowed in Maven Versions
+        .map { c -> if (c.isISOControl() || c == '/' || c == '\\') "_" else c }
+        .joinToString("")
     } else {
       val descriptions = described.split("-")
       val head = descriptions.singleOrNull() ?: ""
