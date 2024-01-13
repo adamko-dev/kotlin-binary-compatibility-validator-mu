@@ -5,7 +5,19 @@ run-name: "Gradle Task ${{ inputs.gradle-task }} @ ${{ inputs.runs-on }}"
 
 on:
   workflow_dispatch:
-
+    inputs:
+      gradle-task:
+        description: "The Gradle task to run, including any flags"
+        required: true
+        type: string
+      runs-on:
+        description: "OSes to run the task on"
+        required: true
+        type: string
+      checkout-ref:
+        description: "The repository reference to checkout"
+        required: false
+        type: string
   workflow_call:
     inputs:
       gradle-task:
@@ -16,17 +28,22 @@ on:
         description: "OSes to run the task on"
         required: true
         type: string
+      checkout-ref:
+        description: "The repository reference to checkout"
+        required: false
+        type: string
 
 
 concurrency:
   # note: the Workflow inputs are also included in the concurrency group
-  group: "${{ github.workflow }} ${{ join(inputs.*) }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: "Gradle Task: ${{ github.workflow }} ${{ join(inputs.*) }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
 
 
 permissions:
   contents: read
   checks: write # required by mikepenz/action-junit-report
+
 
 jobs:
 
@@ -40,27 +57,37 @@ jobs:
 
       - name: Checkout the repo
         uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.checkout-ref || github.event.repository.default_branch }}
 
-      - name: Setup JDK
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup JDK 11
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 11
 
-      - name: Cache Gradle TestKit
-        id: cache-gradle-testkit
-        uses: actions/cache@v3
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
         with:
-          path: |
-            ${{ runner.temp }}/.gradle-test-kit/caches
-          key: gradle-testkit-${{ runner.os }}
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK # required for integration tests
+        uses: android-actions/setup-android@v2
 
       - uses: gradle/gradle-build-action@v2
-        env:
-          GRADLE_TESTKIT_DIR: ${{ runner.temp }}/.gradle-test-kit/caches
         with:
           gradle-home-cache-cleanup: true
-          arguments: ${{ inputs.gradle-task }} --scan
+          arguments: ${{ inputs.gradle-task }}
+        env:
+          MAVEN_SONATYPE_USERNAME: ${{ secrets.MAVEN_SONATYPE_USERNAME }}
+          MAVEN_SONATYPE_PASSWORD: ${{ secrets.MAVEN_SONATYPE_PASSWORD }}
+          MAVEN_SONATYPE_SIGNING_KEY_ID: ${{ secrets.MAVEN_SONATYPE_SIGNING_KEY_ID }}
+          MAVEN_SONATYPE_SIGNING_KEY: ${{ secrets.MAVEN_SONATYPE_SIGNING_KEY }}
+          MAVEN_SONATYPE_SIGNING_PASSWORD: ${{ secrets.MAVEN_SONATYPE_SIGNING_PASSWORD }}
 
       - name: Upload build reports
         if: failure()

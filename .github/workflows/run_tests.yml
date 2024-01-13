@@ -1,0 +1,37 @@
+name: Tests
+
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+
+concurrency:
+  group: "Tests: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+
+permissions:
+  contents: read
+  checks: write # required by mikepenz/action-junit-report
+
+
+jobs:
+
+  gradle-check:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            task: "check --continue"
+          - os: ubuntu-latest
+            task: "check --continue"
+          - os: windows-latest
+            task: "check --continue"
+      fail-fast: false
+    uses: ./.github/workflows/run_gradle_task.yml
+    with:
+      runs-on: ${{ matrix.os }}
+      gradle-task: >-
+        ${{ matrix.task }} --stacktrace
+      checkout-ref: ${{ inputs.checkout-ref || github.event.repository.default_branch }}
