@@ -7,10 +7,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.EXTENSION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_CONFIGURATION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME
-import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
-import dev.adamko.kotlin.binary_compatibility_validator.internal.declarable
-import dev.adamko.kotlin.binary_compatibility_validator.internal.resolvable
-import dev.adamko.kotlin.binary_compatibility_validator.internal.sourceSets
+import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiCheckTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiGenerateTask
@@ -21,7 +18,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.component.external.model.TestFixturesSupport.TEST_FIXTURE_SOURCESET_NAME
@@ -30,7 +29,8 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.language.base.plugins.LifecycleBasePlugin.CHECK_TASK_NAME
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
-import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.targets
 
 
 abstract class BCVProjectPlugin
@@ -181,17 +181,19 @@ constructor(
     extension: BCVProjectExtension,
   ) {
     project.pluginManager.withPlugin("kotlin-multiplatform") {
-      val kotlinTargetsContainer = project.extensions.getByType<KotlinTargetsContainer>()
+      val kotlinTargets = findKotlinTargets(project) ?: return@withPlugin
 
-      kotlinTargetsContainer.targets
-        .matching {
-          it.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
-        }.all {
-          val targetPlatformType = platformType
+      kotlinTargets
+        .filter { target ->
+          target.platformType in arrayOf(KotlinPlatformType.jvm, KotlinPlatformType.androidJvm)
+        }
+        .forEach { target ->
+          val targetPlatformType = target.platformType
+          val targetCompilations = target.compilations
 
-          extension.targets.register(targetName) {
+          extension.targets.register(target.targetName) {
             enabled.convention(true)
-            compilations
+            targetCompilations
               .matching {
                 when (targetPlatformType) {
                   KotlinPlatformType.jvm -> it.name == "main"
@@ -225,6 +227,62 @@ constructor(
   }
 
   companion object {
-    private val logger = Logging.getLogger(BCVProjectPlugin::class.java)
+    private val logger: Logger = Logging.getLogger(BCVProjectPlugin::class.java)
+
+    private fun findKotlinTargets(project: Project): Iterable<KotlinTarget>? {
+
+      val kotlinTargets = project.extensions.findKotlinProjectExtension()?.targets
+        ?: project.extensions.findKotlinMultiplatformExtension()?.targets
+        ?: project.extensions.findKotlinTargetsContainer()?.targets
+
+      if (kotlinTargets != null) {
+        return kotlinTargets
+      } else {
+        if (project.extensions.findByName("kotlin") != null) {
+          // uh oh - the Kotlin extension is present but findKotlinTargetsContainer() failed.
+          // Is there a class loader issue? https://github.com/gradle/gradle/issues/27218
+          logger.warn {
+            val allPlugins =
+              project.plugins.joinToString { it::class.qualifiedName ?: "${it::class}" }
+            val allExtensions =
+              project.extensions.extensionsSchema.elements.joinToString { "${it.name} ${it.publicType}" }
+
+            /* language=TEXT */ """
+                |BCVProjectPlugin failed to get KotlinProjectExtension in ${project.path}
+                |  Applied plugins: $allPlugins
+                |  Available extensions: $allExtensions
+              """.trimMargin()
+          }
+        } else {
+          logger.warn("Could not apply ${BCVProjectPlugin::class.simpleName} in ${project.path} - could not find Kotlin targets")
+        }
+        return null
+      }
+    }
+
+    private fun ExtensionContainer.findKotlinProjectExtension(): org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension? =
+      findOrNull()
+
+    private fun ExtensionContainer.findKotlinTargetsContainer(): org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer? =
+      findOrNull()
+
+    private fun ExtensionContainer.findKotlinMultiplatformExtension(): org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension? =
+      findOrNull()
+
+    private inline fun <reified T : Any> ExtensionContainer.findOrNull(): T? =
+      try {
+        findByType<T>()
+      } catch (e: Throwable) {
+        when (e) {
+          is TypeNotPresentException,
+          is ClassNotFoundException,
+          is NoClassDefFoundError -> {
+            logger.lifecycle("BCVProjectPlugin failed to find ${T::class.qualifiedName} - ${e::class} ${e.message}")
+            null
+          }
+
+          else                    -> throw e
+        }
+      }
   }
 }

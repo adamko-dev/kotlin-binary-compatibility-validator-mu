@@ -28,8 +28,6 @@ internal class SettingsPluginDslTest : FunSpec({
         |ignoredPackages: [com.package.my_ignored_package]
         |inputClasses: [main, main]
         |inputJar: null
-        |------------------------------
-        |
       """.trimMargin()
     )
 
@@ -45,8 +43,6 @@ internal class SettingsPluginDslTest : FunSpec({
         |ignoredPackages: [com.package.my_ignored_package]
         |inputClasses: [main]
         |inputJar: null
-        |------------------------------
-        |
       """.trimMargin()
     )
 
@@ -79,23 +75,30 @@ internal class SettingsPluginDslTest : FunSpec({
             apiDump.shouldExist()
             apiDump.shouldBeAFile()
             apiDump.readText().invariantNewlines() shouldBe /* language=TEXT */ """
-            |
-          """.trimMargin()
+              |
+            """.trimMargin()
           }
 
           testCase.project.projectDir.resolve("sub2/api/sub2.api").asClue { apiDump ->
             apiDump.shouldExist()
             apiDump.shouldBeAFile()
             apiDump.readText().invariantNewlines() shouldBe /* language=TEXT */ """
-            |
-          """.trimMargin()
+              |
+            """.trimMargin()
           }
         }
 
         test("expect the conventions set in the settings plugin are used in the subprojects") {
-          testCase.project.runner.withArguments("printBCVTargets", "-q", "--stacktrace").build {
-            output.invariantNewlines() shouldBe testCase.expectedPrintedBCVTargets
-          }
+          testCase.project.runner
+            .withArguments("printBCVTargets", "--stacktrace")
+            .forwardOutput()
+            .build {
+              output
+                .substringAfter("------------------------------")
+                .substringBefore("------------------------------")
+                .invariantNewlines()
+                .trim() shouldBe testCase.expectedPrintedBCVTargets.trim()
+            }
         }
       }
     }
@@ -114,7 +117,12 @@ private fun kotlinJvmProjectWithBcvSettingsPlugin() =
 
     settingsGradleKts += settingsGradleKtsWithBcvPlugin
 
-    buildGradleKts = "\n"
+    buildGradleKts = """
+      |plugins {
+      |  kotlin("jvm") version "1.9.21" apply false
+      |}
+      |
+    """.trimMargin()
 
     dir("sub1") {
       buildGradleKts = buildGradleKtsWithKotlinJvmAndBcvConfig
@@ -132,7 +140,12 @@ private fun kotlinMultiplatformProjectWithBcvSettingsPlugin() =
 
     settingsGradleKts += settingsGradleKtsWithBcvPlugin
 
-    buildGradleKts = "\n"
+    buildGradleKts = """
+      |plugins {
+      |  kotlin("multiplatform") version "1.9.21" apply false
+      |}
+      |
+    """.trimMargin()
 
     dir("sub1") {
       buildGradleKts = buildGradleKtsWithKotlinMultiplatformJvmAndBcvConfig
@@ -148,7 +161,7 @@ private fun kotlinMultiplatformProjectWithBcvSettingsPlugin() =
 private val settingsGradleKtsWithBcvPlugin = """
 buildscript {
   dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
+    //classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
   }
 }
 
@@ -176,7 +189,7 @@ binaryCompatibilityValidator {
 @Language("kts")
 private val buildGradleKtsWithKotlinJvmAndBcvConfig = """
 plugins {
-  kotlin("jvm") version "1.7.20"
+  kotlin("jvm")
 }
 
 // check that the DSL is available:
@@ -190,7 +203,7 @@ binaryCompatibilityValidator { }
 @Language("kts")
 private val buildGradleKtsWithKotlinMultiplatformJvmAndBcvConfig = """
 plugins {
-  kotlin("multiplatform") version "1.7.20"
+  kotlin("multiplatform")
 }
 
 kotlin {
@@ -205,11 +218,12 @@ binaryCompatibilityValidator { }
 @Language("kts")
 private val printBcvTargetsTask = """
 val printBCVTargets by tasks.registering {
-   
+
   val bcvTargets = binaryCompatibilityValidator.targets
 
   doLast {
     bcvTargets.forEach {
+      println("------------------------------")
       println("name: " + it.name)
       println("platformType: " + it.platformType)
       println("enabled: " + it.enabled.get())
@@ -222,5 +236,4 @@ val printBCVTargets by tasks.registering {
     }
   }
 }
- 
-"""
+""".trimIndent()
