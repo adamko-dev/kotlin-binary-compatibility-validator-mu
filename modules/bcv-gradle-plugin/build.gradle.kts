@@ -130,3 +130,35 @@ publishing {
     }
   }
 }
+
+val createBCVProperties by tasks.registering {
+  val bcvVersion = libs.versions.kotlinx.bcv
+  inputs.property("bcvVersion", bcvVersion)
+
+  val generatedSource = layout.buildDirectory.dir("generated-src/main/kotlin/")
+  outputs.dir(generatedSource)
+    .withPropertyName("generatedSource")
+
+  doLast {
+    val bcvMuBuildPropertiesFile = generatedSource.get()
+      .file("dev/adamko/kotlin/binary_compatibility_validator/internal/BCVProperties.kt")
+
+    bcvMuBuildPropertiesFile.asFile.apply {
+      parentFile.mkdirs()
+      writeText(
+        """
+          |package dev.adamko.kotlin.binary_compatibility_validator.internal
+          |
+          |internal object BCVProperties {
+          |  const val bcvVersion: String = "${bcvVersion.get()}"
+          |}
+          |
+        """.trimMargin()
+      )
+    }
+  }
+}
+
+kotlin.sourceSets.main {
+  kotlin.srcDir(createBCVProperties)
+}

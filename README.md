@@ -34,7 +34,7 @@ or (**experimentally**) [as a Settings plugin](#settings-plugin) in `settings.gr
 
 The minimal supported Gradle version is 7.6.
 
-By default, BCV-MU uses BCV version `0.13.2`, which can be overridden, but may introduce runtime
+By default, BCV-MU uses BCV version `0.14.0`, which can be overridden, but may introduce runtime
 errors.
 
 ### Build plugin
@@ -100,7 +100,7 @@ binaryCompatibilityValidator {
   bcvEnabled.set(true)
 
   // Override the default BCV version
-  kotlinxBinaryCompatibilityValidatorVersion.set("0.13.2")
+  kotlinxBinaryCompatibilityValidatorVersion.set("0.14.0")
 }
 ```
 

@@ -7,10 +7,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.EXTENSION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_CONFIGURATION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME
-import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
-import dev.adamko.kotlin.binary_compatibility_validator.internal.declarable
-import dev.adamko.kotlin.binary_compatibility_validator.internal.resolvable
-import dev.adamko.kotlin.binary_compatibility_validator.internal.sourceSets
+import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiCheckTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiGenerateTask
@@ -97,7 +94,7 @@ constructor(
       enabled.convention(true)
       outputApiDir.convention(layout.projectDirectory.dir(API_DIR))
       projectName.convention(providers.provider { project.name })
-      kotlinxBinaryCompatibilityValidatorVersion.convention("0.13.1")
+      kotlinxBinaryCompatibilityValidatorVersion.convention(BCVProperties.bcvVersion)
     }
 
     extension.targets.configureEach {

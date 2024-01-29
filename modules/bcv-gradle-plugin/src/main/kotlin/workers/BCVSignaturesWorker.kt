@@ -105,6 +105,9 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
       .filterOutAnnotated(ignoredMarkers.map(::replaceDots).toSet())
   }
 
+  // Hack to access internal properties :(
+  // See https://github.com/Kotlin/binary-compatibility-validator/issues/178
+  @Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
   private fun writeSignatures(
     outputApiDir: File,
     projectName: String?,
