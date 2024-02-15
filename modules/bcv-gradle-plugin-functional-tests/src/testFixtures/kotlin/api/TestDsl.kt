@@ -157,7 +157,7 @@ fun AppendableScope.addText(text: String) {
 }
 
 interface FileContainer {
-  fun file(fileName: String, fn: AppendableScope.() -> Unit)
+  fun file(fileName: String, fn: AppendableScope.() -> Unit = {})
 }
 
 class BaseKotlinScope : FileContainer {
@@ -194,7 +194,7 @@ class AppendableScope(val filePath: String) {
 class Runner {
   val arguments: MutableList<String> = mutableListOf(
     "--configuration-cache",
-    "--info",
+    //"--info",
     "--stacktrace",
   )
 }

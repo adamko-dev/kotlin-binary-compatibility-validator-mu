@@ -12,6 +12,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiCheckTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiDumpTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVApiGenerateTask
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.BCVDefaultTask
+import java.io.File
 import javax.inject.Inject
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
@@ -48,21 +49,25 @@ constructor(
 
     project.tasks.withType<BCVDefaultTask>().configureEach {
       bcvEnabled.convention(extension.enabled)
+
       onlyIf("BCV is disabled") { bcvEnabled.get() }
     }
 
     project.tasks.withType<BCVApiGenerateTask>().configureEach {
       runtimeClasspath.from(bcvGenerateClasspath)
       targets.addAllLater(providers.provider { extension.targets })
-      onlyIf("Must have at least one target") { targets.isNotEmpty() }
       outputApiBuildDir.convention(layout.buildDirectory.dir("bcv-api"))
       projectName.convention(extension.projectName)
+
+      onlyIf("Must have at least one target") { targets.isNotEmpty() }
     }
 
     project.tasks.withType<BCVApiCheckTask>().configureEach {
       outputs.dir(temporaryDir) // dummy output, so up-to-date checks work
       expectedProjectName.convention(extension.projectName)
-      expectedApiDirPath.convention(extension.outputApiDir.map { it.asFile.canonicalFile.absolutePath })
+      expectedApiDirPath.convention(
+        extension.outputApiDir.map { it.asFile.canonicalFile.invariantSeparatorsPath }
+      )
     }
 
     project.tasks.withType<BCVApiDumpTask>().configureEach {
@@ -95,10 +100,22 @@ constructor(
       outputApiDir.convention(layout.projectDirectory.dir(API_DIR))
       projectName.convention(providers.provider { project.name })
       kotlinxBinaryCompatibilityValidatorVersion.convention(BCVProperties.bcvVersion)
+
+      // have to set conventions because otherwise .add("...") doesn't work
+      ignoredMarkers.convention(emptyList())
+      publicPackages.convention(emptyList())
+      publicClasses.convention(emptyList())
+      publicMarkers.convention(emptyList())
+      ignoredClasses.convention(emptyList())
+      @Suppress("DEPRECATION")
+      nonPublicMarkers.convention(null)
     }
 
     extension.targets.configureEach {
       enabled.convention(true)
+
+      inputClasses.setFrom(emptyList<File>())
+      inputJar.convention(null)
 
       publicMarkers.convention(extension.publicMarkers)
       publicPackages.convention(extension.publicPackages)

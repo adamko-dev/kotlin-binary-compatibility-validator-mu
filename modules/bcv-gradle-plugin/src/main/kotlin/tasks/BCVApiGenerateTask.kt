@@ -91,6 +91,7 @@ constructor(
     @OptIn(BCVInternalApi::class)
     submit(BCVSignaturesWorker::class) worker@{
       this@worker.projectName.set(task.projectName)
+      this@worker.taskPath.set(task.path)
 
       this@worker.outputApiDir.set(outputDir)
       this@worker.inputClasses.from(target.inputClasses)
