@@ -58,7 +58,7 @@ constructor(
       ?: error(
         """
           Expected folder with API declarations '${expectedApiDirPath.get()}' does not exist.
-          Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against
+          Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against.
         """.trimIndent()
       )
 
