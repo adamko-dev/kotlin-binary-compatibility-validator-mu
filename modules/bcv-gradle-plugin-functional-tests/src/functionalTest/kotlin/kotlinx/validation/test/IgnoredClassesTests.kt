@@ -84,7 +84,35 @@ internal class IgnoredClassesTests : BaseKotlinGradleTest() {
 
       val expected = readResourceFile("/examples/classes/AnotherBuildConfig.dump")
       rootProjectApiDump.readText().shouldBeEqualComparingTo(expected)
-//            Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines(expected)
+    }
+  }
+
+  @Test
+  fun `apiDump should dump class whose name is a subsset of another class that is excluded via ignoredClasses`() {
+    val runner = test {
+      buildGradleKts {
+        resolve("/examples/gradle/base/withPlugin.gradle.kts")
+        resolve("/examples/gradle/configuration/ignoredClasses/oneValidFullyQualifiedClass.gradle.kts")
+      }
+      kotlin("BuildConfig.kt") {
+        resolve("/examples/classes/BuildConfig.kt")
+      }
+      kotlin("BuildCon.kt") {
+        resolve("/examples/classes/BuildCon.kt")
+      }
+
+      runner {
+        arguments.add(":apiDump")
+      }
+    }
+
+    runner.build().apply {
+      shouldHaveRunTask(":apiDump", SUCCESS)
+
+      assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
+
+      val expected = readResourceFile("/examples/classes/BuildCon.dump")
+      rootProjectApiDump.readText().shouldBeEqualComparingTo(expected)
     }
   }
 }

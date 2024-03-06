@@ -176,7 +176,7 @@ internal fun devMavenRepoKotlinDsl(): String {
     |exclusiveContent {
     |  forRepository {
     |    maven(file("$devMavenRepoPathString")) {
-    |      name = "Dev Maven Repo"
+    |      name = "DevMavenRepo"
     |    }
     |  }
     |  filter {
@@ -196,7 +196,7 @@ private fun devMavenRepoGroovyDsl(): String {
     |  forRepository {
     |    maven {
     |      url = file("$devMavenRepoPathString") 
-    |      name = "Dev Maven Repo"
+    |      name = "DevMavenRepo"
     |    }
     |  }
     |  filter {

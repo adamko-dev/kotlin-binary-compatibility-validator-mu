@@ -58,7 +58,7 @@ constructor(
       ?: error(
         """
           Expected folder with API declarations '${expectedApiDirPath.get()}' does not exist.
-          Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against
+          Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against.
         """.trimIndent()
       )
 
@@ -66,7 +66,7 @@ constructor(
 
     val checkApiDeclarationPaths = projectApiDir.relativePathsOfContent { !isDirectory }
     val builtApiDeclarationPaths = apiBuildDir.relativePathsOfContent { !isDirectory }
-    logger.info("checkApiDeclarationPaths: $checkApiDeclarationPaths")
+    logger.info("[$path] checkApiDeclarationPaths: $checkApiDeclarationPaths")
 
     checkApiDeclarationPaths.forEach { checkApiDeclarationPath ->
       logger.info("---------------------------")
@@ -83,22 +83,22 @@ constructor(
     checkApiDeclaration: File,
     builtApiDeclaration: File?,
   ) {
-    logger.info("checkApiDeclaration: $checkApiDeclaration")
-    logger.info("builtApiDeclaration: $builtApiDeclaration")
+    logger.info("[$path] checkApiDeclaration: $checkApiDeclaration")
+    logger.info("[$path] builtApiDeclaration: $builtApiDeclaration")
 
     val allBuiltFilePaths = builtApiDeclaration?.parentFile.relativePathsOfContent()
     val allCheckFilePaths = checkApiDeclaration.parentFile.relativePathsOfContent()
 
-    logger.info("allBuiltPaths: $allBuiltFilePaths")
-    logger.info("allCheckFiles: $allCheckFilePaths")
+    logger.info("[$path] allBuiltPaths: $allBuiltFilePaths")
+    logger.info("[$path] allCheckFiles: $allCheckFilePaths")
 
     val builtFilePath = allBuiltFilePaths.singleOrNull()
-      ?: error("Expected a single file ${expectedProjectName.get()}.api, but found ${allBuiltFilePaths.size}: $allBuiltFilePaths")
+      ?: error("[$path] Expected a single file ${expectedProjectName.get()}.api, but found ${allBuiltFilePaths.size}: $allBuiltFilePaths")
 
     if (builtApiDeclaration == null || builtFilePath !in allCheckFilePaths) {
       val relativeDirPath = projectApiDir.get().toRelativeString(rootDir) + File.separator
       error(
-        "File ${builtFilePath.lastName} is missing from ${relativeDirPath}, please run '$apiDumpTaskPath' task to generate one"
+        "[$path] File ${builtFilePath.lastName} is missing from ${relativeDirPath}, please run '$apiDumpTaskPath' task to generate one"
       )
     }
 
@@ -155,7 +155,7 @@ constructor(
   }
 }
 
-/*
+/**
  * We use case-insensitive comparison to workaround issues with case-insensitive OSes and Gradle
  * behaving slightly different on different platforms. We neither know original sensitivity of
  * existing .api files, not build ones, because projectName that is part of the path can have any
@@ -171,6 +171,14 @@ private class RelativePaths(
   }
 
   operator fun get(path: RelativePath): RelativePath? = map[path]
+
+  override fun toString(): String =
+    map.keys.joinToString(
+      prefix = "RelativePaths(",
+      separator = "/",
+      postfix = ")",
+      transform = RelativePath::getPathString,
+    )
 
   companion object {
     private fun caseInsensitiveMap() =
