@@ -30,32 +30,30 @@ enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 //region git versioning
 val gitDescribe: Provider<String> =
-  providers
-    .exec {
-      workingDir(rootDir)
-      commandLine(
-        "git",
-        "describe",
-        "--always",
-        "--tags",
-        "--dirty=-DIRTY",
-        "--broken=-BROKEN",
-        "--match=v[0-9]*\\.[0-9]*\\.[0-9]*",
-      )
-      isIgnoreExitValue = true
-    }.standardOutput.asText.map { it.trim() }
+  providers.exec {
+    workingDir(rootDir)
+    commandLine(
+      "git",
+      "describe",
+      "--always",
+      "--tags",
+      "--dirty=-DIRTY",
+      "--broken=-BROKEN",
+      "--match=v[0-9]*\\.[0-9]*\\.[0-9]*",
+    )
+    isIgnoreExitValue = true
+  }.standardOutput.asText.map { it.trim() }
 
 val currentBranchName: Provider<String> =
-  providers
-    .exec {
-      workingDir(rootDir)
-      commandLine(
-        "git",
-        "branch",
-        "--show-current",
-      )
-      isIgnoreExitValue = true
-    }.standardOutput.asText.map { it.trim() }
+  providers.exec {
+    workingDir(rootDir)
+    commandLine(
+      "git",
+      "branch",
+      "--show-current",
+    )
+    isIgnoreExitValue = true
+  }.standardOutput.asText.map { it.trim() }
 
 val currentCommitHash: Provider<String> =
   providers.exec {

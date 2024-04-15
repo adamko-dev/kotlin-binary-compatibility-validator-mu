@@ -1,28 +1,20 @@
-import org.jetbrains.kotlin.config.JvmTarget
-
 plugins {
-    kotlin("jvm") version "1.9.22"
-    id("org.jetbrains.kotlinx.binary-compatibility-validator")
+  kotlin("jvm") version "1.9.22"
+  id("dev.adamko.kotlin.binary-compatibility-validator") version "+"
 }
 
-repositories {
-    mavenCentral()
-}
+val minJvmTarget = org.jetbrains.kotlin.config.JvmTarget.supportedValues().minBy { it.majorVersion }
+val maxJvmTarget = org.jetbrains.kotlin.config.JvmTarget.supportedValues().maxBy { it.majorVersion }
 
-val minTarget = JvmTarget.supportedValues().minBy { it.majorVersion }
-val maxTarget = JvmTarget.supportedValues().maxBy { it.majorVersion }
+val useMaxJdkVersion = providers.gradleProperty("useMaxJdkVersion").orNull.toBoolean()
+val selectedJvmTarget = (if (useMaxJdkVersion) maxJvmTarget else minJvmTarget).toString()
 
-val useMax = (project.properties["useMaxVersion"]?.toString() ?: "false").toBoolean()
-val target = (if (useMax) maxTarget else minTarget).toString()
-
-val toolchainVersion = target.split('.').last().toInt()
+val toolchainVersion = selectedJvmTarget.split('.').last().toInt()
 
 kotlin {
-    jvmToolchain(toolchainVersion)
-}
+  jvmToolchain(toolchainVersion)
 
-tasks.compileKotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(target))
-    }
+  compilerOptions {
+    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(selectedJvmTarget))
+  }
 }

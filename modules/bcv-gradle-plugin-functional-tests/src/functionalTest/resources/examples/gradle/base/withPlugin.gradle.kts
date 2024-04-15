@@ -1,4 +1,4 @@
 plugins {
-  kotlin("jvm") version "1.8.0"
+  kotlin("jvm") version embeddedKotlinVersion
   id("dev.adamko.kotlin.binary-compatibility-validator") version "+"
 }

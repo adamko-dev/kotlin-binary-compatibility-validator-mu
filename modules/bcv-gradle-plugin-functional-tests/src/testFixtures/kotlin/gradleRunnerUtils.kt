@@ -8,7 +8,7 @@ fun GradleRunner.withEnvironment(vararg map: Pair<String, String>): GradleRunner
   withEnvironment(map.toMap())
 
 
-inline fun GradleRunner.build(block: BuildResult.() -> Unit) = build().block()
-inline fun GradleRunner.buildAndFail(block: BuildResult.() -> Unit) = buildAndFail().block()
+inline fun GradleRunner.build(block: BuildResult.() -> Unit): Unit = build().block()
+inline fun GradleRunner.buildAndFail(block: BuildResult.() -> Unit): Unit = buildAndFail().block()
 @Suppress("UnstableApiUsage")
-inline fun GradleRunner.run(block: BuildResult.() -> Unit) = run().block()
+inline fun GradleRunner.run(block: BuildResult.() -> Unit): Unit = run().block()

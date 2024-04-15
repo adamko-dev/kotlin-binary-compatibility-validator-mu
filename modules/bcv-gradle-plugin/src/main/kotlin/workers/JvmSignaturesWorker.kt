@@ -14,7 +14,7 @@ import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 
 @BCVInternalApi
-abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> {
+abstract class JvmSignaturesWorker : WorkAction<JvmSignaturesWorker.Parameters> {
 
   private val logger = Logging.getLogger(this::class.java)
 
@@ -34,6 +34,7 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
     val ignoredClasses: SetProperty<String>
 
     val projectName: Property<String>
+
     /**
      * [Task path][org.gradle.api.Task.getPath] of the task that invoked this worker,
      * for log messages

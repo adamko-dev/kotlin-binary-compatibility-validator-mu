@@ -223,7 +223,6 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
 
       val expected = readResourceFile("/examples/classes/AnotherBuildConfig.dump")
       rootProjectApiDump.readText().invariantNewlines().shouldBeEqualComparingTo(expected)
-      //Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines(expected)
     }
   }
 

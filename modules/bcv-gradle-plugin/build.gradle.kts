@@ -8,8 +8,6 @@ plugins {
   buildsrc.conventions.`maven-publishing`
   id("dev.adamko.dev-publish")
   `java-test-fixtures`
-  //com.github.johnrengelman.shadow
-  //buildsrc.conventions.`gradle-plugin-variants`
   dev.adamko.kotlin.`binary-compatibility-validator`
 }
 
@@ -17,8 +15,9 @@ dependencies {
   implementation(libs.javaDiffUtils)
 
   compileOnly(libs.kotlinx.bcv)
-//  compileOnly(libs.kotlin.gradlePlugin)
-  compileOnly(libs.kotlin.gradlePluginApi)
+
+  compileOnly(libs.kotlin.gradlePlugin)
+//  compileOnly(libs.kotlin.gradlePluginApi)
 
   testFixturesApi(gradleTestKit())
 
@@ -85,13 +84,6 @@ configurations
 
 skipTestFixturesPublications()
 
-// Shadow plugin doesn't seem to help with https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu/issues/1
-//tasks.shadowJar {
-//  minimize()
-//  isEnableRelocation = false
-//  archiveClassifier.set("")
-//}
-
 tasks.withType<KotlinCompilationTask<*>>().configureEach {
   compilerOptions {
     freeCompilerArgs.addAll(
@@ -101,7 +93,10 @@ tasks.withType<KotlinCompilationTask<*>>().configureEach {
 }
 
 binaryCompatibilityValidator {
-  ignoredMarkers.add("dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi")
+  ignoredMarkers.addAll(
+    "dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi",
+    "dev.adamko.kotlin.binary_compatibility_validator.internal.BCVExperimentalApi",
+  )
 }
 
 

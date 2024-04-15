@@ -1,10 +1,13 @@
 package dev.adamko.kotlin.binary_compatibility_validator.internal
 
+import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
+import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.kotlin.dsl.*
 import org.gradle.util.GradleVersion
@@ -37,7 +40,7 @@ internal fun Configuration.declarable(
 ) {
   isCanBeResolved = false
   isCanBeConsumed = false
-  canBeDeclared(true)
+  canBeDeclared = true
   isVisible = visible
 }
 
@@ -52,11 +55,11 @@ internal fun Configuration.declarable(
  * ```
  */
 internal fun Configuration.consumable(
-  visible: Boolean = true,
+  visible: Boolean = false,
 ) {
   isCanBeResolved = false
   isCanBeConsumed = true
-  canBeDeclared(false)
+  canBeDeclared = false
   isVisible = visible
 }
 
@@ -75,7 +78,7 @@ internal fun Configuration.resolvable(
 ) {
   isCanBeResolved = true
   isCanBeConsumed = false
-  canBeDeclared(false)
+  canBeDeclared = false
   isVisible = visible
 }
 
@@ -87,12 +90,13 @@ internal fun Configuration.resolvable(
  * This function should be removed when the minimal supported Gradle version is 8.2.
  */
 @Suppress("UnstableApiUsage")
-private fun Configuration.canBeDeclared(value: Boolean) {
-  if (CurrentGradleVersion >= "8.2") {
-    isCanBeDeclared = value
+private var Configuration.canBeDeclared: Boolean
+  get() = isCanBeDeclaredSupported && isCanBeDeclared
+  set(value) {
+    if (isCanBeDeclaredSupported) isCanBeDeclared = value
   }
-}
 
+private val isCanBeDeclaredSupported = CurrentGradleVersion >= "8.2"
 
 /**
  * Create a new [NamedDomainObjectContainer], using
@@ -110,6 +114,35 @@ internal inline fun <reified T : Any> ObjectFactory.domainObjectContainer(
   } else {
     domainObjectContainer(T::class, factory)
   }
+
+
+/**
+ * Create a new [ExtensiblePolymorphicDomainObjectContainer], using
+ * [org.gradle.kotlin.dsl.polymorphicDomainObjectContainer]
+ * (but [T] is `reified`).
+ *
+ * @see org.gradle.kotlin.dsl.polymorphicDomainObjectContainer
+ */
+internal inline fun <reified T : Any> ObjectFactory.polymorphicDomainObjectContainer()
+    : ExtensiblePolymorphicDomainObjectContainer<T> =
+  polymorphicDomainObjectContainer(T::class)
+
+
+
+/** Create a new [BCVTargetsContainer] instance. */
+internal fun ObjectFactory.bcvTargetsContainer(): BCVTargetsContainer {
+  val container = polymorphicDomainObjectContainer<BCVTarget>()
+  container.whenObjectAdded {
+    // workaround for https://github.com/gradle/gradle/issues/24972
+    (container as ExtensionAware).extensions.add(name, this)
+  }
+  return container
+}
+
+
+typealias BCVTargetsContainer =
+    ExtensiblePolymorphicDomainObjectContainer<BCVTarget>
+
 
 
 /**

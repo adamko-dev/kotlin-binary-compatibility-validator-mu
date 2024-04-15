@@ -47,10 +47,10 @@ constructor(
   internal abstract val expectedProjectName: Property<String>
 
   // Project and tasks paths are used for creating better error messages
-  private val projectFullPath = project.fullPath
-  private val apiDumpTaskPath = GradlePath(project.path).child(API_DUMP_TASK_NAME)
+  private val projectFullPath: String = project.fullPath
+  private val apiDumpTaskPath: GradlePath = GradlePath(project.path).child(API_DUMP_TASK_NAME)
 
-  private val rootDir = project.rootProject.rootDir
+  private val rootDir: File = project.rootProject.rootDir
 
   @TaskAction
   fun verify() {
@@ -69,13 +69,11 @@ constructor(
     logger.info("[$path] checkApiDeclarationPaths: $checkApiDeclarationPaths")
 
     checkApiDeclarationPaths.forEach { checkApiDeclarationPath ->
-      logger.info("---------------------------")
       checkTarget(
         checkApiDeclaration = checkApiDeclarationPath.getFile(projectApiDir),
         // fetch the builtFile, using the case-insensitive map
         builtApiDeclaration = builtApiDeclarationPaths[checkApiDeclarationPath]?.getFile(apiBuildDir)
       )
-      logger.info("---------------------------")
     }
   }
 
@@ -166,9 +164,7 @@ private class RelativePaths(
   private val map: TreeMap<RelativePath, RelativePath> = caseInsensitiveMap()
 ) : Set<RelativePath> by map.keys {
 
-  operator fun plusAssign(path: RelativePath) {
-    map[path] = path
-  }
+  operator fun plusAssign(path: RelativePath): Unit = map.set(path, path)
 
   operator fun get(path: RelativePath): RelativePath? = map[path]
 

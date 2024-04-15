@@ -1,23 +1,15 @@
-import org.jetbrains.kotlin.config.JvmTarget
-
 plugins {
-    kotlin("jvm") version "1.9.22"
-    id("org.jetbrains.kotlinx.binary-compatibility-validator")
+  kotlin("jvm") version "1.9.22"
+  id("dev.adamko.kotlin.binary-compatibility-validator") version "+"
 }
 
-repositories {
-    mavenCentral()
-}
-
-val target = project.properties["jdkVersion"]!!.toString()
-val toolchainVersion = target.split('.').last().toInt()
+val selectedJvmTarget = providers.gradleProperty("jvmTarget").get()
+val toolchainVersion = selectedJvmTarget.split('.').last().toInt()
 
 kotlin {
     jvmToolchain(toolchainVersion)
-}
 
-tasks.compileKotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(target))
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(selectedJvmTarget))
     }
 }

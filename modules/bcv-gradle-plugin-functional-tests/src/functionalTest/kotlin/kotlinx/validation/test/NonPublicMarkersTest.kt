@@ -6,6 +6,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveTas
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class NonPublicMarkersTest : BaseKotlinGradleTest() {
@@ -24,6 +25,39 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
 
       apiFile(projectName = rootProjectDir.name) {
         resolve("/examples/classes/Properties.dump")
+      }
+
+      runner {
+        arguments.add(":apiCheck")
+      }
+    }
+
+    runner.build {
+      shouldHaveTaskWithOutcome(":apiCheck", SUCCESS)
+    }
+  }
+
+  @Test
+  @Disabled("https://youtrack.jetbrains.com/issue/KT-62259")
+  fun testIgnoredMarkersOnPropertiesForNativeTargets() {
+    val runner = test {
+      settingsGradleKts {
+        resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+      }
+
+      buildGradleKts {
+        resolve("/examples/gradle/base/withNativePlugin.gradle.kts")
+        resolve("/examples/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
+      }
+
+      kotlin("Properties.kt", sourceSet = "commonMain") {
+        resolve("/examples/classes/Properties.kt")
+      }
+
+      commonNativeTargets.forEach {
+        abiFile(projectName = "testproject", target = it) {
+          resolve("/examples/classes/Properties.klib.dump")
+        }
       }
 
       runner {
@@ -70,5 +104,17 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
         val dumpFile = readResourceFile("/examples/classes/AnotherBuildConfig.dump")
         rootProjectApiDump.readText() shouldBe dumpFile
       }
+  }
+
+  companion object {
+    private val commonNativeTargets: Set<String> = setOf(
+      "linuxX64",
+      "linuxArm64",
+      "mingwX64",
+      "androidNativeArm32",
+      "androidNativeArm64",
+      "androidNativeX64",
+      "androidNativeX86"
+    )
   }
 }

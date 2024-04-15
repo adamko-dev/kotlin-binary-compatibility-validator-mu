@@ -1,9 +1,8 @@
 pluginManagement {
   repositories {
-    mavenLocal()
+    mavenCentral()
     gradlePluginPortal()
     google()
-    mavenCentral()
   }
 }
 
@@ -16,5 +15,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "android-project"
+
 include(":kotlin-library")
 include(":java-library")

@@ -58,10 +58,13 @@ private fun haveTask(taskPath: String): Matcher<BuildResult?> =
   neverNullMatcher { value ->
     MatcherResult(
       value.task(taskPath) != null,
-      { "BuildResult should have run task $taskPath. All tasks: ${value.tasks.joinToString { it.path }}" },
-      { "BuildResult should not have run task $taskPath. All tasks: ${value.tasks.joinToString { it.path }}" },
+      { "BuildResult should have run task $taskPath. All tasks: ${value.tasks.toPathAndOutcomeString()}" },
+      { "BuildResult should not have run task $taskPath. All tasks: ${value.tasks.toPathAndOutcomeString()}" },
     )
   }
+
+internal fun Collection<BuildTask>.toPathAndOutcomeString(): String =
+  joinToString { "${it.path} (${it.outcome})" }
 
 infix fun BuildTask?.shouldHaveOutcome(outcome: TaskOutcome) {
   this should haveOutcome(outcome)
@@ -75,8 +78,8 @@ private fun haveOutcome(outcome: TaskOutcome): Matcher<BuildTask?> =
   neverNullMatcher { value ->
     MatcherResult(
       value.outcome == outcome,
-      { "Task ${value.path} should have outcome $outcome" },
-      { "Task ${value.path} should not have outcome $outcome" },
+      { "Task ${value.path} should have outcome $outcome, but was ${value.outcome}" },
+      { "Task ${value.path} should not have outcome $outcome, but was ${value.outcome}" },
     )
   }
 

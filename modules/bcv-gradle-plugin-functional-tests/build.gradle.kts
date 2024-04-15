@@ -20,6 +20,8 @@ dependencies {
   testFixturesApi(libs.kotest.assertionsCore)
   testFixturesApi(libs.kotest.property)
 
+  testFixturesApi("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+
   testFixturesApi(testFixtures(projects.modules.bcvGradlePlugin))
 }
 

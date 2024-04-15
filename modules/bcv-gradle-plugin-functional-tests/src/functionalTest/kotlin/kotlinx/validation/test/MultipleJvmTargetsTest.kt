@@ -62,9 +62,7 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     val runner = test {
       createProjectHierarchyWithPluginOnRoot()
       runner {
-        arguments.add("--continue")
         arguments.add(":check")
-        arguments.add("--stacktrace")
       }
 
       dir("api/jvm/") {

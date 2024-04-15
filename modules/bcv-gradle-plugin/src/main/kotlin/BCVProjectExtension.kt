@@ -1,25 +1,24 @@
 package dev.adamko.kotlin.binary_compatibility_validator
 
-import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
-import dev.adamko.kotlin.binary_compatibility_validator.internal.adding
-import dev.adamko.kotlin.binary_compatibility_validator.internal.domainObjectContainer
+import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
-import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTargetSpec
+import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTargetBaseSpec
+import dev.adamko.kotlin.binary_compatibility_validator.targets.KLibValidationSpec
 import javax.inject.Inject
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.model.ReplacedBy
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.kotlin.dsl.*
 
 abstract class BCVProjectExtension
 @BCVInternalApi
 @Inject
 constructor(
   private val objects: ObjectFactory
-) : BCVTargetSpec, ExtensionAware {
+) : BCVTargetBaseSpec, ExtensionAware {
 
   /** Sets the default [BCVTarget.enabled] value for all [targets]. */
   abstract override val enabled: Property<Boolean>
@@ -46,17 +45,24 @@ constructor(
   /** Sets the default [BCVTarget.ignoredClasses] value for all [targets]. */
   abstract override val ignoredClasses: SetProperty<String>
 
+  @BCVExperimentalApi
+  val klib: KLibValidationSpec =
+    extensions.adding("klib") {
+      objects.newInstance(KLibValidationSpec::class)
+    }
+
   /**
    * The directory that contains the API declarations.
    *
-   * Defaults to [BCVPlugin.API_DIR].
+   * Defaults to `$projectDir/`[BCVPlugin.API_DIR].
    */
   abstract val outputApiDir: DirectoryProperty
 
   abstract val projectName: Property<String>
 
   abstract val kotlinxBinaryCompatibilityValidatorVersion: Property<String>
+  abstract val kotlinCompilerEmbeddableVersion: Property<String>
 
-  val targets: NamedDomainObjectContainer<BCVTarget> =
-    extensions.adding("targets") { objects.domainObjectContainer() }
+  val targets: BCVTargetsContainer =
+    extensions.adding("targets") { objects.bcvTargetsContainer() }
 }

@@ -3,6 +3,7 @@ package kotlinx.validation.test
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.invariantNewlines
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveRunTask
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveTaskWithOutcome
 import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.file.shouldExist
@@ -35,6 +36,41 @@ class PublicMarkersTest : BaseKotlinGradleTest() {
 
     runner.build {
       shouldHaveTaskWithOutcome(":apiCheck", SUCCESS)
+    }
+  }
+
+  /** ⚠️ Public markers are not supported in KLib ABI dumps */
+  @Test
+  fun testPublicMarkersForNativeTargets() {
+    val runner = test {
+      settingsGradleKts {
+        resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+      }
+
+      buildGradleKts {
+        resolve("/examples/gradle/base/withNativePlugin.gradle.kts")
+        resolve("/examples/gradle/configuration/publicMarkers/markers.gradle.kts")
+      }
+
+      kotlin("ClassWithPublicMarkers.kt", sourceSet = "commonMain") {
+        resolve("/examples/classes/ClassWithPublicMarkers.kt")
+      }
+
+      kotlin("ClassInPublicPackage.kt", sourceSet = "commonMain") {
+        resolve("/examples/classes/ClassInPublicPackage.kt")
+      }
+
+      abiFile(projectName = "testproject") {
+        resolve("/examples/classes/ClassWithPublicMarkers.klib.dump")
+      }
+
+      runner {
+        arguments.add(":apiCheck")
+      }
+    }
+
+    runner.build {
+      shouldHaveRunTask(":apiCheck", SUCCESS)
     }
   }
 

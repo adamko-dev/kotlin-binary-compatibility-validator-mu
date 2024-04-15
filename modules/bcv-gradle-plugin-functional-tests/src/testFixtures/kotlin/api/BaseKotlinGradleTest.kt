@@ -10,5 +10,9 @@ open class BaseKotlinGradleTest {
 
   val rootProjectDir: File get() = testProjectDir
 
-  val rootProjectApiDump: File get() = rootProjectDir.resolve("api/${rootProjectDir.name}.api")
+  val rootProjectApiDump: File get() = rootProjectDir.resolve("$API_DIR/${rootProjectDir.name}.api")
+
+  fun rootProjectAbiDump(
+    project: String = rootProjectDir.name
+  ): File = rootProjectDir.resolve("$API_DIR/$project.klib.api")
 }

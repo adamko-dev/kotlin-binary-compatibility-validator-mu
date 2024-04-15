@@ -29,5 +29,6 @@ constructor() : Plugin<PluginAware> {
     const val API_CHECK_TASK_NAME = "apiCheck"
     const val API_DUMP_TASK_NAME = "apiDump"
     const val API_GENERATE_TASK_NAME = "apiGenerate"
+    const val PREPARE_API_GENERATE_TASK_NAME = "prepareApiGenerate"
   }
 }

@@ -20,7 +20,6 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       createProjectWithSubModules()
       runner {
         arguments.add(":kotlin-library:apiDump")
-        arguments.add("--full-stacktrace")
       }
     }
 
@@ -53,7 +52,6 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       createProjectWithSubModules()
       runner {
         arguments.add(":java-library:apiDump")
-        arguments.add("--full-stacktrace")
       }
     }
 

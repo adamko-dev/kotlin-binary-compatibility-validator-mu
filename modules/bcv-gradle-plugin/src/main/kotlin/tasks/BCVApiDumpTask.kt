@@ -9,6 +9,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.PathSensitivity.RELATIVE
 
 @CacheableTask
 abstract class BCVApiDumpTask
@@ -20,7 +21,7 @@ constructor(
 ) : BCVDefaultTask() {
 
   @get:InputFiles
-  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:PathSensitive(RELATIVE)
   abstract val apiDumpFiles: ConfigurableFileCollection
 
   @get:OutputDirectory

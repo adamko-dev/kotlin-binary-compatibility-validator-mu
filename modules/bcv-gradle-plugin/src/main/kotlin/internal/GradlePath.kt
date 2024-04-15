@@ -6,7 +6,8 @@ internal typealias GradlePath = org.gradle.util.Path
 
 internal fun GradlePath(path: String): GradlePath = GradlePath.path(path)
 
-internal val Project.isRootProject get() = this == rootProject
+internal val Project.isRootProject: Boolean
+  get() = this == rootProject
 
 internal val Project.fullPath: String
   get() = when {
