@@ -93,9 +93,14 @@ constructor(
       outputApiBuildDir = outputApiBuildDir,
     )
 
+    // TODO log when klib file doesn't exist
+    // TODO log warning when klibFile has >1 file
+    val klibTargets = enabledTargets.withType<BCVKLibTarget>()
+      .filter { it.klibFile.singleOrNull()?.exists() == true }
+
     generateKLibTargets(
       workQueue = workQueue,
-      klibTargets = enabledTargets.withType<BCVKLibTarget>(),
+      klibTargets = klibTargets,
       outputApiBuildDir = outputApiBuildDir,
     )
 
