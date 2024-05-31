@@ -7,17 +7,16 @@ import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType.*
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetsContainer
 import org.jetbrains.kotlin.konan.target.HostManager
 
-private val logger: Logger = Logging.getLogger("dev.adamko.kotlin.binary_compatibility_validator.adapters.KotlinMultiplatformAdapter")
+private val logger: Logger =
+  Logging.getLogger("dev.adamko.kotlin.binary_compatibility_validator.adapters.KotlinMultiplatformAdapter")
 
 internal fun createKotlinMultiplatformTargets(
   project: Project,
@@ -79,7 +78,7 @@ private fun registerKotlinKLibCompilation(
   providers: ProviderFactory,
 ) {
   extension.targets.register<BCVKLibTarget>(target.targetName) {
-    logger.lifecycle("registering KLib target ${target.targetName}")
+    logger.info("BCV: registering KLib target ${target.targetName}")
 //    enabled.convention(false)
 
     target.compilations
