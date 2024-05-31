@@ -59,6 +59,14 @@ testing.suites {
           "devMavenRepoDir",
           devPublish.devMavenRepo.asFile.get().invariantSeparatorsPath,
         )
+        val tmpDir = layout.buildDirectory.dir("test-temp").get().asFile
+        systemProperty(
+          "java.io.tmpdir",
+          tmpDir.absoluteFile.invariantSeparatorsPath
+        )
+        doFirst {
+          tmpDir.mkdirs()
+        }
       }
     }
   }

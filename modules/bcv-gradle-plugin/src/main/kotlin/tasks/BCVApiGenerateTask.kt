@@ -1,13 +1,12 @@
 package dev.adamko.kotlin.binary_compatibility_validator.tasks
 
-import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVExperimentalApi
-import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
-import dev.adamko.kotlin.binary_compatibility_validator.internal.adding
-import dev.adamko.kotlin.binary_compatibility_validator.internal.domainObjectContainer
+import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVKLibTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
 import dev.adamko.kotlin.binary_compatibility_validator.workers.JvmSignaturesWorker
+import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibInferSignaturesWorker
+import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibMergeWorker
 import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibSignaturesWorker
 import java.io.File
 import javax.inject.Inject
@@ -19,6 +18,7 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.kotlin.dsl.*
 import org.gradle.workers.WorkQueue
 import org.gradle.workers.WorkerExecutor
@@ -47,16 +47,24 @@ constructor(
 
   @get:Input
   abstract val projectName: Property<String>
-//
-//  /**
-//   * A directory containing a copy of any currently existing API Dump files.
-//   * Provided by [BCVApiGeneratePreparationTask].
-//   */
-//  @get:InputFiles
-//  abstract val extantApiDumpDir: DirectoryProperty
+
+  /**
+   * A directory containing a copy of any currently existing API Dump files.
+   * Provided by [BCVApiGeneratePreparationTask].
+   */
+  @get:InputDirectory
+  @get:PathSensitive(RELATIVE)
+  @get:Optional
+  abstract val extantApiDumpDir: DirectoryProperty
 
   @get:OutputDirectory
   abstract val outputApiBuildDir: DirectoryProperty
+
+  @get:LocalState
+  val supportedTargetsDir: File get() = temporaryDir.resolve("klib-supported")
+
+  @get:LocalState
+  val unsupportedTargetsDir: File get() = temporaryDir.resolve("klib-unsupported")
 
   @TaskAction
   fun generate() {
@@ -65,6 +73,12 @@ constructor(
     val outputApiBuildDir = outputApiBuildDir.get()
     fs.delete { delete(outputApiBuildDir) }
     outputApiBuildDir.asFile.mkdirs()
+
+    fs.delete { delete(supportedTargetsDir) }
+    supportedTargetsDir.mkdirs()
+
+    fs.delete { delete(unsupportedTargetsDir) }
+    unsupportedTargetsDir.mkdirs()
 
     logger.lifecycle("[$path] got ${targets.size} targets : ${targets.joinToString { it.name }}")
 
@@ -166,24 +180,52 @@ constructor(
       klibTargets.partition { it.supportedByCurrentHost.get() }
     logger.lifecycle("[$path] generating ${supportedKLibTargets.size} supported KLib targets : ${supportedKLibTargets.joinToString { it.name }}")
 
-    supportedKLibTargets.forEach { target ->
-      workQueue.submit(
-        target = target,
-        outputDir = outputApiBuildDir.asFile,
-      )
+    val supportedKLibGenDuration = measureTime {
+      supportedKLibTargets.forEach { target ->
+        workQueue.submit(
+          target = target,
+          outputDir = supportedTargetsDir,
+        )
+      }
+      workQueue.await()
     }
-
-    workQueue.await()
-    logger.lifecycle("[$path] finished generating supported KLib targets.")
+    logger.lifecycle("[$path] finished generating supported KLib targets in $supportedKLibGenDuration")
 
     logger.lifecycle("[$path] generating ${unsupportedKLibTargets.size} unsupported KLib targets : ${unsupportedKLibTargets.joinToString { it.name }}")
 
-    supportedKLibTargets.forEach { target ->
-      workQueue.submit(
-        target = target,
-        outputDir = outputApiBuildDir.asFile,
-      )
+    val unsupportedKLibGenDuration = measureTime {
+      unsupportedKLibTargets.forEach { target ->
+        workQueue.inferKLib(
+          target = target,
+          supportedTargetDumpFiles = supportedTargetsDir.walk().filter { it.isFile }.toSet(),
+          extantApiDumpFile = extantApiDumpDir.asFile.orNull?.walk()?.filter { it.isFile }
+            ?.firstOrNull(),
+          outputDir = unsupportedTargetsDir,
+        )
+      }
     }
+    logger.lifecycle("[$path] finished generating unsupported KLib targets in $unsupportedKLibGenDuration")
+
+    workQueue.await()
+
+    val allTargetDumpFiles =
+      supportedTargetsDir.walk().filter { it.isFile }.toSet() union
+          unsupportedTargetsDir.walk().filter { it.isFile }.toSet()
+
+    logger.lifecycle("[$path] merging ${allTargetDumpFiles.size} dump files : ${allTargetDumpFiles.joinToString { it.name }}")
+
+    workQueue.merge(
+      projectName.get(),
+      targetDumpFiles = allTargetDumpFiles,
+      outputDir = outputApiBuildDir.asFile,
+    )
+    workQueue.await()
+
+    logger.lifecycle(
+      "[$path] merged ${allTargetDumpFiles.size} dump files : ${
+        outputApiBuildDir.asFile.walk().filter { it.isFile }.toList()
+      }"
+    )
   }
 
   @OptIn(BCVExperimentalApi::class)
@@ -202,13 +244,53 @@ constructor(
 
       this@worker.klib.set(target.klibFile.singleFile)
       this@worker.signatureVersion.set(target.signatureVersion)
-      this@worker.supportedByCurrentHost.set(target.supportedByCurrentHost)
+//      this@worker.supportedByCurrentHost.set(target.supportedByCurrentHost)
 
 //      this@worker.targets.addAll(klibTargets)
 
       this@worker.ignoredPackages.set(target.ignoredPackages)
       this@worker.ignoredMarkers.set(target.ignoredMarkers)
       this@worker.ignoredClasses.set(target.ignoredClasses)
+    }
+  }
+
+  @OptIn(BCVExperimentalApi::class)
+  private fun WorkQueue.inferKLib(
+    target: BCVKLibTarget,
+    supportedTargetDumpFiles: Set<File>,
+    extantApiDumpFile: File?,
+    outputDir: File,
+  ) {
+    val task = this@BCVApiGenerateTask
+
+    @OptIn(BCVInternalApi::class)
+    submit(KLibInferSignaturesWorker::class) worker@{
+      this@worker.targetName.set(target.name)
+      this@worker.taskPath.set(task.path)
+
+      this@worker.outputApiDir.set(outputDir)
+
+      this@worker.supportedTargetDumpFiles.from(supportedTargetDumpFiles)
+      this@worker.extantApiDumpFile.set(extantApiDumpFile)
+    }
+  }
+
+  @OptIn(BCVExperimentalApi::class)
+  private fun WorkQueue.merge(
+    projectName: String,
+    targetDumpFiles: Set<File>,
+    outputDir: File,
+  ) {
+    val task = this@BCVApiGenerateTask
+
+    @OptIn(BCVInternalApi::class)
+    submit(KLibMergeWorker::class) worker@{
+      this@worker.projectName.set(projectName)
+      this@worker.taskPath.set(task.path)
+
+      this@worker.outputApiDir.set(outputDir)
+
+      this@worker.targetDumpFiles.from(targetDumpFiles)
     }
   }
   //endregion

@@ -21,6 +21,7 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjec
 	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getKotlinCompilerEmbeddableVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getKotlinxBinaryCompatibilityValidatorVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getOutputApiDir ()Lorg/gradle/api/file/DirectoryProperty;
@@ -86,13 +87,11 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/B
 	public final fun getPlatformType ()Ljava/lang/String;
 }
 
-public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVKLibTarget : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget, dev/adamko/kotlin/binary_compatibility_validator/targets/KLibValidationSpec, org/gradle/api/Named {
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVKLibTarget : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget, dev/adamko/kotlin/binary_compatibility_validator/targets/KLibValidationSpec, java/io/Serializable, org/gradle/api/Named {
 	public abstract fun getCompilationDependencies ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getCurrentPlatform ()Lorg/gradle/api/provider/Property;
 	public abstract fun getHasKotlinSources ()Lorg/gradle/api/provider/Property;
-	public abstract fun getInputAbiFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getKlibFile ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getOutputAbiFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getSupportedByCurrentHost ()Lorg/gradle/api/provider/Property;
 	public final fun getTargetName ()Ljava/lang/String;
 }
@@ -150,11 +149,14 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVApiGenerateTask : dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVDefaultTask {
 	public final fun generate ()V
+	public abstract fun getExtantApiDumpDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getInputDependencies ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getOutputApiBuildDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun getSupportedTargetsDir ()Ljava/io/File;
 	public final fun getTargets ()Lorg/gradle/api/NamedDomainObjectContainer;
+	public final fun getUnsupportedTargetsDir ()Ljava/io/File;
 }
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVDefaultTask : org/gradle/api/DefaultTask {

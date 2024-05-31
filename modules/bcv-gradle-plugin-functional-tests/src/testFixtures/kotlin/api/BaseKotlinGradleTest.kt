@@ -6,9 +6,9 @@ import org.junit.jupiter.api.io.TempDir
 
 open class BaseKotlinGradleTest {
   @TempDir(cleanup = ON_SUCCESS)
-  lateinit var testProjectDir: File
+  lateinit var testTempDir: File
 
-  val rootProjectDir: File get() = testProjectDir
+  val rootProjectDir: File get() = testTempDir.resolve("bcv-test-project")
 
   val rootProjectApiDump: File get() = rootProjectDir.resolve("$API_DIR/${rootProjectDir.name}.api")
 

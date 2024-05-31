@@ -2,10 +2,12 @@ package kotlinx.validation.test
 
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import io.kotest.assertions.withClue
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.file.shouldNotExist
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
 import java.nio.file.Files
@@ -790,14 +792,16 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     projectName: String = "testproject",
     dumpTask: String = ":apiDump",
   ) {
-    shouldHaveRunTask(dumpTask, SUCCESS)
+    withClue(output) {
+      shouldHaveRunTask(dumpTask, SUCCESS)
 
-    val generatedDump = rootProjectAbiDump(projectName)
+      val generatedDump = rootProjectAbiDump(projectName)
 
-    generatedDump.shouldExist()
+      generatedDump.shouldExist()
 
-    val expected = readResourceFile(expectedDumpFileName)
-    generatedDump.readText().invariantNewlines().shouldBeEqualComparingTo(expected)
+      val expected = readResourceFile(expectedDumpFileName)
+      generatedDump.readText().invariantNewlines() shouldBe expected
+    }
   }
 
   companion object {

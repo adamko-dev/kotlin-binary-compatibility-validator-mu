@@ -5,6 +5,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_DUMP_TASK_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.API_GENERATE_TASK_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.EXTENSION_NAME
+import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.PREPARE_API_GENERATE_TASK_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_CONFIGURATION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.BCVPlugin.Companion.RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME
 import dev.adamko.kotlin.binary_compatibility_validator.adapters.createJavaTestFixtureTargets
@@ -193,12 +194,12 @@ constructor(
 
 
   private fun registerBcvTasks(project: Project) {
-//    val prepareApiGenerateTask =
-//      project.tasks.register(PREPARE_API_GENERATE_TASK_NAME, BCVApiGeneratePreparationTask::class)
-//
+    val prepareApiGenerateTask =
+      project.tasks.register(PREPARE_API_GENERATE_TASK_NAME, BCVApiGeneratePreparationTask::class)
+
     val apiGenerateTask =
       project.tasks.register(API_GENERATE_TASK_NAME, BCVApiGenerateTask::class) {
-//        extantApiDumpDir.convention(prepareApiGenerateTask.flatMap { it.apiDirectory })
+        extantApiDumpDir.convention(prepareApiGenerateTask.flatMap { it.apiDirectory })
       }
 
     project.tasks.register(API_DUMP_TASK_NAME, BCVApiDumpTask::class) {
