@@ -5,7 +5,6 @@ import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import java.io.Serializable
 import org.gradle.api.Named
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
@@ -28,8 +27,10 @@ constructor(
   @get:Input
   abstract val currentPlatform: Property<String> // for up-to-date checks?
 
+  @BCVInternalApi // should only be used in tests
   @get:Input
   abstract val supportedByCurrentHost: Property<Boolean>
+
   @get:Input
   abstract val hasKotlinSources: Property<Boolean>
 

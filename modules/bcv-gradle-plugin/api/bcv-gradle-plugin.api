@@ -92,7 +92,6 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/B
 	public abstract fun getCurrentPlatform ()Lorg/gradle/api/provider/Property;
 	public abstract fun getHasKotlinSources ()Lorg/gradle/api/provider/Property;
 	public abstract fun getKlibFile ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getSupportedByCurrentHost ()Lorg/gradle/api/provider/Property;
 	public final fun getTargetName ()Ljava/lang/String;
 }
 
