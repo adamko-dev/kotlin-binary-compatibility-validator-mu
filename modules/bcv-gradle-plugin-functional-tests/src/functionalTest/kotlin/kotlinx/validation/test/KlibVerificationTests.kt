@@ -28,7 +28,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
     }
     gradleProperties {
-      addLine("kotlin.mpp.stability.nowarn=true\n")
+      addLine("kotlin.mpp.stability.nowarn=true")
     }
     buildGradleKts {
       resolve("/examples/gradle/base/withNativePlugin.gradle.kts")
@@ -371,7 +371,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      shouldHaveTaskWithOutcome(":klibApiExtractForValidation", FAILED)
+      shouldHaveTaskWithOutcome(":apiCheck", FAILED)
     }
   }
 
@@ -383,13 +383,13 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
       runner {
         arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
     runner.build {
       checkKLibDump(
         "/examples/classes/TopLevelDeclarations.klib.with.linux.dump",
-        dumpTask = ":klibApiDump"
+        dumpTask = ":apiDump"
       )
     }
   }
@@ -500,15 +500,12 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         resolve("/examples/classes/AnotherBuildConfigLinuxArm64.kt")
       }
       runner {
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
 
     runner.build {
-      checkKLibDump(
-        "/examples/classes/AnotherBuildConfig.klib.clash.dump",
-        dumpTask = ":klibApiDump"
-      )
+      checkKLibDump("/examples/classes/AnotherBuildConfig.klib.clash.dump")
     }
   }
 
@@ -546,13 +543,13 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         resolve("/examples/classes/AnotherBuildConfigLinuxArm64.kt")
       }
       runner {
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
     runner.build {
       checkKLibDump(
         "/examples/classes/AnotherBuildConfigLinux.klib.grouping.dump",
-        dumpTask = ":klibApiDump"
+        dumpTask = ":apiDump"
       )
     }
   }

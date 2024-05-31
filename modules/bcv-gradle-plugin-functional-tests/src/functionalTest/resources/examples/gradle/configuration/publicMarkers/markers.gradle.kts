@@ -1,4 +1,4 @@
-configure<dev.adamko.kotlin.binary_compatibility_validator.BCVProjectExtension> {
+binaryCompatibilityValidator {
   publicMarkers.add("foo.PublicClass")
   publicMarkers.add("foo.PublicField")
   publicMarkers.add("foo.PublicProperty")
