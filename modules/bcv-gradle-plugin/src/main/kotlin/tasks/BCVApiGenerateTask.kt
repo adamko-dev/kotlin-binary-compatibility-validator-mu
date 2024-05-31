@@ -84,12 +84,9 @@ constructor(
 
     val enabledTargets = targets.matching { it.enabled.getOrElse(true) }
 
-    logger.lifecycle("[$path] ${enabledTargets.size} enabledTargets : ${enabledTargets.joinToString { it.name }}")
-
     generateJvmTargets(
       workQueue = workQueue,
       jvmTargets = enabledTargets.withType<BCVJvmTarget>(),
-      enabledTargets = enabledTargets.size,
       outputApiBuildDir = outputApiBuildDir,
     )
 
@@ -97,6 +94,7 @@ constructor(
     // TODO log warning when klibFile has >1 file
     val klibTargets = enabledTargets.withType<BCVKLibTarget>()
       .filter { it.klibFile.singleOrNull()?.exists() == true }
+      .sortedBy { it.targetName }
 
     generateKLibTargets(
       workQueue = workQueue,
@@ -124,13 +122,16 @@ constructor(
     workQueue: WorkQueue,
     outputApiBuildDir: Directory,
     jvmTargets: Collection<BCVJvmTarget>,
-    enabledTargets: Int,
   ) {
-    if (jvmTargets.isEmpty()) return
+    if (jvmTargets.isEmpty()) {
+      logger.info("[$path] No enabled JVM targets")
+      return
+    }
+
     logger.lifecycle("[$path] generating ${jvmTargets.size} JVM targets : ${jvmTargets.joinToString { it.name }}")
 
     jvmTargets.forEach { target ->
-      val outputDir = if (enabledTargets == 1) {
+      val outputDir = if (jvmTargets.size == 1) {
         outputApiBuildDir
       } else {
         outputApiBuildDir.dir(target.platformType)
@@ -249,6 +250,7 @@ constructor(
 
       this@worker.klib.set(target.klibFile.singleFile)
       this@worker.signatureVersion.set(target.signatureVersion)
+      this@worker.strictValidation.set(target.strictValidation)
 //      this@worker.supportedByCurrentHost.set(target.supportedByCurrentHost)
 
 //      this@worker.targets.addAll(klibTargets)

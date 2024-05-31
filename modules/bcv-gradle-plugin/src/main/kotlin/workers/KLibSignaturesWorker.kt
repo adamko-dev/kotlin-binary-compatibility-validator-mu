@@ -32,8 +32,7 @@ abstract class KLibSignaturesWorker : WorkAction<KLibSignaturesWorker.Parameters
     val ignoredClasses: SetProperty<String>
 
     val signatureVersion: Property<KLibSignatureVersion>
-
-//    val targets: ListProperty<BCVKLibTarget>
+    val strictValidation: Property<Boolean>
 
     /**
      * [Task path][org.gradle.api.Task.getPath] of the task that invoked this worker,
@@ -46,16 +45,19 @@ abstract class KLibSignaturesWorker : WorkAction<KLibSignaturesWorker.Parameters
     val outputFile = parameters.outputApiDir.asFile.get()
       .resolve("${parameters.targetName.get()}.klib.api")
 
+    val filters = KLibDumpFilters {
+      ignoredClasses += parameters.ignoredClasses.get()
+      ignoredPackages += parameters.ignoredPackages.get()
+      nonPublicMarkers += parameters.ignoredMarkers.get()
+      signatureVersion = parameters.signatureVersion.get().convert()
+    }
+
+    logger.lifecycle("[${parameters.taskPath.get()}:KLibSignaturesWorker] ${filters.toPrettyString()}}")
+
     val dump = KlibDump.fromKlib(
       klibFile = parameters.klib.get().asFile,
       configurableTargetName = parameters.targetName.get(),
-      filters = KLibDumpFilters {
-        ignoredClasses += parameters.ignoredClasses.get()
-        ignoredPackages += parameters.ignoredPackages.get()
-        nonPublicMarkers += parameters.ignoredMarkers.get()
-        signatureVersion = parameters.signatureVersion.get().convert()
-        logger.lifecycle("[${parameters.taskPath.get()}:KLibSignaturesWorker] signatureVersion:$signatureVersion")
-      }
+      filters = filters,
     )
 
     dump.saveTo(outputFile)
@@ -73,5 +75,13 @@ abstract class KLibSignaturesWorker : WorkAction<KLibSignaturesWorker.Parameters
 
     private fun KlibTarget(configName: String, targetName: String): KlibTarget =
       KlibTarget.parse("${configName}.${targetName}")
+
+    private fun KlibDumpFilters.toPrettyString(): String =
+      buildList {
+        add("ignoredPackages=$ignoredPackages")
+        add("ignoredClasses=$ignoredClasses")
+        add("nonPublicMarkers=$nonPublicMarkers")
+        add("signatureVersion=$signatureVersion")
+      }.joinToString(", ", prefix = "KLibDumpFilters(", postfix = ")")
   }
 }

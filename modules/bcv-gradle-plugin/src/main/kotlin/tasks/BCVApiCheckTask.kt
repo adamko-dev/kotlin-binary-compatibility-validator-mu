@@ -9,6 +9,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.internal.fullPath
 import java.io.File
 import java.util.TreeMap
 import javax.inject.Inject
+import kotlin.io.path.listDirectoryEntries
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileVisitDetails
 import org.gradle.api.file.RelativePath
@@ -51,6 +52,17 @@ constructor(
   private val apiDumpTaskPath: GradlePath = GradlePath(project.path).child(API_DUMP_TASK_NAME)
 
   private val rootDir: File = project.rootProject.rootDir
+
+  init {
+    super.onlyIf { task ->
+      require(task is BCVApiCheckTask)
+      task.apiBuildDir.orNull?.asFile
+        ?.takeIf(File::exists)
+        ?.toPath()
+        ?.listDirectoryEntries()
+        ?.isNotEmpty() == true
+    }
+  }
 
   @TaskAction
   fun verify() {
@@ -156,8 +168,8 @@ constructor(
 /**
  * We use case-insensitive comparison to workaround issues with case-insensitive OSes and Gradle
  * behaving slightly different on different platforms. We neither know original sensitivity of
- * existing .api files, not build ones, because projectName that is part of the path can have any
- * sensitivity. To work around that, we replace paths we are looking for the same paths that
+ * existing `.api` files, not build ones, because `projectName` that is part of the path can have
+ * any sensitivity. To work around that, we replace paths we are looking for the same paths that
  * actually exist on the FS.
  */
 private class RelativePaths(

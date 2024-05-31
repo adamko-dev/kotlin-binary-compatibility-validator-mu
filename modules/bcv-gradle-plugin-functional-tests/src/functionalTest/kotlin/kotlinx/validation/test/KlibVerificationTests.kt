@@ -4,13 +4,10 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import io.kotest.assertions.withClue
 import io.kotest.inspectors.shouldForAll
-import io.kotest.matchers.comparables.shouldBeEqualComparingTo
+import io.kotest.matchers.file.shouldBeEmptyDirectory
 import io.kotest.matchers.file.shouldExist
-import io.kotest.matchers.file.shouldNotExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import java.io.File
-import java.nio.file.Files
 import kotlin.io.path.Path
 import kotlin.io.path.name
 import org.gradle.testkit.runner.BuildResult
@@ -143,7 +140,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       jvmApiDump.shouldExist()
 
       val expected = readResourceFile("/examples/classes/AnotherBuildConfig.dump")
-      jvmApiDump.readText().invariantNewlines().shouldBeEqualComparingTo(expected)
+      jvmApiDump.readText().invariantNewlines().shouldBe(expected.invariantNewlines())
     }
   }
 
@@ -386,19 +383,13 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       baseProjectSetting()
       addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
       addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
-
       disableKLibTargets("linuxArm64")
-
       runner {
-//        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
         arguments.add(":apiDump")
       }
     }
     runner.build {
-      checkKLibDump(
-        "/examples/classes/TopLevelDeclarations.klib.with.linux.dump",
-        dumpTask = ":apiDump"
-      )
+      checkKLibDump("/examples/classes/TopLevelDeclarations.klib.with.linux.dump")
     }
   }
 
@@ -419,14 +410,11 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
 
       runner {
 //        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linux")
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
     runner.build {
-      checkKLibDump(
-        "/examples/classes/TopLevelDeclarations.klib.with.guessed.linux.dump",
-        dumpTask = ":klibApiDump"
-      )
+      checkKLibDump("/examples/classes/TopLevelDeclarations.klib.with.guessed.linux.dump")
     }
   }
 
@@ -446,7 +434,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
 
       runner {
 //        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
 
@@ -475,7 +463,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
 //          "-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64,linuxX64,mingwX64," +
 //              "androidNativeArm32,androidNativeArm64,androidNativeX64,androidNativeX86"
 //        )
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
 
@@ -507,7 +495,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
 //          "-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64,linuxX64,mingwX64," +
 //              "androidNativeArm32,androidNativeArm64,androidNativeX64,androidNativeX86"
 //        )
-        arguments.add(":klibApiCheck")
+        arguments.add(":apiCheck")
       }
     }
 
@@ -553,15 +541,12 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
       addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
       runner {
-        arguments.add(":klibApiDump")
+        arguments.add(":apiDump")
       }
     }
 
     runner.build {
-      checkKLibDump(
-        "/examples/classes/AnotherBuildConfig.klib.custom.dump",
-        dumpTask = ":klibApiDump"
-      )
+      checkKLibDump("/examples/classes/AnotherBuildConfig.klib.custom.dump")
     }
   }
 
@@ -579,10 +564,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
     }
     runner.build {
-      checkKLibDump(
-        "/examples/classes/AnotherBuildConfigLinux.klib.grouping.dump",
-        dumpTask = ":apiDump"
-      )
+      checkKLibDump("/examples/classes/AnotherBuildConfigLinux.klib.grouping.dump")
     }
   }
 
@@ -637,16 +619,9 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     // Update the source file by adding a declaration
-    val updatedSourceFile = File(
-      this::class.java.getResource(
-        "/examples/classes/AnotherBuildConfigModified.kt"
-      )!!.toURI()
-    )
-    val existingSource = runner.projectDir.resolve(
-      "src/commonMain/kotlin/AnotherBuildConfig.kt"
-    )
-    Files.write(existingSource.toPath(), updatedSourceFile.readBytes())
-
+    val updatedSourceFile = readResourceFile("/examples/classes/AnotherBuildConfigModified.kt")
+    val existingSource = runner.projectDir.resolve("src/commonMain/kotlin/AnotherBuildConfig.kt")
+    existingSource.writeText(updatedSourceFile)
 
     runner.build {
       checkKLibDump("/examples/classes/AnotherBuildConfigModified.klib.dump")
@@ -666,20 +641,13 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     runner.build {
       checkKLibDump("/examples/classes/AnotherBuildConfig.klib.dump")
       // Update the source file by adding a declaration
-      val updatedSourceFile = File(
-        this::class.java.getResource(
-          "/examples/classes/AnotherBuildConfigLinuxArm64.kt"
-        )!!.toURI()
-      )
-      val existingSource = runner.projectDir.resolve(
-        "src/linuxArm64Main/kotlin/AnotherBuildConfigLinuxArm64.kt"
-      )
+      val updatedSourceFile = readResourceFile("/examples/classes/AnotherBuildConfigLinuxArm64.kt")
+      val existingSource =
+        runner.projectDir.resolve("src/linuxArm64Main/kotlin/AnotherBuildConfigLinuxArm64.kt")
       existingSource.parentFile.mkdirs()
-      Files.write(existingSource.toPath(), updatedSourceFile.readBytes())
-
+      existingSource.writeText(updatedSourceFile)
 
       runner.build {
-
         checkKLibDump("/examples/classes/AnotherBuildConfigLinuxArm64Extra.klib.dump")
       }
     }
@@ -702,18 +670,12 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     // Update the source file by adding a declaration
-    val updatedSourceFile = File(
-      this::class.java.getResource(
-        "/examples/classes/AnotherBuildConfigModified.kt"
-      )!!.toURI()
-    )
-    val existingSource = runner.projectDir.resolve(
-      "src/commonMain/kotlin/AnotherBuildConfig.kt"
-    )
-    Files.write(existingSource.toPath(), updatedSourceFile.readBytes())
+    val updatedSourceFile = readResourceFile("/examples/classes/AnotherBuildConfigModified.kt")
+    val existingSource = runner.projectDir.resolve("src/commonMain/kotlin/AnotherBuildConfig.kt")
+    existingSource.writeText(updatedSourceFile)
 
     runner.buildAndFail {
-      shouldHaveTaskWithOutcome(":klibApiCheck", FAILED)
+      shouldHaveTaskWithOutcome(":apiCheck", FAILED)
     }
   }
 
@@ -746,8 +708,8 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveTaskWithOutcome(":klibApiCheck", SKIPPED)
-      rootProjectApiDump.parentFile.shouldNotExist()
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS)
+      rootProjectApiDump.parentFile.shouldBeEmptyDirectory()
     }
   }
 
@@ -777,7 +739,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
     }
     runner.build {
-      shouldHaveRunTask(":apiCheck", SUCCESS)
+      shouldHaveRunTask(":apiCheck", SKIPPED)
     }
   }
 
@@ -819,10 +781,9 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
   private fun BuildResult.checkKLibDump(
     expectedDumpFileName: String,
     projectName: String = "testproject",
-    dumpTask: String = ":apiDump",
   ) {
     withClue(output) {
-      shouldHaveRunTask(dumpTask, SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS)
 
       val generatedDump = rootProjectAbiDump(projectName)
 
@@ -840,12 +801,13 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     private fun BaseKotlinScope.disableKLibTargets(vararg targetNames: String) {
       buildGradleKts {
         val disabledTargets =
-          targetNames.joinToString(separator = ", ", prefix = "setOf(", postfix = ")")
+          targetNames.joinToString(", ") { "\"$it\"" }
         addText(
           """
-            |binaryCompatibilityValidator.targets.withType<BCVKLibTarget>()
-            |    .matching { it.targetName in $disabledTargets }
-            |    .configureEach { this.supportedByCurrentHost.set(false) }
+            |binaryCompatibilityValidator.targets
+            |    .withType<dev.adamko.kotlin.binary_compatibility_validator.targets.BCVKLibTarget>()
+            |    .matching { it.targetName in setOf($disabledTargets) }
+            |    .configureEach { supportedByCurrentHost.set(false) }
             |
           """.trimMargin()
         )
