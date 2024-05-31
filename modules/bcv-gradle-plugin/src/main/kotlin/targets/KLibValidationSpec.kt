@@ -37,6 +37,13 @@ interface KLibValidationSpec {
   val signatureVersion: Property<KLibSignatureVersion>
 
   /**
+   * Sets the value of [signatureVersion].
+   * @see signatureVersion
+   */
+  fun signatureVersion(version: Int): Unit =
+    signatureVersion.set(KLibSignatureVersion.of(version))
+
+  /**
    * Fail validation if some build targets are not supported by the host compiler.
    * By default, ABI dumped only for supported files will be validated. This option makes validation behavior
    * stricter and treats having unsupported targets as an error.
