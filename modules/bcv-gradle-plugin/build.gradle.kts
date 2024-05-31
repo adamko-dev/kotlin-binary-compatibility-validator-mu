@@ -129,6 +129,8 @@ publishing {
 val createBCVProperties by tasks.registering {
   val bcvVersion = libs.versions.kotlinx.bcv
   inputs.property("bcvVersion", bcvVersion)
+  val kotlinVersion = libs.versions.kotlinGradle
+  inputs.property("kotlinVersion", kotlinVersion)
 
   val generatedSource = layout.buildDirectory.dir("generated-src/main/kotlin/")
   outputs.dir(generatedSource)
@@ -146,6 +148,7 @@ val createBCVProperties by tasks.registering {
           |
           |internal object BCVProperties {
           |  const val bcvVersion: String = "${bcvVersion.get()}"
+          |  const val kotlinVersion: String = "${kotlinVersion.get()}"
           |}
           |
         """.trimMargin()

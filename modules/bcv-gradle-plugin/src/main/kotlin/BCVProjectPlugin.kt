@@ -65,7 +65,7 @@ constructor(
       outputApiDir.convention(layout.projectDirectory.dir(API_DIR))
       projectName.convention(providers.provider { project.name })
       kotlinxBinaryCompatibilityValidatorVersion.convention(BCVProperties.bcvVersion)
-      kotlinCompilerEmbeddableVersion.convention("1.9.22")
+      kotlinCompilerEmbeddableVersion.convention(BCVProperties.kotlinVersion)
 
       // have to set conventions because otherwise .add("...") doesn't work
       ignoredMarkers.convention(emptyList())
