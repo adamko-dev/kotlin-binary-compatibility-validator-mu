@@ -55,16 +55,17 @@ infix fun BuildResult?.shouldNotHaveRunTask(taskPath: String) {
 }
 
 private fun haveTask(taskPath: String): Matcher<BuildResult?> =
-  neverNullMatcher { value ->
+  neverNullMatcher { result ->
     MatcherResult(
-      value.task(taskPath) != null,
-      { "BuildResult should have run task $taskPath. All tasks: ${value.tasks.toPathAndOutcomeString()}" },
-      { "BuildResult should not have run task $taskPath. All tasks: ${value.tasks.toPathAndOutcomeString()}" },
+      result.task(taskPath) != null,
+      { "BuildResult should have run task $taskPath. All tasks: ${result.tasks.toPathAndOutcomeString()}" },
+      { "BuildResult should not have run task $taskPath. All tasks: ${result.tasks.toPathAndOutcomeString()}" },
     )
   }
 
 internal fun Collection<BuildTask>.toPathAndOutcomeString(): String =
   joinToString { "${it.path} (${it.outcome})" }
+    .ifEmpty { "<no tasks found>" }
 
 infix fun BuildTask?.shouldHaveOutcome(outcome: TaskOutcome) {
   this should haveOutcome(outcome)
