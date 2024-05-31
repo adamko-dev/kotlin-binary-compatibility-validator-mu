@@ -15,7 +15,6 @@ import dev.adamko.kotlin.binary_compatibility_validator.adapters.createKotlinMul
 import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVKLibTarget
-import dev.adamko.kotlin.binary_compatibility_validator.targets.KLibSignatureVersion
 import dev.adamko.kotlin.binary_compatibility_validator.tasks.*
 import java.io.File
 import javax.inject.Inject
@@ -92,7 +91,7 @@ constructor(
       withType<BCVKLibTarget>().configureEach {
         enabled.convention(extension.klib.enabled)
 
-        signatureVersion.convention(KLibSignatureVersion.Latest)
+        signatureVersion.convention(extension.klib.signatureVersion)
         strictValidation.convention(false)
         supportedByCurrentHost.convention(false)
       }
