@@ -53,7 +53,7 @@ internal fun Configuration.declarable(
  * ```
  */
 internal fun Configuration.consumable(
-  visible: Boolean = true,
+  visible: Boolean = false,
 ) {
   isCanBeResolved = false
   isCanBeConsumed = true
@@ -152,9 +152,12 @@ fun ProjectLayout.generatedKotlinDslAccessorDirs(): Set<File> {
     "kotlin-dsl-plugins",
   )
 
-  return projectDirectory.asFile.walk()
+  return projectDirectory.dir("buildSrc/build/generated-sources")
+    .asFile
+    .walk()
     .filter { it.isDirectory && it.parentFile.name in generatedSrcDirs }
     .flatMap { file ->
       file.walk().maxDepth(1).filter { it.isDirectory }.toList()
-    }.toSet()
+    }
+    .toSet()
 }
