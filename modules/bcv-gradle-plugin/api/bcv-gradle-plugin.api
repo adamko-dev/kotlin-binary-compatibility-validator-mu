@@ -166,6 +166,10 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 public final class dev/adamko/kotlin/binary_compatibility_validator/workers/JvmSignaturesWorker$Companion {
 }
 
+public final class org/gradle/kotlin/dsl/AssignKt {
+	public static final fun assign (Lorg/gradle/api/provider/Property;I)V
+}
+
 public final class org/gradle/kotlin/dsl/BcvGradleDslAccessorsKt {
 	public static final fun binaryCompatibilityValidator (Lorg/gradle/api/initialization/Settings;Lkotlin/jvm/functions/Function1;)V
 	public static final fun getBinaryCompatibilityValidator (Lorg/gradle/api/initialization/Settings;)Ldev/adamko/kotlin/binary_compatibility_validator/BCVSettingsPlugin$Extension;
