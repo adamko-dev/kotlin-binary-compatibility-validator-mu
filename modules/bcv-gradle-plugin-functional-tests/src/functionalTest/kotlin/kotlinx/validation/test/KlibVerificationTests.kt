@@ -229,7 +229,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
     }
 
-
     runner.build {
       checkKLibDump("/examples/classes/Subclasses.klib.dump")
     }

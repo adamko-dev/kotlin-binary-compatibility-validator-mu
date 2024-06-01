@@ -4,10 +4,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVKLibTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
-import dev.adamko.kotlin.binary_compatibility_validator.workers.JvmSignaturesWorker
-import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibInferSignaturesWorker
-import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibMergeWorker
-import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibSignaturesWorker
+import dev.adamko.kotlin.binary_compatibility_validator.workers.*
 import java.io.File
 import javax.inject.Inject
 import org.gradle.api.NamedDomainObjectContainer
@@ -184,6 +181,23 @@ constructor(
 
     val (supportedKLibTargets, unsupportedKLibTargets) =
       klibTargets.partition { it.supportedByCurrentHost.get() }
+
+    generateSupportedKLibTargets(workQueue, supportedKLibTargets)
+    generateUnsupportedKLibTargets(workQueue, unsupportedKLibTargets)
+
+    workQueue.await()
+
+    val allTargetDumpFiles =
+      supportedTargetsDir.walk().filter { it.isFile }.toSet() union
+          unsupportedTargetsDir.walk().filter { it.isFile }.toSet()
+
+    mergeDumpFiles(workQueue, allTargetDumpFiles, outputApiBuildDir.asFile)
+  }
+
+  private fun generateSupportedKLibTargets(
+    workQueue: WorkQueue,
+    supportedKLibTargets: List<BCVKLibTarget>
+  ) {
     logger.lifecycle("[$path] generating ${supportedKLibTargets.size} supported KLib targets : ${supportedKLibTargets.joinToString { it.name }}")
 
     val supportedKLibGenDuration = measureTime {
@@ -195,8 +209,14 @@ constructor(
       }
       workQueue.await()
     }
-    logger.lifecycle("[$path] finished generating supported KLib targets in $supportedKLibGenDuration")
 
+    logger.lifecycle("[$path] finished generating supported KLib targets in $supportedKLibGenDuration")
+  }
+
+  private fun generateUnsupportedKLibTargets(
+    workQueue: WorkQueue,
+    unsupportedKLibTargets: List<BCVKLibTarget>
+  ) {
     logger.lifecycle("[$path] generating ${unsupportedKLibTargets.size} unsupported KLib targets : ${unsupportedKLibTargets.joinToString { it.name }}")
 
     val unsupportedKLibGenDuration = measureTime {
@@ -210,29 +230,31 @@ constructor(
         )
       }
     }
+
     logger.lifecycle("[$path] finished generating unsupported KLib targets in $unsupportedKLibGenDuration")
+  }
 
-    workQueue.await()
 
-    val allTargetDumpFiles =
-      supportedTargetsDir.walk().filter { it.isFile }.toSet() union
-          unsupportedTargetsDir.walk().filter { it.isFile }.toSet()
-
+  private fun mergeDumpFiles(
+    workQueue: WorkQueue,
+    allTargetDumpFiles: Set<File>,
+    outputApiBuildDir: File
+  ) {
     logger.lifecycle("[$path] merging ${allTargetDumpFiles.size} dump files : ${allTargetDumpFiles.joinToString { it.name }}")
 
     workQueue.merge(
       projectName.get(),
       targetDumpFiles = allTargetDumpFiles,
-      outputDir = outputApiBuildDir.asFile,
+      outputDir = outputApiBuildDir,
     )
     workQueue.await()
 
-    logger.lifecycle(
-      "[$path] merged ${allTargetDumpFiles.size} dump files : ${
-        outputApiBuildDir.asFile.walk().filter { it.isFile }.toList()
-      }"
-    )
+    if (logger.isLifecycleEnabled) {
+      val fileNames = outputApiBuildDir.walk().filter { it.isFile }.toList()
+      logger.lifecycle("[$path] merged ${allTargetDumpFiles.size} dump files : $fileNames")
+    }
   }
+
 
   @OptIn(BCVExperimentalApi::class)
   private fun WorkQueue.submit(
@@ -298,6 +320,25 @@ constructor(
       this@worker.outputApiDir.set(outputDir)
 
       this@worker.targetDumpFiles.from(targetDumpFiles)
+    }
+  }
+
+  @OptIn(BCVExperimentalApi::class)
+  private fun WorkQueue.extract(
+    target: BCVKLibTarget,
+    targetDumpFiles: Set<File>,
+    outputDir: File,
+  ) {
+    val task = this@BCVApiGenerateTask
+
+    @OptIn(BCVInternalApi::class)
+    submit(KLibExtractWorker::class) worker@{
+      this@worker.taskPath.set(task.path)
+      this@worker.strictValidation.set(target.strictValidation)
+
+//      this@worker.inputAbiFile.set()
+//      this@worker.outputAbiFile.set()
+//      this@worker.supportedTargets.set()
     }
   }
   //endregion
