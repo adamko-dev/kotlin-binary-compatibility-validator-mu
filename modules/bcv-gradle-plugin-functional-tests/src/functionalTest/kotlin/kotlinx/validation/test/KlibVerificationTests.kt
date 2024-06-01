@@ -320,7 +320,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
       disableKLibTargets("linuxArm64")
       runner {
-//        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
         arguments.add(":apiCheck")
       }
     }
@@ -342,7 +341,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       disableKLibTargets("linuxArm64")
 
       runner {
-//        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
         arguments.add(":apiCheck")
       }
     }
@@ -362,11 +360,8 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         // note that the regular dump is used, where linuxArm64 is presented
         resolve("/examples/classes/TopLevelDeclarations.klib.dump")
       }
-
       disableKLibTargets("linuxArm64")
-
       runner {
-//        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
         arguments.add(":apiCheck")
       }
     }
@@ -408,7 +403,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       disableKLibTargets("linux")
 
       runner {
-//        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linux")
         arguments.add(":apiDump")
       }
     }
@@ -432,7 +426,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       disableKLibTargets("linuxArm64")
 
       runner {
-//        arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
         arguments.add(":apiDump")
       }
     }
@@ -458,10 +451,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         "androidNativeX86",
       )
       runner {
-//        arguments.add(
-//          "-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64,linuxX64,mingwX64," +
-//              "androidNativeArm32,androidNativeArm64,androidNativeX64,androidNativeX86"
-//        )
         arguments.add(":apiDump")
       }
     }
@@ -490,10 +479,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         "androidNativeX86",
       )
       runner {
-//        arguments.add(
-//          "-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64,linuxX64,mingwX64," +
-//              "androidNativeArm32,androidNativeArm64,androidNativeX64,androidNativeX86"
-//        )
         arguments.add(":apiCheck")
       }
     }
@@ -794,9 +779,6 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
   }
 
   companion object {
-//    private const val BANNED_TARGETS_PROPERTY_NAME =
-//      "binary.compatibility.validator.klib.targets.disabled.for.testing"
-
     private fun BaseKotlinScope.disableKLibTargets(vararg targetNames: String) {
       buildGradleKts {
         val disabledTargets =
