@@ -303,6 +303,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       runner {
         arguments.add(":apiCheck")
         gradleJvmArgs += "-Xmx4g"
+//        gradleJvmArgs += "-XX:MaxMetaspaceSize=1g"
       }
     }
 

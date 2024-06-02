@@ -37,6 +37,13 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
 
   fn(baseKotlinScope)
 
+  baseKotlinScope.gradleProperties {
+    addLine("org.gradle.jvmargs=" + baseKotlinScope.runner.gradleJvmArgs.joinToString(" "))
+    baseKotlinScope.runner.gradleProperties.forEach { (k, v) ->
+      addLine("$k=$v")
+    }
+  }
+
   baseKotlinScope.files.forEach { scope ->
     val fileWriteTo = rootProjectDir.resolve(scope.filePath)
       .apply {
@@ -51,10 +58,6 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
       }
       fileWriteTo.appendText(content)
     }
-  }
-
-  baseKotlinScope.gradleProperties {
-    addLine("org.gradle.jvmargs=" + baseKotlinScope.runner.gradleJvmArgs.joinToString(" "))
   }
 
   return GradleRunner.create()
@@ -118,7 +121,7 @@ fun FileContainer.settingsGradleKts(fn: AppendableScope.() -> Unit) {
 }
 
 /**
- * Shortcut for creating a `settings.gradle.kts` by using [file][FileContainer.file]
+ * Shortcut for creating a `gradle.properties` by using [file][FileContainer.file]
  */
 fun FileContainer.gradleProperties(fn: AppendableScope.() -> Unit) {
   val fileName = "gradle.properties"
@@ -225,7 +228,9 @@ class Runner {
   /** JVM args used by Gradle. Set as `org.gradle.jvmargs` in `gradle.properties`. */
   val gradleJvmArgs: MutableSet<String> = mutableSetOf(
     "-Dfile.encoding=UTF-8",
-    "org.gradle.welcome=never",
+  )
+  val gradleProperties: MutableMap<String, String> = mutableMapOf(
+    "org.gradle.welcome" to "never",
   )
   var configurationCache: Boolean = true
   var rerunTasks: Boolean = false

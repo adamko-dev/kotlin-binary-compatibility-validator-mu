@@ -163,7 +163,7 @@ fun gradleGroovyProjectTest(
 
     gradleProperties = """
       |kotlin.mpp.stability.nowarn=true
-      |org.gradle.cache=true
+      |
     """.trimMargin()
 
     build()
