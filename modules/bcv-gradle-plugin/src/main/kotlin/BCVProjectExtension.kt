@@ -3,7 +3,6 @@ package dev.adamko.kotlin.binary_compatibility_validator
 import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTargetBaseSpec
-import dev.adamko.kotlin.binary_compatibility_validator.targets.KLibValidationSpec
 import javax.inject.Inject
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
@@ -46,9 +45,9 @@ constructor(
   abstract override val ignoredClasses: SetProperty<String>
 
   @BCVExperimentalApi
-  val klib: KLibValidationSpec =
+  val klib: BCVKLibConventions =
     extensions.adding("klib") {
-      objects.newInstance(KLibValidationSpec::class)
+      objects.newInstance(BCVKLibConventions::class)
     }
 
   /**

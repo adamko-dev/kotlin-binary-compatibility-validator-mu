@@ -1,3 +1,8 @@
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVKLibConventions : dev/adamko/kotlin/binary_compatibility_validator/targets/KLibValidationSpec {
+	public fun <init> ()V
+	public abstract fun getStrictValidation ()Lorg/gradle/api/provider/Property;
+}
+
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVPlugin : org/gradle/api/Plugin {
 	public static final field API_CHECK_TASK_NAME Ljava/lang/String;
 	public static final field API_DIR Ljava/lang/String;
@@ -158,6 +163,7 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 	public abstract fun getOutputApiBuildDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getStrictKLibTargetValidation ()Lorg/gradle/api/provider/Property;
 	public final fun getTargets ()Lorg/gradle/api/NamedDomainObjectContainer;
 }
 

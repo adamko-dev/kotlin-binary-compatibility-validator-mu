@@ -100,7 +100,7 @@ constructor(
         enabled.convention(extension.klib.enabled)
 
         signatureVersion.convention(extension.klib.signatureVersion)
-        strictValidation.convention(extension.klib.strictValidation)
+//        strictValidation.convention(extension.klib.strictValidation)
         supportedByCurrentHost.convention(false)
       }
 
@@ -178,6 +178,9 @@ constructor(
       targets.addAllLater(providers.provider { extension.targets })
       outputApiBuildDir.convention(layout.buildDirectory.dir("bcv-api"))
       projectName.convention(extension.projectName)
+
+      @OptIn(BCVExperimentalApi::class)
+      strictKLibTargetValidation.convention(extension.klib.strictValidation)
 
       onlyIf("Must have at least one target") { targets.isNotEmpty() }
     }

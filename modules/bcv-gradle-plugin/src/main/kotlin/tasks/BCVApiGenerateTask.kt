@@ -44,6 +44,9 @@ constructor(
   @get:Input
   abstract val projectName: Property<String>
 
+  @get:Input
+  abstract val strictKLibTargetValidation: Property<Boolean>
+
   /**
    * A directory containing a copy of any currently existing API Dump files.
    * Provided by [BCVApiGeneratePreparationTask].

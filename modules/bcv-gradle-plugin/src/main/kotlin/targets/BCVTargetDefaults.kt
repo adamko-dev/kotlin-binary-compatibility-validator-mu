@@ -1,5 +1,6 @@
 package dev.adamko.kotlin.binary_compatibility_validator.targets
 
+import dev.adamko.kotlin.binary_compatibility_validator.BCVKLibConventions
 import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVExperimentalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.adding
@@ -43,8 +44,8 @@ constructor(
   abstract override val ignoredClasses: SetProperty<String>
 
   @BCVExperimentalApi
-  val klib: KLibValidationSpec =
+  val klib: BCVKLibConventions =
     extensions.adding("klib") {
-      objects.newInstance(KLibValidationSpec::class)
+      objects.newInstance(BCVKLibConventions::class)
     }
 }
