@@ -8,8 +8,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import org.gradle.testkit.runner.TaskOutcome.FAILED
-import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.*
 import org.junit.jupiter.api.Test
 
 class OutputDirectoryTests : BaseKotlinGradleTest() {
@@ -35,7 +34,7 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveTaskWithOutcome(":apiDump", SUCCESS)
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS, FROM_CACHE)
 
       val dumpFile = rootProjectDir.resolve("custom/${rootProjectDir.name}.api")
       dumpFile.shouldExist()
@@ -95,7 +94,7 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveTaskWithOutcome(":apiDump", SUCCESS)
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS, FROM_CACHE)
 
       val dumpFile = rootProjectDir.resolve("validation/api/${rootProjectDir.name}.api")
       dumpFile.shouldExist()

@@ -7,8 +7,7 @@ import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
-import org.gradle.testkit.runner.TaskOutcome.FAILED
-import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.*
 import org.junit.jupiter.api.Test
 
 internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
@@ -117,7 +116,7 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     }
     runner.build {
       withClue(output) {
-        shouldHaveRunTask(":apiDump", SUCCESS)
+        shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
         val anotherExpectedApi = readResourceFile("/examples/classes/Subsub1Class.dump")
         anotherApiDump.shouldBeAFile()

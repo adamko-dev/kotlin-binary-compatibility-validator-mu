@@ -221,7 +221,7 @@ class Runner {
   var configurationCache: Boolean = true
   var rerunTasks: Boolean = false
   var rerunTask: Boolean = false
-  var buildCache: Boolean = false
+  var buildCache: Boolean = true
   var stacktrace: Boolean = true
   var continues: Boolean = true
 

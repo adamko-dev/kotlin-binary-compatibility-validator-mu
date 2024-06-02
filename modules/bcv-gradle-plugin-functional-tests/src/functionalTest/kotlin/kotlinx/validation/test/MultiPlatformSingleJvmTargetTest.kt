@@ -115,7 +115,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveRunTask(":apiDump", SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
       val mainExpectedApi = """
         |${readResourceFile("/examples/classes/Subsub1Class.dump").trim()}
@@ -145,7 +145,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     runner.build {
 //      shouldHaveTaskWithOutcome(":jvmApiDump", SKIPPED)
 //      shouldHaveTaskWithOutcome(":apiDump", UP_TO_DATE)
-      shouldHaveTaskWithOutcome(":apiDump", SUCCESS)
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS, FROM_CACHE)
     }
   }
 

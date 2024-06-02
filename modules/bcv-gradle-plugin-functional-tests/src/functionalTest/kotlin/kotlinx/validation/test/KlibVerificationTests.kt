@@ -692,7 +692,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveTaskWithOutcome(":apiDump", SUCCESS)
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS, FROM_CACHE)
       rootProjectApiDump.parentFile.shouldBeEmptyDirectory()
     }
   }
@@ -767,7 +767,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     projectName: String = "testproject",
   ) {
     withClue(output) {
-      shouldHaveRunTask(":apiDump", SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
       val generatedDump = rootProjectAbiDump(projectName)
 
