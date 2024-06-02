@@ -9,7 +9,6 @@ import java.io.File
 import javax.inject.Inject
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.model.ObjectFactory
@@ -58,24 +57,20 @@ constructor(
   abstract val outputApiBuildDir: DirectoryProperty
 
   @get:LocalState
-  val supportedTargetsDir: File get() = temporaryDir.resolve("klib-supported")
+  internal val workDir: File get() = temporaryDir
 
-  @get:LocalState
-  val unsupportedTargetsDir: File get() = temporaryDir.resolve("klib-unsupported")
+  private val klibTargetsDir = object {
+    private val klibDir: File get() = workDir.resolve("klib")
+    val supported: File get() = klibDir.resolve("supported")
+    val unsupported: File get() = klibDir.resolve("unsupported")
+    val extracted: File get() = klibDir.resolve("extracted")
+  }
 
   @TaskAction
   fun generate() {
     val workQueue = prepareWorkQueue()
 
-    val outputApiBuildDir = outputApiBuildDir.get()
-    fs.delete { delete(outputApiBuildDir) }
-    outputApiBuildDir.asFile.mkdirs()
-
-    fs.delete { delete(supportedTargetsDir) }
-    supportedTargetsDir.mkdirs()
-
-    fs.delete { delete(unsupportedTargetsDir) }
-    unsupportedTargetsDir.mkdirs()
+    prepareDirectories()
 
     logger.lifecycle("[$path] got ${targets.size} targets : ${targets.joinToString { it.name }}")
 
@@ -84,7 +79,7 @@ constructor(
     generateJvmTargets(
       workQueue = workQueue,
       jvmTargets = enabledTargets.withType<BCVJvmTarget>(),
-      outputApiBuildDir = outputApiBuildDir,
+      outputApiBuildDir = outputApiBuildDir.get().asFile,
     )
 
     // TODO log when klib file doesn't exist
@@ -96,7 +91,7 @@ constructor(
     generateKLibTargets(
       workQueue = workQueue,
       klibTargets = klibTargets,
-      outputApiBuildDir = outputApiBuildDir,
+      outputApiBuildDir = outputApiBuildDir.get().asFile,
     )
 
     // The worker queue is asynchronous, so any code here won't wait for the workers to finish.
@@ -113,11 +108,26 @@ constructor(
     }
   }
 
+  private fun prepareDirectories() {
+    val outputApiBuildDir = outputApiBuildDir.get()
+    fs.delete { delete(outputApiBuildDir) }
+    outputApiBuildDir.asFile.mkdirs()
+
+    fs.delete { delete(klibTargetsDir.supported) }
+    klibTargetsDir.supported.mkdirs()
+
+    fs.delete { delete(klibTargetsDir.unsupported) }
+    klibTargetsDir.unsupported.mkdirs()
+
+    fs.delete { delete(klibTargetsDir.extracted) }
+    klibTargetsDir.extracted.mkdirs()
+  }
+
   //region JVM
 
   private fun generateJvmTargets(
     workQueue: WorkQueue,
-    outputApiBuildDir: Directory,
+    outputApiBuildDir: File,
     jvmTargets: Collection<BCVJvmTarget>,
   ) {
     if (jvmTargets.isEmpty()) {
@@ -131,12 +141,12 @@ constructor(
       val outputDir = if (jvmTargets.size == 1) {
         outputApiBuildDir
       } else {
-        outputApiBuildDir.dir(target.platformType)
+        outputApiBuildDir.resolve(target.platformType)
       }
 
       workQueue.submit(
         target = target,
-        outputDir = outputDir.asFile,
+        outputDir = outputDir,
       )
     }
   }
@@ -173,10 +183,13 @@ constructor(
 
   private fun generateKLibTargets(
     workQueue: WorkQueue,
-    outputApiBuildDir: Directory,
+    outputApiBuildDir: File,
     klibTargets: Collection<BCVKLibTarget>,
   ) {
-    if (klibTargets.isEmpty()) return
+    if (klibTargets.isEmpty()) {
+      logger.info("[$path] No enabled KLib targets")
+      return
+    }
     logger.lifecycle("[$path] generating ${klibTargets.size} KLib targets : ${klibTargets.joinToString { it.name }}")
 
     val (supportedKLibTargets, unsupportedKLibTargets) =
@@ -188,10 +201,10 @@ constructor(
     workQueue.await()
 
     val allTargetDumpFiles =
-      supportedTargetsDir.walk().filter { it.isFile }.toSet() union
-          unsupportedTargetsDir.walk().filter { it.isFile }.toSet()
+      klibTargetsDir.supported.walk().filter { it.isFile }.toSet() union
+          klibTargetsDir.unsupported.walk().filter { it.isFile }.toSet()
 
-    mergeDumpFiles(workQueue, allTargetDumpFiles, outputApiBuildDir.asFile)
+    mergeDumpFiles(workQueue, allTargetDumpFiles, outputApiBuildDir)
   }
 
   private fun generateSupportedKLibTargets(
@@ -200,17 +213,17 @@ constructor(
   ) {
     logger.lifecycle("[$path] generating ${supportedKLibTargets.size} supported KLib targets : ${supportedKLibTargets.joinToString { it.name }}")
 
-    val supportedKLibGenDuration = measureTime {
+    val duration = measureTime {
       supportedKLibTargets.forEach { target ->
         workQueue.submit(
           target = target,
-          outputDir = supportedTargetsDir,
+          outputDir = klibTargetsDir.supported,
         )
       }
       workQueue.await()
     }
 
-    logger.lifecycle("[$path] finished generating supported KLib targets in $supportedKLibGenDuration")
+    logger.lifecycle("[$path] finished generating supported KLib targets in $duration")
   }
 
   private fun generateUnsupportedKLibTargets(
@@ -219,19 +232,19 @@ constructor(
   ) {
     logger.lifecycle("[$path] generating ${unsupportedKLibTargets.size} unsupported KLib targets : ${unsupportedKLibTargets.joinToString { it.name }}")
 
-    val unsupportedKLibGenDuration = measureTime {
+    val duration = measureTime {
       unsupportedKLibTargets.forEach { target ->
         workQueue.inferKLib(
           target = target,
-          supportedTargetDumpFiles = supportedTargetsDir.walk().filter { it.isFile }.toSet(),
+          supportedTargetDumpFiles = klibTargetsDir.supported.walk().filter { it.isFile }.toSet(),
           extantApiDumpFile = extantApiDumpDir.asFile.orNull?.walk()?.filter { it.isFile }
             ?.firstOrNull(),
-          outputDir = unsupportedTargetsDir,
+          outputDir = klibTargetsDir.unsupported,
         )
       }
     }
 
-    logger.lifecycle("[$path] finished generating unsupported KLib targets in $unsupportedKLibGenDuration")
+    logger.lifecycle("[$path] finished generating unsupported KLib targets in $duration")
   }
 
 

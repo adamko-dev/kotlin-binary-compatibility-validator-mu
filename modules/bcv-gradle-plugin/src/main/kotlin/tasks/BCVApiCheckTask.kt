@@ -69,8 +69,8 @@ constructor(
     val projectApiDir = projectApiDir.orNull
       ?: error(
         """
-          Expected folder with API declarations '${expectedApiDirPath.get()}' does not exist.
-          Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against.
+        Expected folder with API declarations '${expectedApiDirPath.get()}' does not exist.
+        Please ensure that task '$apiDumpTaskPath' was executed in order to get API dump to compare the build against.
         """.trimIndent()
       )
 
