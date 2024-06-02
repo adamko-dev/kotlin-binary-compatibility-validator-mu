@@ -4,7 +4,10 @@ import dev.adamko.kotlin.binary_compatibility_validator.internal.*
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVKLibTarget
 import dev.adamko.kotlin.binary_compatibility_validator.targets.BCVTarget
-import dev.adamko.kotlin.binary_compatibility_validator.workers.*
+import dev.adamko.kotlin.binary_compatibility_validator.workers.JvmSignaturesWorker
+import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibInferSignaturesWorker
+import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibMergeWorker
+import dev.adamko.kotlin.binary_compatibility_validator.workers.KLibSignaturesWorker
 import java.io.File
 import javax.inject.Inject
 import org.gradle.api.NamedDomainObjectContainer
@@ -71,17 +74,18 @@ constructor(
 
   @TaskAction
   fun generate() {
-    val workQueue = prepareWorkQueue()
-
     prepareDirectories()
 
-    logger.lifecycle("[$path] got ${targets.size} targets : ${targets.joinToString { it.name }}")
+    val workQueue = prepareWorkQueue()
 
     val enabledTargets = targets.matching { it.enabled.getOrElse(true) }
 
+    logger.lifecycle("[$path] got ${targets.size} targets (${enabledTargets.size} enabled) : ${targets.joinToString { it.name }}")
+
+    val jvmTargets = enabledTargets.withType<BCVJvmTarget>().sorted()
     generateJvmTargets(
       workQueue = workQueue,
-      jvmTargets = enabledTargets.withType<BCVJvmTarget>().sorted(),
+      jvmTargets = jvmTargets,
       outputApiBuildDir = outputApiBuildDir.get().asFile,
     )
 
@@ -90,7 +94,6 @@ constructor(
     val klibTargets = enabledTargets.withType<BCVKLibTarget>()
       .filter { it.klibFile.singleOrNull()?.exists() == true }
       .sorted()
-
     generateKLibTargets(
       workQueue = workQueue,
       klibTargets = klibTargets,
@@ -103,26 +106,19 @@ constructor(
 
 
   private fun prepareWorkQueue(): WorkQueue {
-    fs.delete { delete(temporaryDir) }
-    temporaryDir.mkdirs()
-
     return workers.classLoaderIsolation {
       classpath.from(runtimeClasspath)
     }
   }
 
   private fun prepareDirectories() {
-    val outputApiBuildDir = outputApiBuildDir.get()
     fs.delete { delete(outputApiBuildDir) }
-    outputApiBuildDir.asFile.mkdirs()
+    outputApiBuildDir.get().asFile.mkdirs()
 
-    fs.delete { delete(klibTargetsDir.supported) }
+    fs.delete { delete(workDir) }
+    workDir.mkdirs()
     klibTargetsDir.supported.mkdirs()
-
-    fs.delete { delete(klibTargetsDir.unsupported) }
     klibTargetsDir.unsupported.mkdirs()
-
-    fs.delete { delete(klibTargetsDir.extracted) }
     klibTargetsDir.extracted.mkdirs()
   }
 
@@ -187,7 +183,7 @@ constructor(
   private fun generateKLibTargets(
     workQueue: WorkQueue,
     outputApiBuildDir: File,
-    klibTargets: Collection<BCVKLibTarget>,
+    klibTargets: List<BCVKLibTarget>,
   ) {
     if (klibTargets.isEmpty()) {
       logger.info("[$path] No enabled KLib targets")
@@ -201,19 +197,30 @@ constructor(
     generateSupportedKLibTargets(workQueue, supportedKLibTargets)
     generateUnsupportedKLibTargets(workQueue, unsupportedKLibTargets)
 
-    workQueue.await()
+    val allTargetDumpFiles = buildSet {
+      addAll(klibTargetsDir.supported.walk().filter { it.isFile })
+      addAll(klibTargetsDir.unsupported.walk().filter { it.isFile })
+    }
 
-    val allTargetDumpFiles =
-      klibTargetsDir.supported.walk().filter { it.isFile }.toSet() union
-          klibTargetsDir.unsupported.walk().filter { it.isFile }.toSet()
+    mergeDumpFiles(
+      workQueue = workQueue,
+      allTargetDumpFiles = allTargetDumpFiles,
+      outputApiBuildDir = outputApiBuildDir,
+      targets = klibTargets,
+      strictValidation = strictKLibTargetValidation.get(),
+    )
 
-    mergeDumpFiles(workQueue, allTargetDumpFiles, outputApiBuildDir)
+//    workQueue.extract()
   }
 
   private fun generateSupportedKLibTargets(
     workQueue: WorkQueue,
     supportedKLibTargets: List<BCVKLibTarget>
   ) {
+    if (supportedKLibTargets.isEmpty()) {
+      logger.info("[$path] No supported enabled KLib targets")
+      return
+    }
     logger.lifecycle("[$path] generating ${supportedKLibTargets.size} supported KLib targets : ${supportedKLibTargets.joinToString { it.name }}")
 
     val duration = measureTime {
@@ -233,6 +240,10 @@ constructor(
     workQueue: WorkQueue,
     unsupportedKLibTargets: List<BCVKLibTarget>
   ) {
+    if (unsupportedKLibTargets.isEmpty()) {
+      logger.info("[$path] No unsupported enabled KLib targets")
+      return
+    }
     logger.lifecycle("[$path] generating ${unsupportedKLibTargets.size} unsupported KLib targets : ${unsupportedKLibTargets.joinToString { it.name }}")
 
     val duration = measureTime {
@@ -245,6 +256,7 @@ constructor(
           outputDir = klibTargetsDir.unsupported,
         )
       }
+      workQueue.await()
     }
 
     logger.lifecycle("[$path] finished generating unsupported KLib targets in $duration")
@@ -254,20 +266,26 @@ constructor(
   private fun mergeDumpFiles(
     workQueue: WorkQueue,
     allTargetDumpFiles: Set<File>,
-    outputApiBuildDir: File
+    outputApiBuildDir: File,
+    targets: List<BCVKLibTarget>,
+    strictValidation: Boolean,
   ) {
     logger.lifecycle("[$path] merging ${allTargetDumpFiles.size} dump files : ${allTargetDumpFiles.joinToString { it.name }}")
 
-    workQueue.merge(
-      projectName.get(),
-      targetDumpFiles = allTargetDumpFiles,
-      outputDir = outputApiBuildDir,
-    )
-    workQueue.await()
+    val duration = measureTime {
+      workQueue.merge(
+        projectName.get(),
+        targetDumpFiles = allTargetDumpFiles,
+        outputDir = outputApiBuildDir,
+        supportedTargets = targets.filter { it.supportedByCurrentHost.get() }.map { it.targetName },
+        strictValidation = strictValidation,
+      )
+      workQueue.await()
+    }
 
     if (logger.isLifecycleEnabled) {
       val fileNames = outputApiBuildDir.walk().filter { it.isFile }.toList()
-      logger.lifecycle("[$path] merged ${allTargetDumpFiles.size} dump files : $fileNames")
+      logger.lifecycle("[$path] merged ${allTargetDumpFiles.size} dump files in $duration : $fileNames")
     }
   }
 
@@ -288,8 +306,7 @@ constructor(
 
       this@worker.klib.set(target.klibFile.singleFile)
       this@worker.signatureVersion.set(target.signatureVersion)
-      this@worker.strictValidation.set(target.strictValidation)
-//      this@worker.supportedByCurrentHost.set(target.supportedByCurrentHost)
+//      this@worker.strictValidation.set(target.strictValidation)
 
 //      this@worker.targets.addAll(klibTargets)
 
@@ -325,37 +342,45 @@ constructor(
     projectName: String,
     targetDumpFiles: Set<File>,
     outputDir: File,
+    supportedTargets: List<String>,
+    strictValidation: Boolean,
   ) {
     val task = this@BCVApiGenerateTask
 
     @OptIn(BCVInternalApi::class)
     submit(KLibMergeWorker::class) worker@{
-      this@worker.projectName.set(projectName)
+//      this@worker.projectName.set(projectName)
       this@worker.taskPath.set(task.path)
 
-      this@worker.outputApiDir.set(outputDir)
+//      this@worker.outputApiDir.set(outputDir)
+      this@worker.outputApiFile.set(
+        outputDir.resolve("$projectName.klib.api")
+      )
+
+      this@worker.strictValidation.set(strictValidation)
+      this@worker.supportedTargets.set(supportedTargets)
 
       this@worker.targetDumpFiles.from(targetDumpFiles)
     }
   }
 
-  @OptIn(BCVExperimentalApi::class)
-  private fun WorkQueue.extract(
-    target: BCVKLibTarget,
-    targetDumpFiles: Set<File>,
-    outputDir: File,
-  ) {
-    val task = this@BCVApiGenerateTask
-
-    @OptIn(BCVInternalApi::class)
-    submit(KLibExtractWorker::class) worker@{
-      this@worker.taskPath.set(task.path)
-      this@worker.strictValidation.set(target.strictValidation)
-
-//      this@worker.inputAbiFile.set()
-//      this@worker.outputAbiFile.set()
-//      this@worker.supportedTargets.set()
-    }
-  }
+//  @OptIn(BCVExperimentalApi::class)
+//  private fun WorkQueue.extract(
+//    target: BCVKLibTarget,
+//    targetDumpFiles: Set<File>,
+//    outputDir: File,
+//  ) {
+//    val task = this@BCVApiGenerateTask
+//
+//    @OptIn(BCVInternalApi::class)
+//    submit(KLibExtractWorker::class) worker@{
+//      this@worker.taskPath.set(task.path)
+//      this@worker.strictValidation.set(target.strictValidation)
+//
+////      this@worker.inputAbiFile.set()
+////      this@worker.outputAbiFile.set()
+////      this@worker.supportedTargets.set()
+//    }
+//  }
   //endregion
 }

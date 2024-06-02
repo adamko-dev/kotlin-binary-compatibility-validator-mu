@@ -3,6 +3,7 @@ package dev.adamko.kotlin.binary_compatibility_validator.workers
 import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVExperimentalApi
 import dev.adamko.kotlin.binary_compatibility_validator.internal.BCVInternalApi
 import dev.adamko.kotlin.binary_compatibility_validator.targets.KLibSignatureVersion
+import java.io.File
 import java.io.Serializable
 import kotlinx.validation.ExperimentalBCVApi
 import kotlinx.validation.api.klib.*
@@ -32,7 +33,8 @@ abstract class KLibSignaturesWorker : WorkAction<KLibSignaturesWorker.Parameters
     val ignoredClasses: SetProperty<String>
 
     val signatureVersion: Property<KLibSignatureVersion>
-    val strictValidation: Property<Boolean>
+//    val strictValidation: Property<Boolean>
+    val supportedByCurrentHost: Property<Boolean>
 
     /**
      * [Task path][org.gradle.api.Task.getPath] of the task that invoked this worker,
@@ -45,6 +47,14 @@ abstract class KLibSignaturesWorker : WorkAction<KLibSignaturesWorker.Parameters
     val outputFile = parameters.outputApiDir.asFile.get()
       .resolve("${parameters.targetName.get()}.klib.api")
 
+    dump(outputFile)
+
+//    extract(outputFile)
+  }
+
+  private fun dump(
+    outputAbiFile: File,
+  ) {
     val filters = KLibDumpFilters {
       ignoredClasses += parameters.ignoredClasses.get()
       ignoredPackages += parameters.ignoredPackages.get()
@@ -59,8 +69,28 @@ abstract class KLibSignaturesWorker : WorkAction<KLibSignaturesWorker.Parameters
       configurableTargetName = parameters.targetName.get(),
       filters = filters,
     )
+    dump.saveTo(outputAbiFile)
+  }
 
-    dump.saveTo(outputFile)
+  private fun extract(
+    abiFile: File,
+  ) {
+//    val supportedTargets = parameters.supportedTargets.get()
+//    val strictValidation = parameters.strictValidation.getOrElse(false)
+
+    if (abiFile.length() == 0L) {
+      error("Project ABI file $abiFile is empty")
+    }
+    val dump = KlibDump.from(abiFile)
+    val enabledTarget = KlibTarget.parse(parameters.targetName.get())
+    // Filter out only unsupported files.
+    // That ensures that target renaming will be caught and reported as a change.
+//    val targetsToRemove = dump.targets.filter { it.targetName !in enabledTargets }
+//    if (targetsToRemove.isNotEmpty() && strictValidation) {
+//      error("Validation could not be performed as some targets are not available and strictValidation mode is enabled")
+//    }
+//    dump.remove(targetsToRemove)
+    dump.saveTo(abiFile)
   }
 
   @BCVInternalApi
