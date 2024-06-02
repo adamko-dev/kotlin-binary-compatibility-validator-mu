@@ -53,6 +53,10 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
     }
   }
 
+  baseKotlinScope.gradleProperties {
+    addLine("org.gradle.jvmargs=" + baseKotlinScope.runner.gradleJvmArgs.joinToString(" "))
+  }
+
   return GradleRunner.create()
     .withProjectDir(rootProjectDir)
     .withGradleVersion(baseKotlinScope.runner.gradleVersion)
@@ -218,12 +222,18 @@ class AppendableScope(val filePath: String) {
 
 class Runner {
   var gradleVersion: String = minimumGradleTestVersion
+  /** JVM args used by Gradle. Set as `org.gradle.jvmargs` in `gradle.properties`. */
+  val gradleJvmArgs: MutableSet<String> = mutableSetOf(
+    "-Dfile.encoding=UTF-8",
+    "org.gradle.welcome=never",
+  )
   var configurationCache: Boolean = true
   var rerunTasks: Boolean = false
   var rerunTask: Boolean = false
   var buildCache: Boolean = true
   var stacktrace: Boolean = true
   var continues: Boolean = true
+  var parallel: Boolean = true
 
   val arguments: MutableList<String> = mutableListOf()
 
@@ -235,6 +245,7 @@ class Runner {
     if (rerunTask) add("--rerun-task")
     if (stacktrace) add("--stacktrace")
     if (continues) add("--continue")
+    if (parallel) add("--parallel")
   }.distinct()
 }
 
