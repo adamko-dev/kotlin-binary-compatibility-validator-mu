@@ -17,6 +17,21 @@ import org.gradle.api.provider.Property
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 
+/**
+ * Infers a possible KLib ABI dump for an unsupported target.
+ *
+ * To infer a dump, walk up the default targets hierarchy tree starting from the unsupported
+ * target until it finds a node corresponding to a group containing least one supported target.
+ *
+ * After that, dumps generated for such supported targets are merged and declarations that are
+ * common to all of them are considered as a common ABI that most likely will be shared by the
+ * unsupported target.
+ *
+ * At the next step, if a project contains an old dump, declarations specific to the unsupported
+ * target are copied from it and merged into the common ABI extracted previously.
+ *
+ * The resulting dump is then used as an inferred dump for the unsupported target.
+ */
 @BCVInternalApi
 @BCVExperimentalApi
 @OptIn(ExperimentalBCVApi::class)
@@ -37,6 +52,8 @@ abstract class KLibInferSignaturesWorker : WorkAction<KLibInferSignaturesWorker.
      */
     val taskPath: Property<String>
   }
+
+  private val taskPath: String = parameters.taskPath.get()
 
   override fun execute() {
     // Find a set of supported targets that are closer to unsupported target in the hierarchy.
@@ -60,7 +77,7 @@ abstract class KLibInferSignaturesWorker : WorkAction<KLibInferSignaturesWorker.
       }
     if (extantImage == null) {
       logger.warn(
-        "Project's ABI file exists, but empty: ${extantApiDumpFile}. " +
+        "[$taskPath] Project's ABI file exists, but empty: ${extantApiDumpFile}. " +
             "The file will be ignored during ABI dump inference for the unsupported target "
 //            +  target.get()
       )

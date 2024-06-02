@@ -165,7 +165,7 @@ constructor(
     project.tasks.withType<BCVDefaultTask>().configureEach {
       bcvEnabled.convention(extension.enabled)
 
-      onlyIf("BCV is disabled") { bcvEnabled.get() }
+      onlyIf("BCV is enabled") { bcvEnabled.get() }
     }
 
     project.tasks.withType<BCVApiGeneratePreparationTask>().configureEach {

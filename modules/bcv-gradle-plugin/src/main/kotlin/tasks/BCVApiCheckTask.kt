@@ -124,7 +124,7 @@ constructor(
           |
           |$diffText
           |
-          |You can run '$apiDumpTaskPath' task to overwrite API declarations
+          |You can run '$apiDumpTaskPath' task to overwrite API declarations.
         """.trimMargin()
       )
     }
