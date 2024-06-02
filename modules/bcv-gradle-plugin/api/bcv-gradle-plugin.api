@@ -153,9 +153,7 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 	public abstract fun getOutputApiBuildDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public final fun getSupportedTargetsDir ()Ljava/io/File;
 	public final fun getTargets ()Lorg/gradle/api/NamedDomainObjectContainer;
-	public final fun getUnsupportedTargetsDir ()Ljava/io/File;
 }
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVDefaultTask : org/gradle/api/DefaultTask {
@@ -173,4 +171,3 @@ public final class org/gradle/kotlin/dsl/BcvGradleDslAccessorsKt {
 	public static final fun binaryCompatibilityValidator (Lorg/gradle/api/initialization/Settings;Lkotlin/jvm/functions/Function1;)V
 	public static final fun getBinaryCompatibilityValidator (Lorg/gradle/api/initialization/Settings;)Ldev/adamko/kotlin/binary_compatibility_validator/BCVSettingsPlugin$Extension;
 }
-
