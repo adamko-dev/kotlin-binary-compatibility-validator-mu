@@ -5,8 +5,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.file.shouldBeEmpty
 import io.kotest.matchers.string.shouldContain
-import org.gradle.testkit.runner.TaskOutcome.FAILED
-import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -160,7 +159,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveRunTask(":apiDump", SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
       assertTrue(
         rootProjectApiDump.exists(),
@@ -187,7 +186,7 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveRunTask(":apiDump", SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
       val apiDumpFile = rootProjectDir.resolve("api/testproject.api")
       assertTrue(apiDumpFile.exists(), "api dump file ${apiDumpFile.path} should exist")
@@ -217,13 +216,12 @@ internal class DefaultConfigTests : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveRunTask(":apiDump", SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
       assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
 
       val expected = readResourceFile("/examples/classes/AnotherBuildConfig.dump")
       rootProjectApiDump.readText().invariantNewlines().shouldBeEqualComparingTo(expected)
-      //Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines(expected)
     }
   }
 

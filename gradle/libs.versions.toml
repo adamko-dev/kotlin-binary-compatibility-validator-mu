@@ -5,14 +5,14 @@ kotlinGradle = "1.9.24"
 javaDiffUtils = "4.12"
 junit = "5.10.2"
 kotest = "5.9.0"
-kotlinx-bcv = "0.13.2"
+kotlinx-bcv = "0.15.0-Beta.2"
 
 gradlePluginPublishPlugin = "1.2.1"
 shadowPlugin = "8.1.1"
 devPublish = "0.3.0"
 bcvMu = "main-SNAPSHOT"
 
-supportedGradleVersion = "7.6" # the minimal supported Gradle plugin version, used in functional tests
+supportedGradleVersion = "7.6.4" # the minimal supported Gradle plugin version, used in functional tests
 
 [libraries]
 

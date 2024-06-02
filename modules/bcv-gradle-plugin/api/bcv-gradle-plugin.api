@@ -1,3 +1,8 @@
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVKLibConventions : dev/adamko/kotlin/binary_compatibility_validator/targets/KLibValidationSpec {
+	public fun <init> ()V
+	public abstract fun getStrictValidation ()Lorg/gradle/api/provider/Property;
+}
+
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVPlugin : org/gradle/api/Plugin {
 	public static final field API_CHECK_TASK_NAME Ljava/lang/String;
 	public static final field API_DIR Ljava/lang/String;
@@ -5,6 +10,7 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVPlugin
 	public static final field API_GENERATE_TASK_NAME Ljava/lang/String;
 	public static final field Companion Ldev/adamko/kotlin/binary_compatibility_validator/BCVPlugin$Companion;
 	public static final field EXTENSION_NAME Ljava/lang/String;
+	public static final field PREPARE_API_GENERATE_TASK_NAME Ljava/lang/String;
 	public static final field RUNTIME_CLASSPATH_CONFIGURATION_NAME Ljava/lang/String;
 	public static final field RUNTIME_CLASSPATH_RESOLVER_CONFIGURATION_NAME Ljava/lang/String;
 	public static final field TASK_GROUP Ljava/lang/String;
@@ -15,11 +21,12 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVPlugin
 public final class dev/adamko/kotlin/binary_compatibility_validator/BCVPlugin$Companion {
 }
 
-public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjectExtension : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetSpec, org/gradle/api/plugins/ExtensionAware {
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjectExtension : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetBaseSpec, org/gradle/api/plugins/ExtensionAware {
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getKotlinCompilerEmbeddableVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getKotlinxBinaryCompatibilityValidatorVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getOutputApiDir ()Lorg/gradle/api/file/DirectoryProperty;
@@ -27,7 +34,7 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjec
 	public abstract fun getPublicClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicPackages ()Lorg/gradle/api/provider/SetProperty;
-	public final fun getTargets ()Lorg/gradle/api/NamedDomainObjectContainer;
+	public final fun getTargets ()Lorg/gradle/api/ExtensiblePolymorphicDomainObjectContainer;
 }
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVProjectPlugin : org/gradle/api/Plugin {
@@ -45,9 +52,8 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVSettin
 }
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/BCVSettingsPlugin$Extension {
-	public fun <init> (Ldev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetSpec;)V
-	public final fun defaultTargetValues (Lkotlin/jvm/functions/Function1;)V
-	public final fun getDefaultTargetValues ()Ldev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetSpec;
+	public final fun defaultTargetValues (Lorg/gradle/api/Action;)V
+	public final fun getDefaultTargetValues ()Ldev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetDefaults;
 	public abstract fun getIgnoredProjects ()Lorg/gradle/api/provider/SetProperty;
 }
 
@@ -56,28 +62,76 @@ public final class dev/adamko/kotlin/binary_compatibility_validator/BCVSettingsP
 	public final synthetic fun execute (Ljava/lang/Object;)V
 }
 
-public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetSpec, java/io/Serializable, org/gradle/api/Named {
-	public fun <init> (Ljava/lang/String;)V
+public final class dev/adamko/kotlin/binary_compatibility_validator/adapters/AndroidAdapterKt$createKotlinAndroidTargets$1$1$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun execute (Ljava/lang/Object;)V
+}
+
+public final class dev/adamko/kotlin/binary_compatibility_validator/adapters/JavaTestFixturesKt$createJavaTestFixtureTargets$1$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun execute (Ljava/lang/Object;)V
+}
+
+public final class dev/adamko/kotlin/binary_compatibility_validator/adapters/KotlinJvmAdapterKt$createKotlinJvmTargets$1$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun execute (Ljava/lang/Object;)V
+}
+
+public final class dev/adamko/kotlin/binary_compatibility_validator/adapters/KotlinMultiplatformAdapterKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun execute (Ljava/lang/Object;)V
+}
+
+public abstract interface annotation class dev/adamko/kotlin/binary_compatibility_validator/internal/BCVExperimentalApi : java/lang/annotation/Annotation {
+}
+
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVJvmTarget : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget, org/gradle/api/Named {
+	public abstract fun getInputClasses ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getInputJar ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getPlatformType ()Ljava/lang/String;
+}
+
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVKLibTarget : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget, dev/adamko/kotlin/binary_compatibility_validator/targets/KLibValidationSpec, java/io/Serializable, org/gradle/api/Named {
+	public abstract fun getCompilationDependencies ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getCurrentPlatform ()Lorg/gradle/api/provider/Property;
+	public abstract fun getHasKotlinSources ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKlibFile ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun getTargetName ()Ljava/lang/String;
+}
+
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetBaseSpec, java/io/Serializable, java/lang/Comparable, org/gradle/api/Named, org/gradle/api/plugins/ExtensionAware {
+	public static final field Companion Ldev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun compareTo (Ldev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getInputClasses ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getInputJar ()Lorg/gradle/api/file/RegularFileProperty;
 	public fun getName ()Ljava/lang/String;
-	public final fun getPlatformType ()Ljava/lang/String;
 	public abstract fun getPublicClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicPackages ()Lorg/gradle/api/provider/SetProperty;
 }
 
-public abstract interface class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetSpec : java/io/Serializable {
+public final class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTarget$Companion {
+}
+
+public abstract interface class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetBaseSpec : java/io/Serializable {
 	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getInputClasses ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getInputJar ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getPublicClasses ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getPublicPackages ()Lorg/gradle/api/provider/SetProperty;
+}
+
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetDefaults : dev/adamko/kotlin/binary_compatibility_validator/targets/BCVTargetBaseSpec, java/io/Serializable, org/gradle/api/plugins/ExtensionAware {
+	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getIgnoredMarkers ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicClasses ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPublicPackages ()Lorg/gradle/api/provider/SetProperty;
@@ -96,12 +150,20 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 	public abstract fun getApiDumpFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
+public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVApiGeneratePreparationTask : dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVDefaultTask {
+	public final fun action ()V
+	public abstract fun getApiDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getApiDumpFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+}
+
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVApiGenerateTask : dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVDefaultTask {
 	public final fun generate ()V
+	public abstract fun getExtantApiDumpDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getInputDependencies ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getOutputApiBuildDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getStrictKLibTargetValidation ()Lorg/gradle/api/provider/Property;
 	public final fun getTargets ()Lorg/gradle/api/NamedDomainObjectContainer;
 }
 
@@ -109,7 +171,11 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 	public abstract fun getBcvEnabled ()Lorg/gradle/api/provider/Property;
 }
 
-public final class dev/adamko/kotlin/binary_compatibility_validator/workers/BCVSignaturesWorker$Companion {
+public final class dev/adamko/kotlin/binary_compatibility_validator/workers/JvmSignaturesWorker$Companion {
+}
+
+public final class org/gradle/kotlin/dsl/AssignKt {
+	public static final fun assign (Lorg/gradle/api/provider/Property;I)V
 }
 
 public final class org/gradle/kotlin/dsl/BcvGradleDslAccessorsKt {

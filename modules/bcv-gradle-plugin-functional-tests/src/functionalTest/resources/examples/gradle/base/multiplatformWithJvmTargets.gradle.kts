@@ -1,5 +1,5 @@
 plugins {
-  kotlin("multiplatform") version "1.5.20"
+  kotlin("multiplatform") version "1.9.24"
   id("dev.adamko.kotlin.binary-compatibility-validator") version "+"
 }
 
@@ -12,6 +12,9 @@ kotlin {
       testRuns["test"].executionTask.configure {
         useJUnit()
       }
+      attributes {
+        attribute(Attribute.of("variant", String::class.java), "a")
+      }
     }
     jvm("anotherJvm") {
       compilations.all {
@@ -20,11 +23,14 @@ kotlin {
       testRuns["test"].executionTask.configure {
         useJUnit()
       }
+      attributes {
+        attribute(Attribute.of("variant", String::class.java), "b")
+      }
     }
   }
   sourceSets {
-    val commonMain by getting
-    val commonTest by getting {
+    commonMain
+    commonTest {
       dependencies {
         implementation(kotlin("stdlib"))
         implementation(kotlin("test-common"))

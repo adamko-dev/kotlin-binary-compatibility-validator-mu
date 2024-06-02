@@ -1,29 +1,13 @@
 package dev.adamko.kotlin.binary_compatibility_validator.targets
 
 import java.io.Serializable
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 
-interface BCVTargetSpec : Serializable {
+interface BCVTargetBaseSpec : Serializable {
 
   /** Enables or disables API generation and validation for this target */
   val enabled: Property<Boolean>
-
-  /**
-   * The classes to generate signatures for.
-   *
-   * Note that if [inputJar] has a value, the contents of [inputClasses] will be ignored
-   */
-  val inputClasses: ConfigurableFileCollection
-
-  /**
-   * A JAR that contains the classes to generate signatures for.
-   *
-   * Note that if [inputJar] has a value, the contents of [inputClasses] will be ignored
-   */
-  val inputJar: RegularFileProperty
 
   /**
    * Fully qualified names of annotations that can be used to explicitly mark public declarations.

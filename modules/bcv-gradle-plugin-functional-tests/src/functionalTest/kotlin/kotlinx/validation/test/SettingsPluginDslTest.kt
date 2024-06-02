@@ -20,16 +20,19 @@ internal class SettingsPluginDslTest : FunSpec({
       projectType = "Kotlin/JVM",
       project = kotlinJvmProjectWithBcvSettingsPlugin(),
       expectedPrintedBCVTargets = """
+        |type: class dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget_Decorated
         |name: kotlinJvm
-        |platformType: kotlinJvm
         |enabled: true
         |ignoredClasses: [com.package.MyIgnoredClass]
         |ignoredMarkers: [com.package.MyInternalApiAnnotationMarker]
         |ignoredPackages: [com.package.my_ignored_package]
-        |inputClasses: [main, main]
+        |publicMarkers: [com.package.MyIgnoredClass]
+        |publicPackages: [com.package.MyInternalApiAnnotationMarker]
+        |publicClasses: [com.package.my_ignored_package]
+        |platformType: kotlinJvm
         |inputJar: null
+        |inputClasses: [main, main]
         |------------------------------
-        |
       """.trimMargin()
     )
 
@@ -37,16 +40,19 @@ internal class SettingsPluginDslTest : FunSpec({
       projectType = "Kotlin/Multiplatform",
       project = kotlinMultiplatformProjectWithBcvSettingsPlugin(),
       expectedPrintedBCVTargets = """
+        |type: class dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget_Decorated
         |name: jvm
-        |platformType: jvm
         |enabled: true
         |ignoredClasses: [com.package.MyIgnoredClass]
         |ignoredMarkers: [com.package.MyInternalApiAnnotationMarker]
         |ignoredPackages: [com.package.my_ignored_package]
-        |inputClasses: [main]
+        |publicMarkers: [com.package.MyIgnoredClass]
+        |publicPackages: [com.package.MyInternalApiAnnotationMarker]
+        |publicClasses: [com.package.my_ignored_package]
+        |platformType: jvm
         |inputJar: null
+        |inputClasses: [main]
         |------------------------------
-        |
       """.trimMargin()
     )
 
@@ -79,22 +85,22 @@ internal class SettingsPluginDslTest : FunSpec({
             apiDump.shouldExist()
             apiDump.shouldBeAFile()
             apiDump.readText().invariantNewlines() shouldBe /* language=TEXT */ """
-            |
-          """.trimMargin()
+                |
+              """.trimMargin()
           }
 
           testCase.project.projectDir.resolve("sub2/api/sub2.api").asClue { apiDump ->
             apiDump.shouldExist()
             apiDump.shouldBeAFile()
             apiDump.readText().invariantNewlines() shouldBe /* language=TEXT */ """
-            |
-          """.trimMargin()
+                |
+              """.trimMargin()
           }
         }
 
         test("expect the conventions set in the settings plugin are used in the subprojects") {
           testCase.project.runner.withArguments("printBCVTargets", "-q", "--stacktrace").build {
-            output.invariantNewlines() shouldBe testCase.expectedPrintedBCVTargets
+            output.invariantNewlines().trim() shouldBe testCase.expectedPrintedBCVTargets.trim()
           }
         }
       }
@@ -148,7 +154,7 @@ private fun kotlinMultiplatformProjectWithBcvSettingsPlugin() =
 private val settingsGradleKtsWithBcvPlugin = """
 buildscript {
   dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.9.23")
   }
 }
 
@@ -176,7 +182,7 @@ binaryCompatibilityValidator {
 @Language("kts")
 private val buildGradleKtsWithKotlinJvmAndBcvConfig = """
 plugins {
-  kotlin("jvm") version "1.7.20"
+  kotlin("jvm") version "1.9.23"
 }
 
 // check that the DSL is available:
@@ -190,7 +196,7 @@ binaryCompatibilityValidator { }
 @Language("kts")
 private val buildGradleKtsWithKotlinMultiplatformJvmAndBcvConfig = """
 plugins {
-  kotlin("multiplatform") version "1.7.20"
+  kotlin("multiplatform") version "1.9.23"
 }
 
 kotlin {
@@ -204,23 +210,40 @@ binaryCompatibilityValidator { }
 
 @Language("kts")
 private val printBcvTargetsTask = """
+
 val printBCVTargets by tasks.registering {
-   
+
   val bcvTargets = binaryCompatibilityValidator.targets
 
   doLast {
-    bcvTargets.forEach {
-      println("name: " + it.name)
-      println("platformType: " + it.platformType)
-      println("enabled: " + it.enabled.get())
-      println("ignoredClasses: " + it.ignoredClasses.get())
-      println("ignoredMarkers: " + it.ignoredMarkers.get())
-      println("ignoredPackages: " + it.ignoredPackages.get())
-      println("inputClasses: " + it.inputClasses.files.map { f -> f.name })
-      println("inputJar: " + it.inputJar.orNull)
+    bcvTargets.forEach { t ->
+      println("type: " + t::class.toString())
+      println("name: " + t.name)
+      println("enabled: " + t.enabled.get())
+      println("ignoredClasses: " + t.ignoredClasses.get())
+      println("ignoredMarkers: " + t.ignoredMarkers.get())
+      println("ignoredPackages: " + t.ignoredPackages.get())
+      println("publicMarkers: " + t.ignoredClasses.get())
+      println("publicPackages: " + t.ignoredMarkers.get())
+      println("publicClasses: " + t.ignoredPackages.get())
+      when (t) {
+
+        is dev.adamko.kotlin.binary_compatibility_validator.targets.BCVJvmTarget -> {
+          println("platformType: " + t.platformType)
+          println("inputJar: " + t.inputJar.orNull)
+          println("inputClasses: " + t.inputClasses.files.map { f -> f.name })
+        }
+
+        is dev.adamko.kotlin.binary_compatibility_validator.targets.BCVKLibTarget    -> {
+          println("klibFile: " + t.klibFile.files.map { f -> f.name })
+          println("compilationDependencies: " + t.compilationDependencies.files.map { f -> f.name })
+          println("currentPlatform: " + t.currentPlatform.orNull)
+          println("supportedByCurrentHost: " + t.supportedByCurrentHost.orNull)
+          println("hasKotlinSources: " + t.hasKotlinSources.orNull)
+        }
+      }
       println("------------------------------")
     }
   }
 }
- 
 """

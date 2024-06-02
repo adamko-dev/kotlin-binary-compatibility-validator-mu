@@ -1,3 +1,3 @@
-configure<dev.adamko.kotlin.binary_compatibility_validator.BCVProjectExtension> {
+binaryCompatibilityValidator {
   ignoredClasses.add("com.company.BuildConfig")
 }

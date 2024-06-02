@@ -32,9 +32,9 @@ or (**experimentally**) [as a Settings plugin](#settings-plugin) in `settings.gr
 
 #### Requirements
 
-The minimal supported Gradle version is 7.6.
+The minimal supported Gradle version is 7.6.4.
 
-By default, BCV-MU uses BCV version `0.13.2`, which can be overridden, but may introduce runtime
+By default, BCV-MU uses BCV version `0.15.0-Beta.2`, which can be overridden, but may introduce runtime
 errors.
 
 ### Build plugin
@@ -49,7 +49,7 @@ plugins {
 }
 ```
 
-To initialise the API declarations, run the Gradle task
+To initialize the API declarations, run the Gradle task
 
 ```shell
 ./gradlew apiDump
@@ -74,7 +74,7 @@ BCV-MU can be configured in a similar manner to BCV:
 // build.gradle.kts
 
 plugins {
-  kotlin("jvm") version "1.8.10"
+  kotlin("jvm") version "1.9.22"
   id("dev.adamko.kotlin.binary-compatibility-validator") version "$bcvMuVersion"
 }
 
@@ -100,7 +100,7 @@ binaryCompatibilityValidator {
   bcvEnabled.set(true)
 
   // Override the default BCV version
-  kotlinxBinaryCompatibilityValidatorVersion.set("0.13.2")
+  kotlinxBinaryCompatibilityValidatorVersion.set("0.15.0-Beta.2")
 }
 ```
 
@@ -113,7 +113,7 @@ these `BCVTarget`s can be specifically modified, or manually defined, for fine-g
 // build.gradle.kts
 
 plugins {
-  kotlin("jvm") version "1.8.10"
+  kotlin("jvm") version "1.9.22"
   id("dev.adamko.kotlin.binary-compatibility-validator") version "$bcvMuVersion"
   `java-test-fixtures`
 }
@@ -214,7 +214,7 @@ All subprojects are included by default, and can be excluded using BCV-MU config
 buildscript {
   dependencies {
     // BCV-MU requires the Kotlin Gradle Plugin classes are present
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.10")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.9.22")
   }
 }
 

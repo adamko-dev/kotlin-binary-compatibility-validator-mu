@@ -1,8 +1,8 @@
 package kotlinx.validation.test
 
-import dev.adamko.kotlin.binary_compatibility_validator.test.*
-import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.build
+import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveRunTask
 import java.io.File
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Disabled
@@ -20,7 +20,6 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       createProjectWithSubModules()
       runner {
         arguments.add(":kotlin-library:apiDump")
-        arguments.add("--full-stacktrace")
       }
     }
 
@@ -53,7 +52,6 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
       createProjectWithSubModules()
       runner {
         arguments.add(":java-library:apiDump")
-        arguments.add("--full-stacktrace")
       }
     }
 

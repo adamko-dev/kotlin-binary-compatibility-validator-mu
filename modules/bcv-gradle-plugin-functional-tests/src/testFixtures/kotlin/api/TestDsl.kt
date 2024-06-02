@@ -53,10 +53,14 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
     }
   }
 
+  baseKotlinScope.gradleProperties {
+    addLine("org.gradle.jvmargs=" + baseKotlinScope.runner.gradleJvmArgs.joinToString(" "))
+  }
+
   return GradleRunner.create()
     .withProjectDir(rootProjectDir)
-    .withGradleVersion(minimumGradleTestVersion)
-    .withArguments(baseKotlinScope.runner.arguments)
+    .withGradleVersion(baseKotlinScope.runner.gradleVersion)
+    .withArguments(baseKotlinScope.runner.buildArgs())
     .apply {
       GradleProjectTest.gradleTestKitDir?.let {
         println("Using Gradle TestKit dir $it")
@@ -66,7 +70,7 @@ fun BaseKotlinGradleTest.test(fn: BaseKotlinScope.() -> Unit): GradleRunner {
 }
 
 /**
- * same as [file][FileContainer.file], but prepends "src/${sourceSet}/kotlin" before given `classFileName`
+ * same as [file][FileContainer.file], but prepends `src/${sourceSet}/kotlin` before given `classFileName`
  */
 fun FileContainer.kotlin(
   classFileName: String,
@@ -82,7 +86,7 @@ fun FileContainer.kotlin(
 }
 
 /**
- * same as [file][FileContainer.file], but prepends "src/${sourceSet}/java" before given `classFileName`
+ * same as [file][FileContainer.file], but prepends `src/${sourceSet}/java` before given `classFileName`
  */
 fun FileContainer.java(
   classFileName: String,
@@ -114,6 +118,14 @@ fun FileContainer.settingsGradleKts(fn: AppendableScope.() -> Unit) {
 }
 
 /**
+ * Shortcut for creating a `settings.gradle.kts` by using [file][FileContainer.file]
+ */
+fun FileContainer.gradleProperties(fn: AppendableScope.() -> Unit) {
+  val fileName = "gradle.properties"
+  file(fileName, fn)
+}
+
+/**
  * Declares a directory with the given [dirName] inside the current container.
  * All calls creating files within this scope will create the files nested in this directory.
  *
@@ -133,6 +145,23 @@ fun FileContainer.apiFile(projectName: String, fn: AppendableScope.() -> Unit) {
   }
 }
 
+/**
+ * Shortcut for creating a `api/<target>/<project>.klib.api` descriptor using [file][FileContainer.file]
+ */
+fun FileContainer.abiFile(projectName: String, target: String, fn: AppendableScope.() -> Unit) {
+  dir(API_DIR) {
+    dir(target) {
+      file("$projectName.klib.api", fn)
+    }
+  }
+}
+
+fun FileContainer.abiFile(projectName: String, fn: AppendableScope.() -> Unit) {
+  dir(API_DIR) {
+    file("$projectName.klib.api", fn)
+  }
+}
+
 // not using default argument in apiFile for clarity in tests (explicit "empty" in the name)
 /**
  * Shortcut for creating an empty `api/<project>.api` descriptor by using [file][FileContainer.file]
@@ -142,10 +171,7 @@ fun FileContainer.emptyApiFile(projectName: String) {
 }
 
 fun BaseKotlinScope.runner(fn: Runner.() -> Unit) {
-  val runner = Runner()
   fn(runner)
-
-  this.runner = runner
 }
 
 fun AppendableScope.resolve(@Language("file-reference") path: String) {
@@ -156,11 +182,14 @@ fun AppendableScope.addText(text: String) {
   this.content.add(AppendableScope.AppendText(text))
 }
 
+fun AppendableScope.addLine(text: String): Unit = addText("$text\n")
+
 interface FileContainer {
-  fun file(fileName: String, fn: AppendableScope.() -> Unit)
+  fun file(fileName: String, fn: AppendableScope.() -> Unit = {})
 }
 
 class BaseKotlinScope : FileContainer {
+
   var files: MutableList<AppendableScope> = mutableListOf()
   var runner: Runner = Runner()
 
@@ -192,13 +221,35 @@ class AppendableScope(val filePath: String) {
 }
 
 class Runner {
-  val arguments: MutableList<String> = mutableListOf(
-    "--configuration-cache",
-    "--info",
-    "--stacktrace",
+  var gradleVersion: String = minimumGradleTestVersion
+  /** JVM args used by Gradle. Set as `org.gradle.jvmargs` in `gradle.properties`. */
+  val gradleJvmArgs: MutableSet<String> = mutableSetOf(
+    "-Dfile.encoding=UTF-8",
+    "org.gradle.welcome=never",
   )
+  var configurationCache: Boolean = true
+  var rerunTasks: Boolean = false
+  var rerunTask: Boolean = false
+  var buildCache: Boolean = true
+  var stacktrace: Boolean = true
+  var continues: Boolean = true
+  var parallel: Boolean = true
+
+  val arguments: MutableList<String> = mutableListOf()
+
+  internal fun buildArgs(): List<String> = buildList {
+    addAll(arguments)
+    if (configurationCache) add("--configuration-cache") else add("--no-configuration-cache")
+    if (buildCache) add("--build-cache") else add("--no-build-cache")
+    if (rerunTasks) add("--rerun-tasks")
+    if (rerunTask) add("--rerun-task")
+    if (stacktrace) add("--stacktrace")
+    if (continues) add("--continue")
+    if (parallel) add("--parallel")
+  }.distinct()
 }
 
+/** Read a resources file as a [String]. */
 fun readResourceFile(@Language("file-reference") path: String): String {
   val resource = BaseKotlinGradleTest::class.java.getResource(path)
     ?: error("Could not find resource '$path'")

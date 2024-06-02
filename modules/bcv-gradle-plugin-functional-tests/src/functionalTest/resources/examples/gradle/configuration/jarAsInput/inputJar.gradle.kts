@@ -1,6 +1,6 @@
 tasks.jar {
   exclude("foo/HiddenField.class")
-  exclude("**/HiddenProperty.class")
+  exclude("foo/HiddenProperty.class")
 }
 
 binaryCompatibilityValidator {

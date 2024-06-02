@@ -14,7 +14,7 @@ import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 
 @BCVInternalApi
-abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> {
+abstract class JvmSignaturesWorker : WorkAction<JvmSignaturesWorker.Parameters> {
 
   private val logger = Logging.getLogger(this::class.java)
 
@@ -34,7 +34,15 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
     val ignoredClasses: SetProperty<String>
 
     val projectName: Property<String>
+
+    /**
+     * [Task path][org.gradle.api.Task.getPath] of the task that invoked this worker,
+     * for log messages
+     */
+    val taskPath: Property<String>
   }
+
+  private val logTag: String by lazy { "[${parameters.taskPath.get()}:BCVSignaturesWorker]" }
 
   override fun execute() {
     val projectName = parameters.projectName.get()
@@ -56,13 +64,13 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
       writeSignatures(
         outputApiDir = parameters.outputApiDir.get().asFile,
         projectName = parameters.projectName.get(),
-        signatures = signatures
+        signatures = signatures,
       )
 
       signatures.count()
     }
 
-    logger.info("BCVSignaturesWorker generated $signaturesCount signatures for $projectName in $duration")
+    logger.info("$logTag generated $signaturesCount signatures for $projectName in $duration")
   }
 
   private fun generateSignatures(
@@ -75,33 +83,59 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
     ignoredMarkers: Set<String>,
     ignoredPackages: Set<String>,
   ): List<ClassBinarySignature> {
+
+    logger.info(
+      """
+        $logTag inputJar        : $inputJar
+        $logTag publicMarkers   : $publicMarkers
+        $logTag publicPackages  : $publicPackages
+        $logTag publicClasses   : $publicClasses
+        $logTag ignoredClasses  : $ignoredClasses
+        $logTag ignoredMarkers  : $ignoredMarkers
+        $logTag ignoredPackages : $ignoredPackages
+      """.trimIndent()
+    )
+
     val signatures = when {
       // inputJar takes precedence if specified
       inputJar != null      ->
         JarFile(inputJar.asFile).use { it.loadApiFromJvmClasses() }
 
       !inputClasses.isEmpty -> {
-        logger.info("inputClasses: ${inputClasses.files}")
+        logger.info("$logTag inputClasses: ${inputClasses.files}")
 
         val filteredInputClasses = inputClasses.asFileTree.matching {
           exclude("META-INF/**")
           include("**/*.class")
         }
 
-        logger.info("filteredInputClasses: ${filteredInputClasses.files}")
+        logger.info("$logTag filteredInputClasses: ${filteredInputClasses.files}")
 
-        filteredInputClasses.asSequence()
+        filteredInputClasses
+          .asSequence()
           .map(File::inputStream)
           .loadApiFromJvmClasses()
       }
 
       else                  ->
-        error("BCVSignaturesWorker should have either inputClassesDirs, or inputJar property set")
+        error("$logTag should have either inputClassesDirs, or inputJar property set")
     }
 
+    val publicPackagesNames =
+      signatures.extractAnnotatedPackages(publicMarkers.map(::replaceDots).toSet())
+    val ignoredPackagesNames =
+      signatures.extractAnnotatedPackages(ignoredMarkers.map(::replaceDots).toSet())
+
     return signatures
-      .retainExplicitlyIncludedIfDeclared(publicPackages, publicClasses, publicMarkers)
-      .filterOutNonPublic(ignoredPackages, ignoredClasses)
+      .retainExplicitlyIncludedIfDeclared(
+        publicPackages = publicPackages + publicPackagesNames,
+        publicClasses = publicClasses,
+        publicMarkerAnnotations = publicMarkers,
+      )
+      .filterOutNonPublic(
+        nonPublicPackages = ignoredPackages + ignoredPackagesNames,
+        nonPublicClasses = ignoredClasses,
+      )
       .filterOutAnnotated(ignoredMarkers.map(::replaceDots).toSet())
   }
 
@@ -112,19 +146,11 @@ abstract class BCVSignaturesWorker : WorkAction<BCVSignaturesWorker.Parameters> 
   ) {
     outputApiDir.mkdirs()
 
-    outputApiDir
-      .resolve("$projectName.api")
-      .bufferedWriter().use { writer ->
-        signatures
-          .sortedBy { it.name }
-          .forEach { api ->
-            writer.append(api.signature).appendLine(" {")
-            api.memberSignatures
-              .sortedWith(MEMBER_SORT_ORDER)
-              .forEach { writer.append("\t").appendLine(it.signature) }
-            writer.appendLine("}\n")
-          }
-      }
+    val apiFile = outputApiDir.resolve("$projectName.api")
+
+    apiFile.bufferedWriter().use { writer ->
+      signatures.dump(writer)
+    }
   }
 
   companion object {

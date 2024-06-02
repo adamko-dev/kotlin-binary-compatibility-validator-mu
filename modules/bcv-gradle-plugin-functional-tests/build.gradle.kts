@@ -20,6 +20,8 @@ dependencies {
   testFixturesApi(libs.kotest.assertionsCore)
   testFixturesApi(libs.kotest.property)
 
+  testFixturesApi("org.jetbrains.kotlin:kotlin-gradle-plugin:$embeddedKotlinVersion")
+
   testFixturesApi(testFixtures(projects.modules.bcvGradlePlugin))
 }
 
@@ -57,6 +59,14 @@ testing.suites {
           "devMavenRepoDir",
           devPublish.devMavenRepo.asFile.get().invariantSeparatorsPath,
         )
+        val testTempDir = layout.buildDirectory.dir("test-temp").get().asFile
+        systemProperty(
+          "testTempDir",
+          testTempDir.invariantSeparatorsPath
+        )
+        doFirst {
+          testTempDir.mkdirs()
+        }
       }
     }
   }

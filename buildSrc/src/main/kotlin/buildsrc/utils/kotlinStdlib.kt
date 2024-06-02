@@ -7,3 +7,6 @@ fun String.titlecaseFirstChar(): String =
       else             -> it.toString()
     }
   }
+
+fun List<String>.filterContains(substring: String): List<String> =
+  filter { substring in it }

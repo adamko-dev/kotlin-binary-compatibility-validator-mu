@@ -1,5 +1,5 @@
 plugins {
-  kotlin("multiplatform") version "1.7.20"
+  kotlin("multiplatform") version "1.9.24"
   id("dev.adamko.kotlin.binary-compatibility-validator") version "+"
 }
 
@@ -18,7 +18,6 @@ kotlin {
     val commonMain by getting
     val commonTest by getting {
       dependencies {
-        implementation(kotlin("stdlib"))
         implementation(kotlin("test-common"))
         implementation(kotlin("test-annotations-common"))
       }
@@ -26,7 +25,6 @@ kotlin {
     val jvmMain by getting
     val jvmTest by getting {
       dependencies {
-        implementation(kotlin("stdlib"))
         implementation(kotlin("test-junit"))
       }
     }

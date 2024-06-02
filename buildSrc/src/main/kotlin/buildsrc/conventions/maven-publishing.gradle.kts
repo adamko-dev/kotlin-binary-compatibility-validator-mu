@@ -2,6 +2,7 @@ package buildsrc.conventions
 
 import buildsrc.settings.MavenPublishingSettings
 
+
 plugins {
   `maven-publish`
   signing
@@ -16,7 +17,7 @@ publishing {
   publications.withType<MavenPublication>().configureEach {
     pom {
       name.convention("Binary Compatibility Validator MU")
-      description.convention("BCV-MU is a Gradle Plugin that validates the public JVM binary API of libraries, to make sure that breaking changes are tracked.")
+      description.convention("BCV-MU is a Gradle Plugin that validates the public API of libraries, to make sure that breaking changes are tracked.")
       url.convention("https://github.com/adamko-dev/kotlin-binary-compatibility-validator-mu")
 
       scm {
@@ -89,23 +90,35 @@ signing {
 //endregion
 
 
-//region Fix Gradle warning about signing tasks using publishing task outputs without explicit dependencies
-// https://youtrack.jetbrains.com/issue/KT-46466 https://github.com/gradle/gradle/issues/26091
 tasks.withType<AbstractPublishToMaven>().configureEach {
+
+  //region Fix Gradle warning about signing tasks using publishing task outputs without explicit dependencies
+  // https://youtrack.jetbrains.com/issue/KT-46466 https://github.com/gradle/gradle/issues/26091
   val signingTasks = tasks.withType<Sign>()
   mustRunAfter(signingTasks)
-}
-//endregion
+  //endregion
 
-
-//region publishing logging
-tasks.withType<AbstractPublishToMaven>().configureEach {
+  //region publishing logging
   val publicationGAV = provider { publication?.run { "$group:$artifactId:$version" } }
   doLast("log publication GAV") {
     if (publicationGAV.isPresent) {
       logger.info("[task: ${path}] ${publicationGAV.get()}")
     }
   }
+  //endregion
+}
+
+
+//region Maven Central can't handle parallel uploads, so limit parallel uploads with a service.
+abstract class MavenPublishLimiter : BuildService<BuildServiceParameters.None>
+
+val mavenPublishLimiter =
+  gradle.sharedServices.registerIfAbsent("mavenPublishLimiter", MavenPublishLimiter::class) {
+    maxParallelUsages = 1
+  }
+
+tasks.withType<PublishToMavenRepository>().configureEach {
+  usesService(mavenPublishLimiter)
 }
 //endregion
 

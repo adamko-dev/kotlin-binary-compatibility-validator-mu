@@ -1,0 +1,5 @@
+kotlin {
+  wasmWasi()
+  wasmJs()
+  js()
+}

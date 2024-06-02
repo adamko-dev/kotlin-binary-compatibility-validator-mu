@@ -1,0 +1,4 @@
+package annotated
+
+class ClassFromAnnotatedPackage {
+}

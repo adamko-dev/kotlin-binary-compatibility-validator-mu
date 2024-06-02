@@ -7,8 +7,7 @@ import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
-import org.gradle.testkit.runner.TaskOutcome.FAILED
-import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.*
 import org.junit.jupiter.api.Test
 
 internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
@@ -27,7 +26,6 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
       createProjectHierarchyWithPluginOnRoot()
       runner {
         arguments.add(":apiCheck")
-        arguments.add("--stacktrace")
       }
 
       dir("api/") {
@@ -56,9 +54,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     val runner = test {
       createProjectHierarchyWithPluginOnRoot()
       runner {
-        arguments.add("--continue")
         arguments.add(":check")
-        arguments.add("--stacktrace")
       }
 
       dir("api/") {
@@ -107,7 +103,6 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
       runner {
         arguments.add(":apiDump")
-        arguments.add("--stacktrace")
       }
 
       dir("src/jvmMain/kotlin") {}
@@ -120,7 +115,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveRunTask(":apiDump", SUCCESS)
+      shouldHaveRunTask(":apiDump", SUCCESS, FROM_CACHE)
 
       val mainExpectedApi = """
         |${readResourceFile("/examples/classes/Subsub1Class.dump").trim()}
@@ -132,6 +127,46 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
       jvmApiDump.shouldBeAFile()
       jvmApiDump.readText().invariantNewlines() shouldBe mainExpectedApi
+    }
+  }
+
+  @Test
+  fun testApiDumpPassesForEmptyProject() {
+    val runner = test {
+      buildGradleKts {
+        resolve("/examples/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
+      }
+
+      runner {
+        arguments.add(":apiDump")
+      }
+    }
+
+    runner.build {
+//      shouldHaveTaskWithOutcome(":jvmApiDump", SKIPPED)
+//      shouldHaveTaskWithOutcome(":apiDump", UP_TO_DATE)
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS, FROM_CACHE)
+    }
+  }
+
+  @Test
+  fun testApiCheckPassesForEmptyProject() {
+    val runner = test {
+      buildGradleKts {
+        resolve("/examples/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
+      }
+
+      emptyApiFile(projectName = rootProjectDir.name)
+
+      runner {
+        arguments.add(":apiCheck")
+      }
+    }
+
+    runner.build {
+//      shouldHaveTaskWithOutcome(":jvmApiCheck", SKIPPED)
+//      shouldHaveTaskWithOutcome(":apiCheck", UP_TO_DATE)
+      shouldHaveTaskWithOutcome(":apiCheck", SUCCESS)
     }
   }
 
