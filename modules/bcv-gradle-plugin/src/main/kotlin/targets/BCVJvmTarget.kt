@@ -23,7 +23,7 @@ constructor(
   @get:Internal
   val platformType: String,
   @get:Internal
-  val objects: ObjectFactory
+  internal val objects: ObjectFactory
 ) : BCVTarget(platformType), Named {
 
   @get:Classpath

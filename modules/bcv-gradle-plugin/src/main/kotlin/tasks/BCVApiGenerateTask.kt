@@ -78,7 +78,7 @@ constructor(
 
     generateJvmTargets(
       workQueue = workQueue,
-      jvmTargets = enabledTargets.withType<BCVJvmTarget>(),
+      jvmTargets = enabledTargets.withType<BCVJvmTarget>().sorted(),
       outputApiBuildDir = outputApiBuildDir.get().asFile,
     )
 
@@ -86,7 +86,7 @@ constructor(
     // TODO log warning when klibFile has >1 file
     val klibTargets = enabledTargets.withType<BCVKLibTarget>()
       .filter { it.klibFile.singleOrNull()?.exists() == true }
-      .sortedBy { it.targetName }
+      .sorted()
 
     generateKLibTargets(
       workQueue = workQueue,

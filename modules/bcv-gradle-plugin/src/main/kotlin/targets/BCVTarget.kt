@@ -15,7 +15,7 @@ sealed class BCVTarget
 @Inject
 constructor(
   private val named: String,
-) : BCVTargetBaseSpec, Serializable, Named, ExtensionAware {
+) : BCVTargetBaseSpec, Serializable, Named, ExtensionAware, Comparable<BCVTarget> {
 
   @get:Input
   @get:Optional
@@ -60,6 +60,16 @@ constructor(
   @get:Optional
   abstract override val ignoredClasses: SetProperty<String>
 
+  override fun compareTo(other: BCVTarget): Int =
+    this.string().compareTo(other.string())
+
   @Input
   override fun getName(): String = named
+
+  companion object {
+    private fun BCVTarget.string(): String = when (this) {
+      is BCVJvmTarget  -> "BCVJvmTarget(${named})"
+      is BCVKLibTarget -> "BCVKLibTarget(${named})"
+    }
+  }
 }
