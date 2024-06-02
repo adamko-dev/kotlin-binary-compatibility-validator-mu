@@ -302,6 +302,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
       runner {
         arguments.add(":apiCheck")
+        gradleJvmArgs += "-Xmx4g"
       }
     }
 
