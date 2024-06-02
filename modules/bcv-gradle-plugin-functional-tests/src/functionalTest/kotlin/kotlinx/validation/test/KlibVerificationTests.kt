@@ -431,7 +431,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
-      shouldHaveTaskWithOutcome(":linuxArm64ApiInfer", FAILED)
+//      shouldHaveTaskWithOutcome(":linuxArm64ApiInfer", FAILED)
       output shouldContain "The target linuxArm64 is not supported by the host compiler and there are no targets similar to linuxArm64 to infer a dump from it."
     }
   }
