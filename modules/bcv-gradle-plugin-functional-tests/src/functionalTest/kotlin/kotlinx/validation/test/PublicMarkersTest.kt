@@ -8,6 +8,7 @@ import dev.adamko.kotlin.binary_compatibility_validator.test.utils.shouldHaveTas
 import io.kotest.matchers.file.shouldBeAFile
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
+import org.gradle.testkit.runner.TaskOutcome.FROM_CACHE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
@@ -99,7 +100,7 @@ class PublicMarkersTest : BaseKotlinGradleTest() {
     }
 
     runner.build {
-      shouldHaveTaskWithOutcome(":apiDump", SUCCESS)
+      shouldHaveTaskWithOutcome(":apiDump", SUCCESS, FROM_CACHE)
 
       rootProjectApiDump.shouldExist()
       rootProjectApiDump.shouldBeAFile()
