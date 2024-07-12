@@ -3,7 +3,7 @@
 kotlinGradle = "1.9.24"
 
 javaDiffUtils = "4.12"
-junit = "5.10.2"
+junit = "5.10.3"
 kotest = "5.9.1"
 kotlinx-bcv = "0.13.2"
 
