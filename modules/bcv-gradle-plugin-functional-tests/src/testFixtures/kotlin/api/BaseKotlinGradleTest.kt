@@ -5,7 +5,7 @@ import java.io.File
 import org.junit.jupiter.api.io.CleanupMode.ON_SUCCESS
 import org.junit.jupiter.api.io.TempDir
 
-open class BaseKotlinGradleTest {
+abstract class BaseKotlinGradleTest {
   @TempDir(
     factory = TempTestNameDirFactory::class,
     cleanup = ON_SUCCESS,

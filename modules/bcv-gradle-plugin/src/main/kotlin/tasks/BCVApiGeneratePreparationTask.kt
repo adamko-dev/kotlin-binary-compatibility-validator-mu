@@ -14,6 +14,9 @@ import org.gradle.work.DisableCachingByDefault
 
 @DisableCachingByDefault(because = "Performs simple file operations, not worth caching")
 abstract class BCVApiGeneratePreparationTask
+// TODO This task probably isn't needed and can be removed
+//      The generate task can just directly use files in `$projectDir/api`,
+//      so long as it only reads them.
 @BCVInternalApi
 @Inject
 constructor(

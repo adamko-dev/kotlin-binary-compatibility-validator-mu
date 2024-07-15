@@ -3,7 +3,6 @@ package kotlinx.validation.test
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.*
 import dev.adamko.kotlin.binary_compatibility_validator.test.utils.api.*
 import io.kotest.assertions.withClue
-import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.file.shouldBeEmptyDirectory
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
@@ -12,6 +11,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.name
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.*
+import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -97,10 +97,8 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
+      shouldHaveRunTask(":apiCheck", FAILED)
       output shouldContain "+final class com.company/BuildConfig { // com.company/BuildConfig|null[0]"
-      tasks.filter { it.path.endsWith("ApiCheck") }.shouldForAll {
-        it.shouldHaveOutcome(FAILED)
-      }
     }
   }
 
@@ -268,6 +266,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
+      shouldHaveTaskWithOutcome(":apiDump", FAILED)
       output shouldContain "Unsupported KLib signature version '100500'"
     }
   }
@@ -433,6 +432,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
+      shouldHaveTaskWithOutcome(":apiDump", FAILED)
 //      shouldHaveTaskWithOutcome(":linuxArm64ApiInfer", FAILED)
       output shouldContain "The target linuxArm64 is not supported by the host compiler and there are no targets similar to linuxArm64 to infer a dump from it."
     }
@@ -458,6 +458,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
+      shouldHaveTaskWithOutcome(":apiDump", FAILED)
       output shouldContain "is not supported by the host compiler and there are no targets similar to"
     }
   }
@@ -486,6 +487,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
 
     runner.buildAndFail {
+      shouldHaveTaskWithOutcome(":apiCheck", FAILED)
       output shouldContain "KLib ABI dump/validation requires at least one enabled klib target, but none were found."
     }
   }
@@ -678,6 +680,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
       }
     }
     runner.buildAndFail {
+      shouldHaveTaskWithOutcome(":apiCheck", FAILED)
       output shouldContain "  -// Targets: [androidNativeArm32, androidNativeArm64, androidNativeX64, androidNativeX86, linuxArm64.linux, linuxX64, mingwX64]"
     }
   }

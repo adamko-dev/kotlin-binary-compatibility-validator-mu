@@ -21,7 +21,6 @@ import org.gradle.workers.WorkParameters
 @BCVExperimentalApi
 @OptIn(ExperimentalBCVApi::class)
 abstract class KLibMergeWorker : WorkAction<KLibMergeWorker.Parameters> {
-// TODO rename 'Merge' to something that represents 'Merge' and 'Extract'... 'MergeSupported'?
 
   @BCVInternalApi
   interface Parameters : WorkParameters, Serializable {
@@ -31,11 +30,11 @@ abstract class KLibMergeWorker : WorkAction<KLibMergeWorker.Parameters> {
 
     val targetDumpFiles: ConfigurableFileCollection
 
-    /** Provider returning targets supported by the host compiler. */
-    val supportedTargets: SetProperty<String>
-
-    /** Refer to [KlibValidationSettings.strictValidation] for details. */
-    val strictValidation: Property<Boolean>
+//    /** Provider returning targets supported by the host compiler. */
+//    val supportedTargets: SetProperty<String>
+//
+//    /** Refer to [KlibValidationSettings.strictValidation] for details. */
+//    val strictValidation: Property<Boolean>
 
     /**
      * [Task path][org.gradle.api.Task.getPath] of the task that invoked this worker,
@@ -53,8 +52,7 @@ abstract class KLibMergeWorker : WorkAction<KLibMergeWorker.Parameters> {
 //    val outputFile = parameters.outputApiDir.get().asFile.resolve(parameters.projectName.get() + ".klib.api")
     val outputApiFile = parameters.outputApiFile.get().asFile
 
-
-    val supportedTargets = parameters.supportedTargets.get().map { KlibTarget.parse(it).targetName }
+//    val supportedTargets = parameters.supportedTargets.get().map { KlibTarget.parse(it).targetName }
 
     val dump = KlibDump()
 

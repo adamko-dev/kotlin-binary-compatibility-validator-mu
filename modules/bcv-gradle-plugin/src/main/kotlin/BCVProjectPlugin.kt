@@ -168,10 +168,10 @@ constructor(
       onlyIf("BCV is enabled") { bcvEnabled.get() }
     }
 
-    project.tasks.withType<BCVApiGeneratePreparationTask>().configureEach {
-      apiDumpFiles.from(extension.outputApiDir)
-      apiDirectory.convention(objects.directoryProperty().fileValue(temporaryDir))
-    }
+//    project.tasks.withType<BCVApiGeneratePreparationTask>().configureEach {
+//      apiDumpFiles.from(extension.outputApiDir)
+//      apiDirectory.convention(objects.directoryProperty().fileValue(temporaryDir))
+//    }
 
     project.tasks.withType<BCVApiGenerateTask>().configureEach {
       runtimeClasspath.from(bcvGenerateClasspath)
@@ -182,15 +182,19 @@ constructor(
       @OptIn(BCVExperimentalApi::class)
       strictKLibTargetValidation.convention(extension.klib.strictValidation)
 
+      projectApiDumpDir.convention(extension.outputApiDir)
+
       onlyIf("Must have at least one target") { targets.isNotEmpty() }
     }
 
     project.tasks.withType<BCVApiCheckTask>().configureEach {
-      outputs.dir(temporaryDir) // dummy output, so up-to-date checks work
+      targets.addAllLater(providers.provider { extension.targets })
+//      outputs.dir(temporaryDir) // dummy output, so up-to-date checks work
       expectedProjectName.convention(extension.projectName)
       expectedApiDirPath.convention(
         extension.outputApiDir.map { it.asFile.canonicalFile.invariantSeparatorsPath }
       )
+//      runtimeClasspath.from(bcvGenerateClasspath)
     }
 
     project.tasks.withType<BCVApiDumpTask>().configureEach {
@@ -204,12 +208,12 @@ constructor(
 
 
   private fun registerBcvTasks(project: Project) {
-    val prepareApiGenerateTask =
-      project.tasks.register(PREPARE_API_GENERATE_TASK_NAME, BCVApiGeneratePreparationTask::class)
+//    val prepareApiGenerateTask =
+//      project.tasks.register(PREPARE_API_GENERATE_TASK_NAME, BCVApiGeneratePreparationTask::class)
 
     val apiGenerateTask =
       project.tasks.register(API_GENERATE_TASK_NAME, BCVApiGenerateTask::class) {
-        extantApiDumpDir.convention(prepareApiGenerateTask.flatMap { it.apiDirectory })
+//        projectApiDumpDir.convention(prepareApiGenerateTask.flatMap { it.apiDirectory })
       }
 
     project.tasks.register(API_DUMP_TASK_NAME, BCVApiDumpTask::class) {

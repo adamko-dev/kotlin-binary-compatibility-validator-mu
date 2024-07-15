@@ -141,6 +141,7 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 	public abstract fun getApiBuildDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getExpectedApiDirPath ()Lorg/gradle/api/provider/Property;
 	public final fun getProjectApiDir ()Lorg/gradle/api/provider/Provider;
+	public final fun getTargets ()Lorg/gradle/api/NamedDomainObjectContainer;
 	public final fun verify ()V
 }
 
@@ -158,9 +159,9 @@ public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCV
 
 public abstract class dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVApiGenerateTask : dev/adamko/kotlin/binary_compatibility_validator/tasks/BCVDefaultTask {
 	public final fun generate ()V
-	public abstract fun getExtantApiDumpDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getInputDependencies ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getOutputApiBuildDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getProjectApiDumpDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getStrictKLibTargetValidation ()Lorg/gradle/api/provider/Property;
