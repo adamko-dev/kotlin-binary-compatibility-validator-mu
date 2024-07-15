@@ -464,7 +464,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
   }
 
   @Test
-  fun `klibCheck if all klib-targets are unavailable`() {
+  fun `klibCheck should not fail if all klib-targets are unavailable`() {
     val runner = test {
       baseProjectSetting()
       addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
@@ -472,6 +472,37 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         // note that the regular dump is used, where linuxArm64 is presented
         resolve("/examples/classes/TopLevelDeclarations.klib.dump")
       }
+      disableKLibTargets(
+        "linuxArm64",
+        "linuxX64",
+        "mingwX64",
+        "androidNativeArm32",
+        "androidNativeArm64",
+        "androidNativeX64",
+        "androidNativeX86",
+      )
+      runner {
+        arguments.add(":apiCheck")
+      }
+    }
+
+    runner.buildAndFail {
+      shouldHaveTaskWithOutcome(":apiCheck", FAILED)
+      output shouldContain "KLib ABI dump/validation requires at least one enabled klib target, but none were found."
+    }
+  }
+
+  @Test
+  fun `klibCheck should fail with strict validation if all klib-targets are unavailable`() {
+    val runner = test {
+      baseProjectSetting()
+      additionalBuildConfig("/examples/gradle/configuration/unsupported/enforce.gradle.kts")
+      addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+      abiFile(projectName = "testproject") {
+        // note that the regular dump is used, where linuxArm64 is presented
+        resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+      }
+
       disableKLibTargets(
         "linuxArm64",
         "linuxX64",
@@ -703,6 +734,26 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
   }
 
   @Test
+  fun `apiDump should remove dump file if the project does not contain sources anymore`() {
+    val runner = test {
+      baseProjectSetting()
+      addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
+      abiFile(projectName = "testproject") {
+        resolve("/examples/classes/AnotherBuildConfig.klib.dump")
+      }
+
+      runner {
+        arguments.add(":apiDump")
+      }
+    }
+    runner.build {
+      shouldHaveRunTask(":apiDump", SUCCESS)
+    }
+    rootProjectApiDump.parentFile.shouldBeEmptyDirectory()
+//    assertFalse(runner.projectDir.resolve("api").resolve("testproject.klib.api").exists())
+  }
+
+  @Test
   fun `apiDump should not fail if there is only one target`() {
     val runner = test {
       baseProjectSetting()
@@ -767,8 +818,27 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     }
   }
 
+  @Test
+  fun `apiCheck should fail after a source set was removed`() {
+    val runner = test {
+      baseProjectSetting()
+      addToSrcSet("/examples/classes/AnotherBuildConfig.kt", "linuxX64Main")
+      addToSrcSet("/examples/classes/AnotherBuildConfig.kt", "linuxArm64Main")
+      abiFile(projectName = "testproject") {
+        resolve("/examples/classes/AnotherBuildConfig.klib.dump")
+      }
+      runner {
+        arguments.add(":apiCheck")
+      }
+    }
+    runner.buildAndFail {
+      shouldHaveRunTask(":apiCheck", FAILED)
+    }
+  }
+
   private fun BuildResult.checkKLibDump(
-    expectedDumpFileName: String,
+    @Language("file-reference")
+    expected: String,
     projectName: String = "testproject",
   ) {
     withClue(output) {
@@ -778,8 +848,8 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
 
       generatedDump.shouldExist()
 
-      val expected = readResourceFile(expectedDumpFileName)
-      generatedDump.readText().invariantNewlines() shouldBe expected
+      val expectedFile = readResourceFile(expected)
+      generatedDump.readText().invariantNewlines() shouldBe expectedFile
     }
   }
 
