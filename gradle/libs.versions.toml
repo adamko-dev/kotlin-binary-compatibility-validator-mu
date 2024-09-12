@@ -7,7 +7,7 @@ junit = "5.11.0"
 kotest = "5.9.1"
 kotlinx-bcv = "0.13.2"
 
-gradlePluginPublishPlugin = "1.2.1"
+gradlePluginPublishPlugin = "1.2.2"
 shadowPlugin = "8.1.1"
 devPublish = "0.4.2"
 bcvMu = "main-SNAPSHOT"
