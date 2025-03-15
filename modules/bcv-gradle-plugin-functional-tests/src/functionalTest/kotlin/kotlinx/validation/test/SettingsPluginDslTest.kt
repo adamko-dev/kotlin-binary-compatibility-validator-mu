@@ -148,7 +148,7 @@ private fun kotlinMultiplatformProjectWithBcvSettingsPlugin() =
 private val settingsGradleKtsWithBcvPlugin = """
 buildscript {
   dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
+    //classpath("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.20")
   }
 }
 
@@ -222,5 +222,5 @@ val printBCVTargets by tasks.registering {
     }
   }
 }
- 
+
 """
