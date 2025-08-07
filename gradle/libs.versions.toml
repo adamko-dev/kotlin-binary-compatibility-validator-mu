@@ -1,6 +1,6 @@
 [versions]
 
-kotlinGradle = "1.9.25"
+kotlinGradle = "2.2.0"
 
 javaDiffUtils = "4.16"
 junit = "5.13.4"
